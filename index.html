@@ -7,28 +7,75 @@
 <meta name="apple-mobile-web-app-title" content="寮管理">
 <meta name="theme-color" content="#0f172a">
 <link rel="manifest" href="manifest.json">
-<title>寮管理 iPhone完全版</title>
+<title>寮管理 iPhone完全版 Ver.2</title>
 <style>
 :root{--bg:#f4f6fb;--card:#fff;--ink:#111827;--muted:#6b7280;--line:#e5e7eb;--blue:#2563eb;--green:#16a34a;--orange:#f97316;--red:#dc2626;--dark:#0f172a}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;color:var(--ink);padding-bottom:88px}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;color:var(--ink);padding-bottom:90px}
 header{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#0f172a,#1d4ed8);color:white;padding:18px 16px 14px;border-bottom-left-radius:22px;border-bottom-right-radius:22px;box-shadow:0 8px 22px rgba(15,23,42,.18)}
-h1{font-size:22px;margin:0 0 4px}.sub{font-size:12px;opacity:.86}.wrap{padding:14px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:var(--card);border-radius:18px;padding:14px;box-shadow:0 5px 18px rgba(15,23,42,.08);border:1px solid rgba(229,231,235,.8)}
-.stat{font-size:28px;font-weight:800}.label{font-size:12px;color:var(--muted);margin-top:4px}.btn{border:0;border-radius:14px;padding:12px 14px;font-weight:700;font-size:15px;background:var(--dark);color:white;width:100%;min-height:46px}.btn.blue{background:var(--blue)}.btn.green{background:var(--green)}.btn.orange{background:var(--orange)}.btn.red{background:var(--red)}.btn.light{background:#eef2ff;color:#1e40af}
-.row{display:flex;gap:8px}.row>*{flex:1}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:14px;padding:12px;font-size:16px;background:white}label{display:block;font-size:12px;color:var(--muted);font-weight:700;margin:10px 0 5px}
+h1{font-size:22px;margin:0 0 4px}.sub{font-size:12px;opacity:.86}.wrap{padding:14px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:white;border-radius:18px;padding:14px;box-shadow:0 5px 18px rgba(15,23,42,.08);border:1px solid rgba(229,231,235,.8)}
+.stat{font-size:28px;font-weight:900}.label{font-size:12px;color:var(--muted);margin-top:4px}.btn{border:0;border-radius:14px;padding:12px 14px;font-weight:800;font-size:15px;background:var(--dark);color:white;width:100%;min-height:46px}.btn.blue{background:var(--blue)}.btn.green{background:var(--green)}.btn.orange{background:var(--orange)}.btn.red{background:var(--red)}.btn.light{background:#eef2ff;color:#1e40af}
+.row{display:flex;gap:8px}.row>*{flex:1}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:14px;padding:12px;font-size:16px;background:white}label{display:block;font-size:12px;color:var(--muted);font-weight:800;margin:10px 0 5px}
 .section{display:none}.section.active{display:block}.item{background:white;border-radius:16px;margin:10px 0;padding:13px;border-left:6px solid #2563eb;box-shadow:0 3px 12px rgba(15,23,42,.07)}
-.item.hotel{border-left-color:#f97316}.item.done{opacity:.68}.title{font-weight:800;font-size:16px}.meta{font-size:13px;color:#4b5563;line-height:1.55;margin-top:5px;white-space:pre-wrap}.pill{display:inline-block;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800;margin-right:4px;background:#e0ecff;color:#1d4ed8}.pill.orange{background:#ffedd5;color:#c2410c}.pill.green{background:#dcfce7;color:#15803d}.pill.red{background:#fee2e2;color:#b91c1c}
+.item.hotel{border-left-color:#f97316}.item.clean{border-left-color:#2563eb}.item.vacant{border-left-color:#16a34a}.item.done{opacity:.68}.title{font-weight:900;font-size:16px}.meta{font-size:13px;color:#4b5563;line-height:1.55;margin-top:5px;white-space:pre-wrap}
+.pill{display:inline-block;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:900;margin-right:4px;background:#e0ecff;color:#1d4ed8}.pill.orange{background:#ffedd5;color:#c2410c}.pill.green{background:#dcfce7;color:#15803d}.pill.red{background:#fee2e2;color:#b91c1c}.pill.gray{background:#f3f4f6;color:#374151}
 nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:7px 4px calc(7px + env(safe-area-inset-bottom));z-index:20}
-nav button{background:transparent;border:0;color:#6b7280;font-size:10px;font-weight:700;padding:5px 0}nav button b{display:block;font-size:20px;line-height:22px}nav button.active{color:#2563eb}
-textarea.report{height:220px;line-height:1.55}.small{font-size:12px;color:var(--muted);line-height:1.5}.empty{text-align:center;color:var(--muted);padding:24px 0}.topspace{height:8px}
+nav button{background:transparent;border:0;color:#6b7280;font-size:10px;font-weight:800;padding:5px 0}nav button b{display:block;font-size:20px;line-height:22px}nav button.active{color:#2563eb}
+textarea.report{height:235px;line-height:1.55}.small{font-size:12px;color:var(--muted);line-height:1.5}.empty{text-align:center;color:var(--muted);padding:24px 0}.topspace{height:8px}
+.monthHead{display:flex;align-items:center;gap:8px;margin:6px 0 10px}.monthTitle{flex:1;text-align:center;font-size:20px;font-weight:900}
+.legend{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.lg{font-size:12px}.dot{display:inline-block;width:11px;height:11px;border-radius:4px;margin-right:4px}.g{background:#bbf7d0}.o{background:#fed7aa}.b{background:#bfdbfe}
+.boardWrap{overflow:auto;border:1px solid var(--line);border-radius:16px;background:white;box-shadow:0 4px 16px rgba(15,23,42,.07);max-height:68vh}
+.board{border-collapse:collapse;min-width:980px;width:max-content;font-size:12px}.board th,.board td{border:1px solid #e5e7eb;height:44px;min-width:34px;text-align:center;vertical-align:middle;background:white}
+.board th{position:sticky;top:0;background:#f8fafc;z-index:2;font-weight:900}.board .prop{position:sticky;left:0;min-width:110px;text-align:left;padding:0 8px;background:#f8fafc;z-index:3;font-weight:900}.board .room{position:sticky;left:110px;min-width:82px;text-align:left;padding:0 8px;background:#fff;z-index:3;font-weight:800}.board th.prop,.board th.room{z-index:4;background:#eaf2ff}
+.board .sun{color:#dc2626;background:#fff7f7}.board .sat{color:#2563eb;background:#f7fbff}.board .todayCol{outline:2px solid #ef4444;outline-offset:-2px}.ev{display:inline-block;max-width:100%;border-radius:6px;padding:3px 5px;font-weight:900;line-height:1.1;white-space:nowrap}.ev.in{background:#dcfce7;color:#166534}.ev.out{background:#ffedd5;color:#c2410c}.ev.clean{background:#dbeafe;color:#1d4ed8}.groupRow td{height:30px;background:#f1f5f9;font-weight:900;text-align:left;padding-left:8px}.groupRow .prop{background:#dbeafe}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px}.tabs button{font-size:12px;padding:10px 4px}
 </style>
 </head>
 <body>
-<header><h1>🏠 寮管理</h1><div class="sub" id="todayText">本日の状況を確認</div></header>
+<header><h1>🏠 寮管理 Ver.2</h1><div class="sub" id="todayText">本日の状況を確認</div></header>
 <div class="wrap">
 <section id="home" class="section active">
-<div class="grid"><div class="card"><div class="stat" id="stIn">0</div><div class="label">本日入寮</div></div><div class="card"><div class="stat" id="stOut">0</div><div class="label">本日退寮</div></div><div class="card"><div class="stat" id="stClean">0</div><div class="label">清掃予定</div></div><div class="card"><div class="stat" id="stStay">0</div><div class="label">入居・宿泊中</div></div></div>
-<div class="topspace"></div><button class="btn blue" onclick="show('add')">＋ 予定を追加</button><div class="topspace"></div><button class="btn light" onclick="makeReport();show('report')">本日のAI書き出しを作成</button><h3>本日の予定</h3><div id="todayList"></div>
+<div class="grid">
+<div class="card"><div class="stat" id="stIn">0</div><div class="label">本日入寮</div></div>
+<div class="card"><div class="stat" id="stOut">0</div><div class="label">本日退寮</div></div>
+<div class="card"><div class="stat" id="stClean">0</div><div class="label">清掃待ち</div></div>
+<div class="card"><div class="stat" id="stVacant">0</div><div class="label">空室</div></div>
+</div>
+<div class="topspace"></div><button class="btn blue" onclick="show('add')">＋ 予定を追加</button>
+<div class="topspace"></div><button class="btn light" onclick="show('month')">📅 1ヶ月予定表を見る</button>
+<div class="topspace"></div><button class="btn green" onclick="makeReport();shareLine()">AI書き出しをLINE送信</button>
+<h3>本日の予定</h3><div id="todayList"></div>
 </section>
+
+<section id="quick" class="section">
+<div class="tabs">
+<button class="btn light" onclick="quickMode='in';renderQuick()">入寮</button>
+<button class="btn light" onclick="quickMode='out';renderQuick()">退寮</button>
+<button class="btn light" onclick="quickMode='clean';renderQuick()">清掃</button>
+<button class="btn light" onclick="quickMode='vacant';renderQuick()">空室</button>
+</div>
+<div id="quickTitle" class="card"></div>
+<div id="quickList"></div>
+</section>
+
+<section id="summary" class="section">
+<div class="grid">
+<div class="card"><div class="stat" id="sumTotal">0</div><div class="label">登録部屋</div></div>
+<div class="card"><div class="stat" id="sumStay">0</div><div class="label">入居・予約</div></div>
+<div class="card"><div class="stat" id="sumVacant">0</div><div class="label">空室</div></div>
+<div class="card"><div class="stat" id="sumClean">0</div><div class="label">未清掃</div></div>
+</div>
+<div class="topspace"></div>
+<div class="card"><h3>月間集計</h3><div id="summaryText" class="meta"></div></div>
+</section>
+
+<section id="month" class="section">
+<div class="card"><div class="monthHead"><button class="btn light" onclick="moveMonth(-1)">←</button><div class="monthTitle" id="monthTitle"></div><button class="btn light" onclick="moveMonth(1)">→</button></div>
+<button class="btn blue" onclick="show('add')">＋ 予定登録</button>
+<div class="legend"><span class="lg"><span class="dot g"></span>入寮：名前表示</span><span class="lg"><span class="dot o"></span>退寮：退</span><span class="lg"><span class="dot b"></span>清掃：清</span></div>
+<p class="small">横スクロールで1ヶ月分を確認。左に物件名、隣に部屋番号が固定表示されます。</p></div>
+<div class="topspace"></div><div class="boardWrap"><table class="board" id="monthBoard"></table></div>
+</section>
+
 <section id="add" class="section"><div class="card"><h3>予定追加</h3>
 <label>種別</label><select id="type"><option>アパート</option><option>ビジホ</option></select>
 <label>物件名／ビジホ名</label><input id="property" placeholder="例：○○アパート / ○○ホテル">
@@ -36,29 +83,45 @@ textarea.report{height:220px;line-height:1.55}.small{font-size:12px;color:var(--
 <label>名前</label><input id="name" placeholder="例：山田">
 <div class="row"><div><label>入寮日</label><input id="inDate" type="date"></div><div><label>退寮日</label><input id="outDate" type="date"></div></div>
 <label>清掃状況</label><select id="clean"><option>未清掃</option><option>清掃予定</option><option>清掃中</option><option>完了</option><option>不要</option></select>
+<label>清掃日</label><input id="cleanDate" type="date">
 <label>状態</label><select id="status"><option>入居中</option><option>予約</option><option>退寮予定</option><option>空室</option></select>
 <label>備考</label><textarea id="note" placeholder="連絡事項・時間など"></textarea>
-<div class="topspace"></div><button class="btn green" onclick="saveItem()">保存</button><div class="topspace"></div><button class="btn" onclick="clearForm()">入力クリア</button></div></section>
+<div class="topspace"></div><button class="btn green" onclick="saveItem()">保存</button>
+<div class="topspace"></div><button class="btn" onclick="clearForm()">入力クリア</button></div></section>
+
 <section id="list" class="section"><div class="row"><button class="btn light" onclick="filter='all';render()">全て</button><button class="btn light" onclick="filter='アパート';render()">アパート</button><button class="btn light" onclick="filter='ビジホ';render()">ビジホ</button></div><div class="topspace"></div><input id="search" placeholder="物件名・部屋番号・名前で検索" oninput="render()"><div id="allList"></div></section>
-<section id="report" class="section"><div class="card"><h3>本日のAI書き出し</h3><textarea class="report" id="reportText"></textarea><div class="topspace"></div><button class="btn blue" onclick="copyReport()">コピー</button></div></section>
-<section id="data" class="section"><div class="card"><h3>データ管理</h3><p class="small">データはこのiPhone内のブラウザに保存されます。機種変更やSafariのデータ削除前にバックアップしてください。</p><button class="btn blue" onclick="exportData()">バックアップを書き出し</button><div class="topspace"></div><label>バックアップ読み込み</label><input type="file" id="importFile" accept=".json" onchange="importData(event)"><div class="topspace"></div><button class="btn red" onclick="resetAll()">全データ削除</button></div></section>
+<section id="report" class="section"><div class="card"><h3>AI書き出し</h3><textarea class="report" id="reportText"></textarea><div class="topspace"></div><button class="btn blue" onclick="copyReport()">コピー</button><div class="topspace"></div><button class="btn green" onclick="shareLine()">LINEに送信</button></div></section>
+<section id="data" class="section"><div class="card"><h3>データ管理</h3><p class="small">データはこのiPhone内のブラウザに保存されます。機種変更やSafariのデータ削除前にバックアップしてください。</p><button class="btn blue" onclick="exportData()">バックアップを書き出し</button><div class="topspace"></div><label>バックアップ読み込み</label><input type="file" accept=".json" onchange="importData(event)"><div class="topspace"></div><button class="btn red" onclick="resetAll()">全データ削除</button></div></section>
 </div>
-<nav><button onclick="show('home')" class="active"><b>🏠</b>ホーム</button><button onclick="show('add')"><b>＋</b>追加</button><button onclick="show('list')"><b>📋</b>一覧</button><button onclick="makeReport();show('report')"><b>📝</b>書出</button><button onclick="show('data')"><b>⚙️</b>管理</button></nav>
+<nav>
+<button onclick="show('home')" class="active"><b>🏠</b>ホーム</button>
+<button onclick="show('quick')"><b>🚪</b>状況</button>
+<button onclick="show('month')"><b>📅</b>月間</button>
+<button onclick="show('add')"><b>＋</b>追加</button>
+<button onclick="show('summary')"><b>📊</b>集計</button>
+</nav>
 <script>
-let items = JSON.parse(localStorage.getItem('dormItemsV3')||'[]');let filter='all';let editId=null;const $=id=>document.getElementById(id);
-function today(){return new Date().toISOString().slice(0,10)}
-function jp(d){if(!d)return "";let x=new Date(d+"T00:00:00");return (x.getMonth()+1)+"/"+x.getDate()}
+let items=JSON.parse(localStorage.getItem('dormItemsV5')||localStorage.getItem('dormItemsV4')||localStorage.getItem('dormItemsV3')||'[]');let filter='all',quickMode='in',editId=null;let viewMonth=new Date();viewMonth.setDate(1);const $=id=>document.getElementById(id);
+function today(){return new Date().toISOString().slice(0,10)}function iso(d){return d.toISOString().slice(0,10)}function jp(d){if(!d)return "";let x=new Date(d+"T00:00:00");return (x.getMonth()+1)+"/"+x.getDate()}
+function persist(){localStorage.setItem('dormItemsV5',JSON.stringify(items))}
 function show(id){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));[...document.querySelectorAll('nav button')].find(b=>b.getAttribute('onclick')?.includes("'"+id+"'"))?.classList.add('active');render()}
-function persist(){localStorage.setItem('dormItemsV3',JSON.stringify(items))}
-function saveItem(){let obj={id:editId||Date.now(),type:$('type').value,property:$('property').value.trim(),room:$('room').value.trim(),name:$('name').value.trim(),inDate:$('inDate').value,outDate:$('outDate').value,clean:$('clean').value,status:$('status').value,note:$('note').value.trim()};if(!obj.property||!obj.room){alert('物件名と部屋番号は必須です');return}if(editId){items=items.map(x=>x.id===editId?obj:x)}else{items.push(obj)}persist();clearForm();show('home')}
-function clearForm(){editId=null;['property','room','name','inDate','outDate','note'].forEach(id=>$(id).value='');$('type').value='アパート';$('clean').value='未清掃';$('status').value='入居中'}
-function edit(id){let x=items.find(i=>i.id===id);if(!x)return;editId=id;['type','property','room','name','inDate','outDate','clean','status','note'].forEach(k=>$(k).value=x[k]||'');show('add')}
+function saveItem(){let obj={id:editId||Date.now(),type:$('type').value,property:$('property').value.trim(),room:$('room').value.trim(),name:$('name').value.trim(),inDate:$('inDate').value,outDate:$('outDate').value,clean:$('clean').value,cleanDate:$('cleanDate').value,status:$('status').value,note:$('note').value.trim()};if(!obj.property||!obj.room){alert('物件名と部屋番号は必須です');return}items=editId?items.map(x=>x.id===editId?obj:x):items.concat(obj);persist();clearForm();show('month')}
+function clearForm(){editId=null;['property','room','name','inDate','outDate','cleanDate','note'].forEach(id=>$(id).value='');$('type').value='アパート';$('clean').value='未清掃';$('status').value='入居中'}
+function edit(id){let x=items.find(i=>i.id===id);if(!x)return;editId=id;['type','property','room','name','inDate','outDate','clean','cleanDate','status','note'].forEach(k=>$(k).value=x[k]||'');show('add')}
 function del(id){if(confirm('削除しますか？')){items=items.filter(x=>x.id!==id);persist();render()}}
-function badge(x){return `<span class="pill ${x.type==='ビジホ'?'orange':''}">${x.type}</span><span class="pill ${x.clean==='完了'?'green':(x.clean==='未清掃'||x.clean==='清掃予定'?'red':'')}">${x.clean}</span>`}
-function card(x){return `<div class="item ${x.type==='ビジホ'?'hotel':''} ${x.clean==='完了'?'done':''}"><div class="title">${badge(x)} ${x.property} ${x.room}</div><div class="meta">名前：${x.name||'-'}\n入寮：${jp(x.inDate)||'-'}　退寮：${jp(x.outDate)||'-'}\n状態：${x.status||'-'}${x.note?'\n備考：'+x.note:''}</div><div class="row" style="margin-top:10px"><button class="btn light" onclick="edit(${x.id})">編集</button><button class="btn red" onclick="del(${x.id})">削除</button></div></div>`}
-function render(){let t=today();$('todayText').textContent=new Date().toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',weekday:'short'})+" の状況";let inToday=items.filter(x=>x.inDate===t),outToday=items.filter(x=>x.outDate===t),cleanToday=items.filter(x=>(x.inDate===t||x.outDate===t)&&x.clean!=='完了'&&x.clean!=='不要');$('stIn').textContent=inToday.length;$('stOut').textContent=outToday.length;$('stClean').textContent=cleanToday.length;$('stStay').textContent=items.filter(x=>x.status==='入居中'||x.status==='予約').length;let todayItems=[...new Map([...inToday,...outToday,...cleanToday].map(x=>[x.id,x])).values()];$('todayList').innerHTML=todayItems.length?todayItems.map(card).join(''):'<div class="empty">本日の予定はありません</div>';let q=($('search')?.value||'').toLowerCase();let list=items.filter(x=>(filter==='all'||x.type===filter)&&(x.property+x.room+x.name+x.note).toLowerCase().includes(q)).sort((a,b)=>(a.inDate||'9999').localeCompare(b.inDate||'9999'));$('allList').innerHTML=list.length?list.map(card).join(''):'<div class="empty">データがありません</div>'}
-function makeReport(){let t=today(),d=jp(t);let ins=items.filter(x=>x.inDate===t),outs=items.filter(x=>x.outDate===t),cleans=items.filter(x=>(x.inDate===t||x.outDate===t)&&x.clean!=='完了'&&x.clean!=='不要');let line=arr=>arr.length?arr.map(x=>`${x.property} ${x.room}　${x.name||''}${x.note?'（'+x.note+'）':''}`).join('\n'):'なし';$('reportText').value=`${d} 寮状況\n\n【入寮予定】\n${line(ins)}\n\n【退寮予定】\n${line(outs)}\n\n【清掃予定】\n${line(cleans)}\n\n【注意】\n未清掃・重複・備考欄を確認してください。`}
+function markDone(id){let x=items.find(i=>i.id===id);if(x){x.clean='完了';persist();render()}}
+function vacantNow(){return items.filter(x=>x.status==='空室'||(x.outDate&&x.outDate<today()&&(x.clean==='完了'||x.clean==='不要')))}
+function cleanWait(){return items.filter(x=>x.clean!=='完了'&&x.clean!=='不要'&&(x.clean==='未清掃'||x.clean==='清掃予定'||x.outDate<=today()||x.cleanDate<=today()))}
+function badge(x){return `<span class="pill ${x.type==='ビジホ'?'orange':''}">${x.type}</span><span class="pill ${x.clean==='完了'?'green':(x.clean==='未清掃'||x.clean==='清掃予定'?'red':'gray')}">${x.clean}</span>`}
+function card(x,mode='normal'){let extra=mode==='clean'?`<button class="btn green" onclick="markDone(${x.id})">清掃完了</button>`:'';return `<div class="item ${x.type==='ビジホ'?'hotel':''} ${mode==='clean'?'clean':''} ${mode==='vacant'?'vacant':''}"><div class="title">${badge(x)} ${x.property} ${x.room}</div><div class="meta">名前：${x.name||'-'}\n入寮：${jp(x.inDate)||'-'}　退寮：${jp(x.outDate)||'-'}\n清掃日：${jp(x.cleanDate)||'-'}\n状態：${x.status||'-'}${x.note?'\n備考：'+x.note:''}</div><div class="row" style="margin-top:10px"><button class="btn light" onclick="edit(${x.id})">編集</button><button class="btn red" onclick="del(${x.id})">削除</button></div>${extra?'<div class="topspace"></div>'+extra:''}</div>`}
+function renderQuick(){let t=today(),arr=[],title='';if(quickMode==='in'){arr=items.filter(x=>x.inDate===t);title='本日入寮'}if(quickMode==='out'){arr=items.filter(x=>x.outDate===t);title='本日退寮'}if(quickMode==='clean'){arr=cleanWait();title='清掃待ち一覧'}if(quickMode==='vacant'){arr=vacantNow();title='空室一覧'}$('quickTitle').innerHTML=`<h3>${title}</h3><p class="small">${arr.length}件</p>`;$('quickList').innerHTML=arr.length?arr.map(x=>card(x,quickMode)).join(''):'<div class="empty">該当なし</div>'}
+function moveMonth(n){viewMonth.setMonth(viewMonth.getMonth()+n);renderMonth()}
+function renderMonth(){let y=viewMonth.getFullYear(),m=viewMonth.getMonth(),days=new Date(y,m+1,0).getDate();$('monthTitle').textContent=`${y}年${m+1}月`;let rooms=[...new Map(items.map(x=>[x.property+'|||'+x.room,{property:x.property,room:x.room,type:x.type}])).values()].sort((a,b)=>(a.property+a.room).localeCompare(b.property+b.room,'ja'));let html='<tr><th class="prop">物件名</th><th class="room">部屋</th>';for(let d=1;d<=days;d++){let dt=new Date(y,m,d),w=dt.getDay(),cls=(w===0?'sun ':w===6?'sat ':'')+(iso(dt)===today()?'todayCol':'');html+=`<th class="${cls}">${d}<br>${'日月火水木金土'[w]}</th>`}html+='</tr>';let cur='';rooms.forEach(r=>{if(r.property!==cur){cur=r.property;html+=`<tr class="groupRow"><td class="prop">${cur}</td><td colspan="${days+1}">${r.type||''}</td></tr>`}html+=`<tr><td class="prop">${r.property}</td><td class="room">${r.room}</td>`;for(let d=1;d<=days;d++){let date=iso(new Date(y,m,d));let evs=items.filter(x=>x.property===r.property&&x.room===r.room&&(x.inDate===date||x.outDate===date||x.cleanDate===date||(!x.cleanDate&&x.outDate===date&&x.clean!=='不要'&&x.clean!=='完了')));let cell='';evs.forEach(x=>{if(x.inDate===date)cell+=`<span class="ev in">${x.name||'入寮'}</span>`;if(x.outDate===date)cell+=`<span class="ev out">退</span>`;if(x.cleanDate===date||(!x.cleanDate&&x.outDate===date&&x.clean!=='不要'&&x.clean!=='完了'))cell+=`<span class="ev clean">清</span>`});let dt=new Date(y,m,d),w=dt.getDay(),cls=(w===0?'sun ':w===6?'sat ':'')+(date===today()?'todayCol':'');html+=`<td class="${cls}">${cell}</td>`}html+='</tr>'});if(!rooms.length)html+=`<tr><td colspan="${days+2}" class="empty">予定を追加すると月間表に表示されます</td></tr>`;$('monthBoard').innerHTML=html}
+function renderSummary(){let y=viewMonth.getFullYear(),m=viewMonth.getMonth()+1,ym=String(y)+'-'+String(m).padStart(2,'0');let inM=items.filter(x=>(x.inDate||'').startsWith(ym)).length,outM=items.filter(x=>(x.outDate||'').startsWith(ym)).length,cleanM=items.filter(x=>(x.cleanDate||x.outDate||'').startsWith(ym)&&x.clean!=='不要').length;$('sumTotal').textContent=new Set(items.map(x=>x.property+'|'+x.room)).size;$('sumStay').textContent=items.filter(x=>x.status==='入居中'||x.status==='予約').length;$('sumVacant').textContent=vacantNow().length;$('sumClean').textContent=cleanWait().length;$('summaryText').textContent=`${y}年${m}月\n入寮数：${inM}件\n退寮数：${outM}件\n清掃件数：${cleanM}件\n現在の空室：${vacantNow().length}件\n清掃待ち：${cleanWait().length}件`}
+function render(){let t=today();$('todayText').textContent=new Date().toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',weekday:'short'})+" の状況";let inToday=items.filter(x=>x.inDate===t),outToday=items.filter(x=>x.outDate===t),cw=cleanWait();$('stIn').textContent=inToday.length;$('stOut').textContent=outToday.length;$('stClean').textContent=cw.length;$('stVacant').textContent=vacantNow().length;let todayItems=[...new Map([...inToday,...outToday,...cw.filter(x=>x.cleanDate===t||x.outDate===t)].map(x=>[x.id,x])).values()];$('todayList').innerHTML=todayItems.length?todayItems.map(card).join(''):'<div class="empty">本日の予定はありません</div>';let q=($('search')?.value||'').toLowerCase();let list=items.filter(x=>(filter==='all'||x.type===filter)&&(x.property+x.room+x.name+x.note).toLowerCase().includes(q)).sort((a,b)=>(a.inDate||'9999').localeCompare(b.inDate||'9999'));$('allList').innerHTML=list.length?list.map(card).join(''):'<div class="empty">データがありません</div>';renderQuick();renderMonth();renderSummary()}
+function makeReport(){let t=today(),d=jp(t);let ins=items.filter(x=>x.inDate===t),outs=items.filter(x=>x.outDate===t),cleans=cleanWait(),vac=vacantNow();let line=arr=>arr.length?arr.map(x=>`${x.property} ${x.room}　${x.name||''}${x.note?'（'+x.note+'）':''}`).join('\n'):'なし';$('reportText').value=`${d} 寮状況\n\n【入寮予定】\n${line(ins)}\n\n【退寮予定】\n${line(outs)}\n\n【清掃待ち】\n${line(cleans)}\n\n【空室】\n${line(vac)}\n\n【注意】\n未清掃・重複・備考欄を確認してください。`}
 function copyReport(){navigator.clipboard.writeText($('reportText').value).then(()=>alert('コピーしました'))}
+function shareLine(){if(!$('reportText').value)makeReport();let text=$('reportText').value;if(navigator.share){navigator.share({text}).catch(()=>{})}else{location.href='https://line.me/R/msg/text/?'+encodeURIComponent(text)}}
 function exportData(){let blob=new Blob([JSON.stringify(items,null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='寮管理バックアップ.json';a.click()}
 function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{items=JSON.parse(r.result);persist();alert('読み込み完了');render()}catch{alert('読み込み失敗')}};r.readAsText(f)}
 function resetAll(){if(confirm('全データを削除しますか？')){items=[];persist();render()}}
