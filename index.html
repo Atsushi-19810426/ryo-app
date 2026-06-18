@@ -1,74 +1,398 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#2563eb">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="寮管理">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="apple-touch-icon" href="icon-192.png">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>G-SPOT管理システム</title>
 <link rel="manifest" href="manifest.json">
-<title>寮管理 iPhone</title>
+<meta name="theme-color" content="#2563eb">
 <style>
-:root{--bg:#f4f6fb;--card:#fff;--text:#101828;--muted:#667085;--line:#e4e7ec;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--yellow:#f59e0b;--purple:#7c3aed;--safeBottom:env(safe-area-inset-bottom)}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;background:var(--bg);color:var(--text);font-size:16px}body{overscroll-behavior:none}.app{min-height:100dvh;padding:calc(env(safe-area-inset-top) + 10px) 14px calc(88px + var(--safeBottom));max-width:480px;margin:0 auto}.top{position:sticky;top:0;z-index:5;margin:-10px -14px 12px;padding:calc(env(safe-area-inset-top) + 10px) 14px 12px;background:rgba(244,246,251,.92);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(228,231,236,.7)}.sub{font-size:12px;color:var(--muted);margin:0 0 2px}.title{font-size:24px;line-height:1.1;margin:0;font-weight:800}.copy{border:0;border-radius:999px;background:#111827;color:#fff;padding:12px 14px;font-weight:700;font-size:15px}.datebar{display:grid;grid-template-columns:48px 1fr 48px 64px;gap:8px;margin-bottom:12px}.datebar button,.datebar input{height:48px;border:1px solid var(--line);border-radius:16px;background:#fff;font-size:16px;font-weight:700;text-align:center}.datebar input{padding:0 8px;color:var(--text);-webkit-appearance:none}.page{display:none}.page.active{display:block}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 14px}.stat{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px 8px;text-align:center;box-shadow:0 8px 22px rgba(16,24,40,.05)}.stat span{display:block;font-size:12px;color:var(--muted)}.stat b{font-size:26px;line-height:1.1}.stat.in b{color:var(--green)}.stat.out b{color:var(--red)}.stat.clean b{color:var(--yellow)}.stat.alert b{color:var(--purple)}.grid{display:grid;grid-template-columns:1fr;gap:12px}.menu-card{width:100%;min-height:82px;text-align:left;border:0;border-radius:24px;background:#fff;padding:18px 18px;box-shadow:0 10px 28px rgba(16,24,40,.08);display:flex;justify-content:space-between;gap:14px;align-items:center}.menu-card strong{display:block;font-size:19px;margin-bottom:4px}.menu-card span{font-size:13px;color:var(--muted)}.chev{font-size:28px;color:#98a2b3}.note,.panel,.form,.task,.room-card,.record{background:#fff;border:1px solid var(--line);border-radius:22px;padding:16px;box-shadow:0 8px 22px rgba(16,24,40,.05)}.note{margin-top:14px;color:#344054;font-size:14px}.back{width:100%;height:48px;border:0;border-radius:16px;background:#eaf0ff;color:#1d4ed8;font-size:16px;font-weight:800;margin-bottom:12px}.panel h2,.form h2{font-size:19px;margin:0 0 10px}pre{white-space:pre-wrap;font:600 15px/1.65 -apple-system,BlinkMacSystemFont,"Hiragino Sans";margin:0}.tasks{display:grid;gap:12px;margin-top:12px}.task h3{font-size:17px;margin:0 0 8px}.item{padding:12px;border-radius:16px;background:#f8fafc;margin:8px 0;border-left:5px solid #cbd5e1}.item.in{border-color:var(--green)}.item.out{border-color:var(--red)}.item.clean{border-color:var(--yellow)}.item.alert{border-color:var(--purple);background:#faf5ff}.item b{display:block}.item small{display:block;color:var(--muted);margin-top:2px}.legend{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.pill{border-radius:999px;background:#fff;border:1px solid var(--line);padding:8px 10px;font-size:13px;font-weight:700}.board{display:grid;gap:10px}.board-row{background:#fff;border:1px solid var(--line);border-radius:18px;padding:13px}.board-top{display:flex;justify-content:space-between;align-items:center;gap:8px}.badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}.badge{font-size:12px;border-radius:999px;padding:5px 8px;color:#fff;font-weight:700}.b-in{background:var(--green)}.b-out{background:var(--red)}.b-clean{background:var(--yellow)}.b-alert{background:var(--purple)}label{display:block;font-size:13px;color:#344054;font-weight:800;margin:12px 0 6px}input,select,textarea{width:100%;height:50px;border:1px solid var(--line);border-radius:16px;background:#fff;padding:0 13px;font-size:16px;color:var(--text)}textarea{height:76px;padding-top:12px}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.primary{width:100%;height:54px;border:0;border-radius:18px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-size:17px;font-weight:900;margin-top:14px}.danger{background:#fff1f2;color:#dc2626;border:1px solid #fecdd3;border-radius:12px;padding:8px 10px;font-weight:800}.records{display:grid;gap:10px;margin-top:12px}.record h4,.room-card h4{margin:0 0 6px;font-size:17px}.meta{color:var(--muted);font-size:13px;line-height:1.55}.room-cards{display:grid;gap:10px}.status{display:inline-block;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800;margin-top:6px}.s-free{background:#dcfce7;color:#166534}.s-busy{background:#dbeafe;color:#1e40af}.s-warn{background:#fef3c7;color:#92400e}.bottom{position:fixed;left:0;right:0;bottom:0;z-index:10;padding:8px 10px calc(8px + var(--safeBottom));background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);gap:4px;max-width:480px;margin:0 auto}.tab{border:0;background:transparent;border-radius:16px;padding:7px 0 5px;color:#667085;font-size:21px;font-weight:800}.tab span{display:block;font-size:10px;margin-top:1px}.tab.active{background:#eff6ff;color:#1d4ed8}@media (max-width:360px){.app{padding-left:10px;padding-right:10px}.title{font-size:22px}.stat b{font-size:22px}.datebar{grid-template-columns:42px 1fr 42px 58px}.menu-card strong{font-size:17px}}
+body{margin:0;background:#f4f6fb;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;color:#111827}
+header{background:linear-gradient(135deg,#2563eb,#4f46e5);color:white;padding:16px;position:sticky;top:0;z-index:10}
+h1{font-size:20px;margin:0} p{line-height:1.5}
+.wrap{padding:12px;max-width:1100px;margin:auto;padding-bottom:40px}
+.menu{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+button{border:0;border-radius:14px;padding:12px;background:white;box-shadow:0 2px 8px rgba(0,0,0,.08);font-weight:700;font-size:14px}
+button.active,.primary{background:#2563eb;color:white}.good{background:#16a34a;color:white}.danger{background:#ef4444;color:white}.sub{background:#eef2ff;color:#3730a3}
+.card{background:white;border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+h2{font-size:18px;margin:0 0 10px}
+label{display:block;font-size:12px;color:#6b7280;margin:8px 0 4px}
+input,select,textarea{width:100%;box-sizing:border-box;border:1px solid #e5e7eb;border-radius:12px;padding:10px;font-size:16px;background:white}
+textarea{height:360px;font-family:monospace;line-height:1.55}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.note{font-size:12px;color:#6b7280}
+.hidden{display:none}
+.item{border:1px solid #e5e7eb;border-radius:14px;padding:10px;margin-bottom:8px;background:white}
+.badge{display:inline-block;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:800;margin-left:5px;background:#fef3c7;color:#92400e}.badgeGreen{background:#dcfce7;color:#166534}.badgeRed{background:#fee2e2;color:#991b1b}.badgeBlue{background:#dbeafe;color:#1e40af}.badgePurple{background:#ede9fe;color:#5b21b6}
+.tableWrap{overflow:auto;border:1px solid #e5e7eb;border-radius:14px;background:white}
+table{border-collapse:collapse;width:max-content;min-width:100%}
+th,td{border:1px solid #e5e7eb;padding:6px;text-align:center;font-size:12px;white-space:nowrap}
+th.name,td.name{position:sticky;left:0;background:white;z-index:2;min-width:90px;text-align:left;font-weight:800}
+th{background:#f9fafb}.sat{background:#dbeafe!important}.sun,.holiday{background:#fee2e2!important}
+.green{background:#dcfce7!important;color:#166534;font-weight:900}.orange{background:#ffedd5!important;color:#9a3412;font-weight:900}
+.occupied{background:#f0fdf4!important;color:#166534;font-weight:800}.vacant{color:#9ca3af;background:#f9fafb!important}
+.in{background:#dcfce7!important;color:#166534;font-weight:900}.out{background:#fee2e2!important;color:#991b1b;font-weight:900}.clean{background:#ede9fe!important;color:#5b21b6;font-weight:900}.cleanDone{background:#e0f2fe!important;color:#075985;font-weight:900}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stat{text-align:center;background:#f9fafb;border-radius:14px;padding:10px}.stat b{font-size:22px}
+@media(max-width:700px){.row,.row3,.stats{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="app">
-<header class="top"><div><p class="sub">Dorm Management</p><h1 id="pageTitle" class="title">メニュー</h1></div><button class="copy" onclick="copyAI()">コピー</button></header>
-<section class="datebar"><button id="prevDay">‹</button><input type="date" id="targetDate"><button id="nextDay">›</button><button id="todayBtn">今日</button></section>
-<main>
-<section id="menu" class="page active">
- <div class="stats"><div class="stat in"><span>入寮</span><b id="countIn">0</b></div><div class="stat out"><span>退寮</span><b id="countOut">0</b></div><div class="stat clean"><span>清掃</span><b id="countClean">0</b></div><div class="stat alert"><span>注意</span><b id="countAlert">0</b></div></div>
- <div class="grid">
-  <button class="menu-card" data-page="today"><div><strong>🤖 本日の状況</strong><span>入寮・退寮・清掃を文章で確認</span></div><div class="chev">›</div></button>
-  <button class="menu-card" data-page="board"><div><strong>📅 管理ボード</strong><span>アパート・ビジホを色分け表示</span></div><div class="chev">›</div></button>
-  <button class="menu-card" data-page="input"><div><strong>✍ 登録</strong><span>予定をiPhoneから追加</span></div><div class="chev">›</div></button>
-  <button class="menu-card" data-page="rooms"><div><strong>🏢 部屋一覧</strong><span>空室・入居中・清掃待ち</span></div><div class="chev">›</div></button>
- </div>
- <div class="note"><b>iPhone用</b><br>Safariで開いて、共有ボタン →「ホーム画面に追加」でアプリのように起動できます。</div>
-</section>
-<section id="today" class="page"><button class="back" data-page="menu">← メニューへ戻る</button><div class="panel"><h2>本日のAI書き出し</h2><pre id="aiText"></pre></div><div class="tasks"><div class="task"><h3>入寮予定</h3><div id="inList"></div></div><div class="task"><h3>退寮予定</h3><div id="outList"></div></div><div class="task"><h3>清掃予定</h3><div id="cleanList"></div></div><div class="task"><h3>重複注意</h3><div id="alertList"></div></div></div></section>
-<section id="board" class="page"><button class="back" data-page="menu">← メニューへ戻る</button><div class="legend"><span class="pill">🟢 入寮</span><span class="pill">🔴 退寮</span><span class="pill">🟡 清掃</span><span class="pill">🟣 重複</span></div><div id="boardList" class="board"></div></section>
-<section id="input" class="page"><button class="back" data-page="menu">← メニューへ戻る</button><div class="form"><h2>予定登録</h2><div class="two"><div><label>種別</label><select id="type"><option>アパート</option><option>ビジホ</option><option>その他</option></select></div><div><label>部屋番号</label><input id="room" placeholder="101 / 305"></div></div><label>アパート名・ビジホ名</label><input id="property" placeholder="例：○○ハイツ / ○○ホテル"><label>名前</label><input id="name" placeholder="名前"><div class="two"><div><label>入寮日</label><input type="date" id="moveIn"></div><div><label>退寮日</label><input type="date" id="moveOut"></div></div><label>清掃日</label><input type="date" id="cleaning"><label>メモ</label><textarea id="memo" placeholder="備考・注意事項"></textarea><button id="addBtn" class="primary">登録する</button></div><div id="records" class="records"></div></section>
-<section id="rooms" class="page"><button class="back" data-page="menu">← メニューへ戻る</button><div id="roomsList" class="room-cards"></div></section>
-</main>
-<nav class="bottom"><button class="tab active" data-page="menu">🏠<span>メニュー</span></button><button class="tab" data-page="today">🤖<span>本日</span></button><button class="tab" data-page="board">📅<span>ボード</span></button><button class="tab" data-page="input">✍<span>登録</span></button><button class="tab" data-page="rooms">🏢<span>部屋</span></button></nav>
+<header><h1>G-SPOT管理システム</h1><p style="margin:4px 0 0;font-size:12px">新規アプリ版 / 出勤管理・寮管理・31日書き出し</p></header>
+<div class="wrap">
+<div class="menu">
+<button id="tab_home" class="active" onclick="showPage('home')">🏠 ホーム</button>
+<button id="tab_staff" onclick="showPage('staff')">📅 出勤</button>
+<button id="tab_dorm" onclick="showPage('dorm')">🏢 寮管理</button>
+<button id="tab_master" onclick="showPage('master')">⚙️ 寮設定</button>
+<button id="tab_monthly" onclick="showPage('monthly')">📊 月間表</button>
+<button id="tab_ai" onclick="showPage('ai')">🤖 書き出し</button>
+<button id="tab_backup" onclick="showPage('backup')">💾 バックアップ</button>
 </div>
+
+<section id="home" class="page">
+<div class="card"><h2>ホーム</h2>
+<div class="stats">
+<div class="stat"><div class="note">登録人数</div><b id="statStaff">0</b></div>
+<div class="stat"><div class="note">新人</div><b id="statNewbie">0</b></div>
+<div class="stat"><div class="note">寮部屋</div><b id="statDorm">0</b></div>
+<div class="stat"><div class="note">本日出勤</div><b id="statToday">0</b></div>
+</div>
+<p class="note">新規リポジトリ用です。GitHubには index.html / manifest.json / icon-192.png / icon-512.png をアップロードしてください。</p>
+<button class="primary" onclick="showPage('staff')">出勤を登録</button>
+<button class="sub" onclick="showPage('dorm')">寮を登録</button>
+<button class="good" onclick="showPage('ai')">LINE用に書き出し</button>
+<button class="sub" onclick="exportBackup()">データをバックアップ</button>
+<label class="note">バックアップ復元</label>
+<input type="file" accept=".json" onchange="importBackup(event)">
+</div></section>
+
+
+<section id="backup" class="page hidden">
+<div class="card">
+<h2>バックアップ・復元</h2>
+<p class="note">データ消失防止のため、定期的にバックアップしてください。PC・iPhone間の移動にも使えます。</p>
+<button class="good" onclick="exportBackup()">バックアップ作成</button>
+<label>バックアップ復元</label>
+<input type="file" accept=".json" onchange="importBackup(event)">
+<button class="sub" onclick="showStorageInfo()">保存状態を確認</button>
+<textarea id="storageInfo" placeholder="保存状態がここに表示されます"></textarea>
+</div>
+</section>
+
+<section id="staff" class="page hidden">
+<div class="card"><h2>源氏名・出勤登録</h2>
+<div class="row"><div><label>源氏名</label><input id="name" placeholder="例：いずな"></div><div><label>新人</label><select id="newbie"><option value="0">通常</option><option value="1">新人</option></select></div></div>
+<div class="row"><div><label>開始日</label><input id="start" type="date"></div><div><label>終了日</label><input id="end" type="date"></div></div>
+<div class="row"><div><label>出勤開始</label><input id="timeStart" type="time" value="10:00"></div><div><label>出勤終了</label><input id="timeEnd" type="time" value="20:00"></div></div>
+<button class="primary" onclick="addStaff()">登録する</button><p class="note">日別変更で特定日だけ時間変更・休みにできます。</p></div>
+<div class="card"><h2>出勤登録一覧</h2><div id="staffList"></div></div>
+</section>
+
+
+<section id="master" class="page hidden">
+<div class="card"><h2>寮設定</h2>
+<p class="note">寮名と部屋番号を先に登録します。入寮登録では、寮を選ぶとその寮の部屋番号だけ選べます。</p>
+<div class="row">
+<div><label>寮名</label><input id="masterDormName" placeholder="例：第一寮"></div>
+<div><label>部屋番号</label><input id="masterRoomNo" placeholder="例：101"></div>
+</div>
+<button class="primary" onclick="addDormRoomMaster()">寮/部屋を追加</button>
+</div>
+<div class="card"><h2>登録済みの寮/部屋</h2><div id="masterList"></div></div>
+</section>
+
+<section id="dorm" class="page hidden">
+<div class="card"><h2>寮管理登録</h2>
+<div class="row"><div><label>寮名</label><select id="dormSelect" onchange="updateRoomSelect()"></select></div><div><label>部屋番号</label><select id="roomSelect"></select></div></div>
+<div class="row"><div><label>名前/源氏名</label><input id="residentName" placeholder="例：いずな"></div><div><label>状態</label><select id="roomStatus"><option>入寮中</option><option>空室</option><option>予約</option></select></div></div>
+<div class="row3"><div><label>入寮日</label><input id="moveIn" type="date"></div><div><label>退寮日</label><input id="moveOut" type="date"></div><div><label>清掃日</label><input id="cleanDate" type="date"></div></div>
+<div class="row"><div><label>清掃状態</label><select id="cleanStatus"><option>未清掃</option><option>清掃予定</option><option>清掃済み</option></select></div><div><label>清掃済み日</label><input id="cleanDoneDate" type="date"></div></div>
+<button class="primary" onclick="addDorm()">入寮情報を登録</button>
+<p class="note">寮名や部屋番号が出ない場合は「寮設定」で追加してください。</p></div>
+<div class="card"><h2>寮一覧</h2><div id="dormList"></div></div>
+</section>
+
+<section id="monthly" class="page hidden">
+<div class="card"><h2 id="monthTitle">月間表</h2>
+<div class="row"><div><label>表示開始日</label><input id="monthBase" type="date" onchange="renderMonthly();renderDormMonthly();"></div><div><label>表示日数</label><select id="daysCount" onchange="renderMonthly();renderDormMonthly();"><option>31</option><option>30</option><option>14</option><option>7</option></select></div></div>
+<div class="tableWrap" id="monthlyTable"></div></div>
+<div class="card"><h2>寮 月間表</h2><p class="note">入居期間中は名前を表示します。入寮日は「入」、退寮日は「退」、清掃日は「清」も一緒に表示します。</p><div class="tableWrap" id="dormMonthlyTable"></div></div>
+</section>
+
+<section id="ai" class="page hidden">
+<div class="card"><h2>AI書き出し・LINE送信</h2>
+<div class="row"><div><label>更新日</label><input id="updateDate" type="date"></div><div><label>日数</label><select id="exportDays"><option>31</option><option>30</option><option>14</option><option>7</option></select></div></div>
+<div class="row"><button class="primary" onclick="generateText()">書き出し作成</button><button class="good" onclick="copyText()">コピー</button></div>
+<button class="sub" onclick="sendLine()">LINEで送る</button>
+<textarea id="output"></textarea></div>
+</section>
+</div>
+
 <script>
-const STORE='dormAppIphoneRecordsV1';
-const sample=[
- {type:'アパート',property:'土浦ハイツ',room:'101',name:'山田 太郎',moveIn:'2026-06-16',moveOut:'',cleaning:'',memo:'入寮予定'},
- {type:'アパート',property:'土浦ハイツ',room:'102',name:'佐藤 花子',moveIn:'2026-06-16',moveOut:'',cleaning:'',memo:'入寮予定'},
- {type:'ビジホ',property:'駅前ビジホ',room:'305',name:'鈴木 一郎',moveIn:'2026-06-15',moveOut:'2026-06-16',cleaning:'2026-06-16',memo:'退寮後清掃'},
- {type:'アパート',property:'荒川沖コーポ',room:'202',name:'田中 美咲',moveIn:'2026-06-16',moveOut:'',cleaning:'',memo:'同日入寮注意'},
- {type:'アパート',property:'荒川沖コーポ',room:'202',name:'前入居者',moveIn:'2026-05-01',moveOut:'2026-06-16',cleaning:'2026-06-16',memo:'同日退寮・清掃'}
-];
-let records=JSON.parse(localStorage.getItem(STORE)||'null')||sample;
-const $=id=>document.getElementById(id); const todayISO=()=>new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
-$('targetDate').value=todayISO();
-function fmt(d){if(!d)return ''; const [y,m,day]=d.split('-'); return `${Number(m)}/${Number(day)}`}
-function label(r){return `${r.type}｜${r.property||'物件名未入力'} ${r.room||''}号室`}
-function dayData(){const d=$('targetDate').value; const ins=records.filter(r=>r.moveIn===d); const outs=records.filter(r=>r.moveOut===d); const cleans=records.filter(r=>r.cleaning===d); const keys={}; [...ins,...outs,...cleans].forEach(r=>{const k=`${r.type}_${r.property}_${r.room}`; keys[k]=(keys[k]||0)+1}); const alerts=records.filter(r=>keys[`${r.type}_${r.property}_${r.room}`]>1 && (r.moveIn===d||r.moveOut===d||r.cleaning===d)); return {d,ins,outs,cleans,alerts}}
-function item(r,cls){return `<div class="item ${cls}"><b>${label(r)}</b><small>${r.name||'名前未入力'}　${r.memo||''}</small></div>`}
-function empty(){return '<div class="item"><small>予定なし</small></div>'}
-function render(){const {d,ins,outs,cleans,alerts}=dayData(); $('countIn').textContent=ins.length; $('countOut').textContent=outs.length; $('countClean').textContent=cleans.length; $('countAlert').textContent=[...new Set(alerts.map(r=>label(r)))].length;
- $('inList').innerHTML=ins.map(r=>item(r,'in')).join('')||empty(); $('outList').innerHTML=outs.map(r=>item(r,'out')).join('')||empty(); $('cleanList').innerHTML=cleans.map(r=>item(r,'clean')).join('')||empty(); $('alertList').innerHTML=alerts.map(r=>item(r,'alert')).join('')||empty();
- const lines=[`${fmt(d)} 本日の寮状況`,'']; if(ins.length){lines.push('【入寮予定】',...ins.map(r=>`${label(r)}　${r.name||''}`),'')} if(outs.length){lines.push('【退寮予定】',...outs.map(r=>`${label(r)}　${r.name||''}`),'')} if(cleans.length){lines.push('【清掃予定】',...cleans.map(r=>`${label(r)}　${r.name||''}`),'')} if(alerts.length){lines.push('【重複注意】',...[...new Set(alerts.map(r=>label(r)))].map(x=>`${x}　同日予定あり`),'')} if(lines.length===2)lines.push('本日の予定はありません。'); $('aiText').textContent=lines.join('\n');
- const dayRows=[...new Map([...ins,...outs,...cleans].map(r=>[label(r),r])).values()]; $('boardList').innerHTML=dayRows.map(r=>{let b=''; if(r.moveIn===d)b+='<span class="badge b-in">入寮</span>'; if(r.moveOut===d)b+='<span class="badge b-out">退寮</span>'; if(r.cleaning===d)b+='<span class="badge b-clean">清掃</span>'; if(alerts.some(a=>label(a)===label(r)))b+='<span class="badge b-alert">重複</span>'; return `<div class="board-row"><div class="board-top"><b>${label(r)}</b><span>${r.name||''}</span></div><div class="badges">${b}</div><div class="meta">${r.memo||''}</div></div>`}).join('')||'<div class="note">本日の表示対象はありません。</div>';
- $('records').innerHTML=records.slice().reverse().map((r,i)=>`<div class="record"><h4>${label(r)}</h4><div class="meta">${r.name||''}<br>入寮 ${fmt(r.moveIn)||'-'} / 退寮 ${fmt(r.moveOut)||'-'} / 清掃 ${fmt(r.cleaning)||'-'}<br>${r.memo||''}</div><button class="danger" onclick="delRec(${records.length-1-i})">削除</button></div>`).join('');
- const latest={}; records.forEach(r=>latest[`${r.type}_${r.property}_${r.room}`]=r); $('roomsList').innerHTML=Object.values(latest).sort((a,b)=>label(a).localeCompare(label(b),'ja')).map(r=>{let st='空室',cls='s-free'; if(r.moveIn && (!r.moveOut || r.moveOut>=d)){st='入居中';cls='s-busy'} if(r.cleaning===d){st='清掃予定';cls='s-warn'} return `<div class="room-card"><h4>${label(r)}</h4><div class="meta">${r.name||''}<br>入寮 ${fmt(r.moveIn)||'-'} / 退寮 ${fmt(r.moveOut)||'-'} / 清掃 ${fmt(r.cleaning)||'-'}</div><span class="status ${cls}">${st}</span></div>`}).join('');
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("./sw.js").catch(function(){})})}
+var holidays={"2026-01-01":"元日","2026-01-12":"成人の日","2026-02-11":"建国記念の日","2026-02-23":"天皇誕生日","2026-03-20":"春分の日","2026-04-29":"昭和の日","2026-05-03":"憲法記念日","2026-05-04":"みどりの日","2026-05-05":"こどもの日","2026-05-06":"振替休日","2026-07-20":"海の日","2026-08-11":"山の日","2026-09-21":"敬老の日","2026-09-22":"国民の休日","2026-09-23":"秋分の日","2026-10-12":"スポーツの日","2026-11-03":"文化の日","2026-11-23":"勤労感謝の日"};
+function loadFirst(keys){
+ for(var i=0;i<keys.length;i++){
+  try{
+   var raw=localStorage.getItem(keys[i]);
+   if(raw){
+    var v=JSON.parse(raw);
+    if(Array.isArray(v) && v.length){return v;}
+   }
+  }catch(e){}
+ }
+ return [];
 }
-function save(){localStorage.setItem(STORE,JSON.stringify(records)); render()}
-function show(page){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); $(page).classList.add('active'); document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.page===page)); $('pageTitle').textContent={menu:'メニュー',today:'本日の状況',board:'管理ボード',input:'登録',rooms:'部屋一覧'}[page]||'寮管理'; window.scrollTo(0,0)}
-document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.page)));
-$('prevDay').onclick=()=>{let d=new Date($('targetDate').value); d.setDate(d.getDate()-1); $('targetDate').value=d.toISOString().slice(0,10); render()};
-$('nextDay').onclick=()=>{let d=new Date($('targetDate').value); d.setDate(d.getDate()+1); $('targetDate').value=d.toISOString().slice(0,10); render()}; $('todayBtn').onclick=()=>{$('targetDate').value=todayISO();render()}; $('targetDate').onchange=render;
-$('addBtn').onclick=()=>{records.push({type:$('type').value,property:$('property').value.trim(),room:$('room').value.trim(),name:$('name').value.trim(),moveIn:$('moveIn').value,moveOut:$('moveOut').value,cleaning:$('cleaning').value,memo:$('memo').value.trim()}); ['property','room','name','moveIn','moveOut','cleaning','memo'].forEach(id=>$(id).value=''); save(); show('today')};
-function delRec(i){if(confirm('この登録を削除しますか？')){records.splice(i,1);save()}}
-async function copyAI(){try{await navigator.clipboard.writeText($('aiText').textContent); alert('コピーしました')}catch(e){alert('コピーできませんでした')}}
-render(); if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'))}
+var staff=loadFirst(["newAppStaffV1","staffDataStable","staffDataUnifiedV1","managementAppDataV4"]);
+var dorms=loadFirst(["newAppDormV1","dormDataStable","dormDataUnifiedV1","dormDataV1","ryokanDormDataV1"]);
+var dormMaster=loadFirst(["dormMasterV1","roomMasterV1"]);
+try{
+ if(staff.length){localStorage.setItem("newAppStaffV1",JSON.stringify(staff));}
+ if(dorms.length){localStorage.setItem("newAppDormV1",JSON.stringify(dorms));}
+}catch(e){}
+var wds=["日","月","火","水","木","金","土"];
+function el(id){return document.getElementById(id)}
+function pad(n){return String(n).padStart(2,"0")}
+function ymd(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
+function md(d){return (d.getMonth()+1)+"/"+d.getDate()}
+function today(){return ymd(new Date())}
+function parseDate(s){var a=s.split("-");return new Date(Number(a[0]),Number(a[1])-1,Number(a[2]))}
+function save(){localStorage.setItem("newAppStaffV1",JSON.stringify(staff));localStorage.setItem("newAppDormV1",JSON.stringify(dorms));localStorage.setItem("dormMasterV1",JSON.stringify(dormMaster));renderStats()}
+function dateClass(d){var s=ymd(d);if(holidays[s])return "holiday";if(d.getDay()==0)return "sun";if(d.getDay()==6)return "sat";return ""}
+function diffHours(a,b){if(!a||!b)return 0;var A=a.split(":"),B=b.split(":");var s=Number(A[0])*60+Number(A[1]),e=Number(B[0])*60+Number(B[1]);if(e<s)e+=1440;return Math.max(0,(e-s)/60)}
+function point(h){if(h<=0)return 0;if(h<=7)return .5;return 1}
+function fmt(n){return Number.isInteger(n)?String(n):n.toFixed(1)}
+function showPage(id){
+ var pages=document.querySelectorAll(".page");for(var i=0;i<pages.length;i++)pages[i].classList.add("hidden");
+ var tabs=document.querySelectorAll(".menu button");for(var j=0;j<tabs.length;j++)tabs[j].classList.remove("active");
+ el(id).classList.remove("hidden");el("tab_"+id).classList.add("active");
+ if(id==="staff")renderStaff(); if(id==="master")renderMaster(); if(id==="dorm"){syncMasterFromDorms();renderDorm();updateDormSelect()} if(id==="monthly"){renderMonthly();renderDormMonthly()} if(id==="ai"&&!el("updateDate").value)el("updateDate").value=today();
+ renderStats();
+}
+
+function exportBackup(){
+ var backup={staff:staff,dorms:dorms,createdAt:new Date().toISOString()};
+ var blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
+ var a=document.createElement("a");
+ a.href=URL.createObjectURL(blob);
+ a.download="shift_dorm_backup.json";
+ a.click();
+ URL.revokeObjectURL(a.href);
+}
+function importBackup(ev){
+ var file=ev.target.files[0];
+ if(!file)return;
+ var reader=new FileReader();
+ reader.onload=function(){
+  try{
+   var data=JSON.parse(reader.result);
+   if(Array.isArray(data.staff)){staff=data.staff;}
+   if(Array.isArray(data.dorms)){dorms=data.dorms;}
+   save();syncMasterFromDorms();renderStaff();renderMaster();renderDorm();renderMonthly();renderDormMonthly();renderStats();updateDormSelect();
+   alert("復元しました");
+  }catch(e){alert("復元できませんでした");}
+ };
+ reader.readAsText(file);
+}
+
+function init(){
+ var d=new Date();el("start").value=today();el("end").value=ymd(new Date(d.getFullYear(),d.getMonth(),d.getDate()+30));el("monthBase").value=today();el("updateDate").value=today();el("moveIn").value=today();el("cleanDate").value=today();
+ syncMasterFromDorms();renderStaff();renderMaster();renderDorm();renderMonthly();renderDormMonthly();renderStats();updateDormSelect();
+}
+function renderStats(){el("statStaff").textContent=staff.length;el("statNewbie").textContent=staff.filter(function(x){return x.newbie}).length;el("statDorm").textContent=dorms.length;el("statToday").textContent=totals(today()).real}
+
+function exportBackup(){
+ var backup={staff:staff,dorms:dorms,dormMaster:(typeof dormMaster!=="undefined"?dormMaster:[]),createdAt:new Date().toISOString()};
+ var blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
+ var a=document.createElement("a");
+ a.href=URL.createObjectURL(blob);
+ a.download="gspot_management_backup.json";
+ a.click();
+ URL.revokeObjectURL(a.href);
+}
+function importBackup(ev){
+ var file=ev.target.files[0];
+ if(!file)return;
+ var reader=new FileReader();
+ reader.onload=function(){
+  try{
+   var data=JSON.parse(reader.result);
+   if(Array.isArray(data.staff)){staff=data.staff;}
+   if(Array.isArray(data.dorms)){dorms=data.dorms;}
+   if(Array.isArray(data.dormMaster)&&typeof dormMaster!=="undefined"){dormMaster=data.dormMaster;}
+   save();
+   if(typeof renderStaff==="function")renderStaff();
+   if(typeof renderMaster==="function")renderMaster();
+   if(typeof renderDorm==="function")renderDorm();
+   if(typeof renderMonthly==="function")renderMonthly();
+   if(typeof renderDormMonthly==="function")renderDormMonthly();
+   if(typeof updateDormSelect==="function")updateDormSelect();
+   if(typeof renderStats==="function")renderStats();
+   alert("復元しました");
+  }catch(e){alert("復元できませんでした");}
+ };
+ reader.readAsText(file);
+}
+function showStorageInfo(){
+ var info={
+  staff:staff.length,
+  dorms:dorms.length,
+  dormMaster:(typeof dormMaster!=="undefined"?dormMaster.length:0),
+  keys:Object.keys(localStorage).filter(function(k){return k.indexOf("Staff")>=0||k.indexOf("Dorm")>=0||k.indexOf("staff")>=0||k.indexOf("dorm")>=0||k.indexOf("management")>=0||k.indexOf("Master")>=0})
+ };
+ var area=document.getElementById("storageInfo");
+ if(area){area.value=JSON.stringify(info,null,2);}
+}
+
+function addStaff(){var name=el("name").value.trim();if(!name){alert("源氏名を入力してください");return}staff.push({id:Date.now(),name:name,newbie:el("newbie").value==="1",start:el("start").value,end:el("end").value,timeStart:el("timeStart").value,timeEnd:el("timeEnd").value,overrides:{}});el("name").value="";save();renderStaff();renderMonthly()}
+function renderStaff(){var box=el("staffList");box.innerHTML="";if(!staff.length){box.innerHTML='<p class="note">まだ登録がありません。</p>';return}staff.forEach(function(p){var div=document.createElement("div");div.className="item";div.innerHTML="<b>"+p.name+"</b>"+(p.newbie?'<span class=\"badge\">新人</span>':"")+"<div class='note'>"+p.start+"〜"+p.end+" / 基本 "+p.timeStart+"〜"+p.timeEnd+"</div><div class='row3'><button class='sub' onclick='editDay("+p.id+")'>日別変更</button><button onclick='toggleNewbie("+p.id+")'>新人切替</button><button class='danger' onclick='removeStaff("+p.id+")'>削除</button></div>";box.appendChild(div)})}
+function toggleNewbie(id){var p=staff.find(function(x){return x.id===id});p.newbie=!p.newbie;save();renderStaff();renderMonthly()}
+function removeStaff(id){if(confirm("削除しますか？")){staff=staff.filter(function(x){return x.id!==id});save();renderStaff();renderMonthly()}}
+function editDay(id){var p=staff.find(function(x){return x.id===id});var date=prompt("変更する日付 例：2026-06-18",today());if(!date)return;var cur=p.overrides[date]||{};var st=prompt("開始時間。休みの場合は空欄",cur.off?"":(cur.timeStart||p.timeStart));if(st===null)return;if(st===""){p.overrides[date]={off:true};save();renderStaff();renderMonthly();return}var en=prompt("終了時間",cur.timeEnd||p.timeEnd);if(!en)return;p.overrides[date]={timeStart:st,timeEnd:en,off:false};save();renderStaff();renderMonthly()}
+function workFor(p,ds){if(ds<p.start||ds>p.end)return null;var ov=p.overrides[ds];if(ov&&ov.off)return null;var st=(ov&&ov.timeStart)?ov.timeStart:p.timeStart;var en=(ov&&ov.timeEnd)?ov.timeEnd:p.timeEnd;var h=diffHours(st,en);if(h<=0)return null;return{hours:h,point:point(h)}}
+function totals(ds){var real=0,calc=0,newbies=[];staff.forEach(function(p){var w=workFor(p,ds);if(w){real++;calc+=w.point;if(p.newbie)newbies.push(p.name)}});return{real:real,calc:calc,newbies:newbies}}
+
+function syncMasterFromDorms(){
+ dorms.forEach(function(r){
+  if(r.dormName&&r.roomNo&&!dormMaster.some(function(m){return m.dormName===r.dormName&&m.roomNo===r.roomNo})){
+   dormMaster.push({id:Date.now()+Math.random(),dormName:r.dormName,roomNo:r.roomNo});
+  }
+ });
+ localStorage.setItem("dormMasterV1",JSON.stringify(dormMaster));
+}
+function addDormRoomMaster(){
+ var dn=el("masterDormName").value.trim(),rn=el("masterRoomNo").value.trim();
+ if(!dn||!rn){alert("寮名と部屋番号を入力してください");return}
+ if(dormMaster.some(function(m){return m.dormName===dn&&m.roomNo===rn})){alert("すでに登録されています");return}
+ dormMaster.push({id:Date.now(),dormName:dn,roomNo:rn});
+ el("masterRoomNo").value="";
+ save();renderMaster();updateDormSelect();
+}
+function renderMaster(){
+ var box=el("masterList");if(!box)return;box.innerHTML="";
+ if(!dormMaster.length){box.innerHTML='<p class="note">まだ寮/部屋設定がありません。</p>';return}
+ var groups={};
+ dormMaster.forEach(function(m){if(!groups[m.dormName])groups[m.dormName]=[];groups[m.dormName].push(m)});
+ Object.keys(groups).sort().forEach(function(dn){
+  var div=document.createElement("div");div.className="item";
+  var rooms=groups[dn].sort(function(a,b){return a.roomNo.localeCompare(b.roomNo,'ja')}).map(function(m){
+   return "<span class='badge badgeBlue'>"+m.roomNo+" <button style='box-shadow:none;padding:2px 5px;margin-left:4px' onclick='removeMaster("+m.id+")'>×</button></span>"
+  }).join(" ");
+  div.innerHTML="<b>"+dn+"</b><div style='margin-top:8px'>"+rooms+"</div>";
+  box.appendChild(div);
+ });
+}
+function removeMaster(id){
+ if(confirm("部屋設定を削除しますか？")){
+  dormMaster=dormMaster.filter(function(x){return x.id!==id});
+  save();renderMaster();updateDormSelect();
+ }
+}
+function updateDormSelect(){
+ var ds=el("dormSelect");if(!ds)return;
+ var current=ds.value;
+ var names=[...new Set(dormMaster.map(function(m){return m.dormName}))].sort();
+ ds.innerHTML="";
+ if(!names.length){ds.innerHTML="<option value=''>先に寮設定してください</option>";updateRoomSelect();return}
+ names.forEach(function(n){var o=document.createElement("option");o.value=n;o.textContent=n;ds.appendChild(o)});
+ if(names.indexOf(current)>=0)ds.value=current;
+ updateRoomSelect();
+}
+function updateRoomSelect(){
+ var rs=el("roomSelect"),ds=el("dormSelect");if(!rs||!ds)return;
+ var dn=ds.value;
+ var rooms=dormMaster.filter(function(m){return m.dormName===dn}).map(function(m){return m.roomNo}).sort(function(a,b){return a.localeCompare(b,'ja')});
+ rs.innerHTML="";
+ if(!rooms.length){rs.innerHTML="<option value=''>部屋なし</option>";return}
+ rooms.forEach(function(r){var o=document.createElement("option");o.value=r;o.textContent=r+"号室";rs.appendChild(o)});
+}
+function addDorm(){
+ var dn=el("dormSelect").value,rn=el("roomSelect").value;
+ if(!dn||!rn){alert("寮と部屋番号を選択してください");return}
+ dorms.push({id:Date.now(),dormName:dn,roomNo:rn,residentName:el("residentName").value.trim(),status:el("roomStatus").value,moveIn:el("moveIn").value,moveOut:el("moveOut").value,cleanDate:el("cleanDate").value,cleanStatus:el("cleanStatus").value,cleanDoneDate:el("cleanDoneDate").value});
+ el("residentName").value="";
+ save();renderDorm();renderDormMonthly();
+}
+function cleanBadge(r){
+ var st=r.cleanStatus||"未清掃";
+ if(st==="清掃済み")return "<span class='badge badgeGreen'>清掃済み "+(r.cleanDoneDate||"")+"</span>";
+ if(st==="清掃予定")return "<span class='badge badgePurple'>清掃予定 "+(r.cleanDate||"")+"</span>";
+ return "<span class='badge badgeRed'>未清掃</span>";
+}
+function renderDorm(){
+ var box=el("dormList");box.innerHTML="";
+ if(!dorms.length){box.innerHTML='<p class="note">まだ入寮登録がありません。</p>';return}
+ dorms.sort(function(a,b){return (a.dormName+a.roomNo).localeCompare(b.dormName+b.roomNo,'ja')}).forEach(function(r){
+  var div=document.createElement("div");div.className="item";
+  div.innerHTML="<b>"+r.dormName+" "+r.roomNo+"号室</b><span class='badge'>"+r.status+"</span>"+cleanBadge(r)+"<div class='note'>名前："+(r.residentName||"-")+" / 入寮："+(r.moveIn||"-")+" / 退寮："+(r.moveOut||"-")+" / 清掃日："+(r.cleanDate||"-")+"</div><div class='row3'><button class='sub' onclick='editDorm("+r.id+")'>編集</button><button onclick='markClean("+r.id+")'>清掃済み</button><button class='danger' onclick='removeDorm("+r.id+")'>削除</button></div>";
+  box.appendChild(div);
+ });
+}
+function editDorm(id){
+ var r=dorms.find(function(x){return x.id===id});
+ r.residentName=prompt("名前/源氏名",r.residentName)||r.residentName;
+ r.moveIn=prompt("入寮日",r.moveIn)||r.moveIn;
+ r.moveOut=prompt("退寮日",r.moveOut)||r.moveOut;
+ r.cleanDate=prompt("清掃日",r.cleanDate)||r.cleanDate;
+ r.cleanStatus=prompt("清掃状態：未清掃 / 清掃予定 / 清掃済み",r.cleanStatus||"未清掃")||r.cleanStatus;
+ r.cleanDoneDate=prompt("清掃済み日",r.cleanDoneDate||"")||r.cleanDoneDate;
+ save();renderDorm();renderDormMonthly();
+}
+function markClean(id){
+ var r=dorms.find(function(x){return x.id===id});
+ r.cleanStatus="清掃済み";r.cleanDoneDate=today();
+ save();renderDorm();renderDormMonthly();
+}
+function removeDorm(id){if(confirm("削除しますか？")){dorms=dorms.filter(function(x){return x.id!==id});save();renderDorm();renderDormMonthly()}}
+function renderMonthly(){var base=parseDate(el("monthBase").value||today()),days=Number(el("daysCount").value||31);el("monthTitle").textContent=(base.getMonth()+1)+"月出勤";var html="<table><thead><tr><th class='name' rowspan='2'>源氏名</th>";for(var i=0;i<days;i++){var d=new Date(base);d.setDate(base.getDate()+i);html+="<th class='"+dateClass(d)+"'>"+d.getDate()+"日</th>"}html+="</tr><tr>";for(i=0;i<days;i++){d=new Date(base);d.setDate(base.getDate()+i);html+="<th class='"+dateClass(d)+"'>"+wds[d.getDay()]+"</th>"}html+="</tr></thead><tbody>";staff.forEach(function(p){html+="<tr><td class='name'>"+p.name+(p.newbie?" 🆕":"")+"</td>";for(var i=0;i<days;i++){var d=new Date(base);d.setDate(base.getDate()+i);var ds=ymd(d),w=workFor(p,ds),c=dateClass(d);if(!w)html+="<td class='"+c+"'>-</td>";else{var wc=w.hours>=10?"green":(w.hours<=8?"orange":"");html+="<td class='"+c+" "+wc+"'>"+w.hours.toFixed(1)+"</td>"}}html+="</tr>"});html+="<tr><td class='name'>合計</td>";for(i=0;i<days;i++){d=new Date(base);d.setDate(base.getDate()+i);var t=totals(ymd(d));html+="<td class='"+dateClass(d)+"'><b>"+fmt(t.calc)+"</b><br>("+t.real+")</td>"}html+="</tr></tbody></table>";el("monthlyTable").innerHTML=html}
+function renderDormMonthly(){
+ var base=parseDate(el("monthBase").value||today()),days=Number(el("daysCount").value||31);
+ var html="<table><thead><tr><th class='name' rowspan='2'>寮/部屋</th>";
+ for(var i=0;i<days;i++){var d=new Date(base);d.setDate(base.getDate()+i);html+="<th class='"+dateClass(d)+"'>"+d.getDate()+"日</th>"}
+ html+="</tr><tr>";
+ for(i=0;i<days;i++){d=new Date(base);d.setDate(base.getDate()+i);html+="<th class='"+dateClass(d)+"'>"+wds[d.getDay()]+"</th>"}
+ html+="</tr></thead><tbody>";
+ var rows=(dormMaster.length?dormMaster:dorms).slice().sort(function(a,b){return (a.dormName+a.roomNo).localeCompare(b.dormName+b.roomNo,'ja')});
+ rows.forEach(function(room){
+  html+="<tr><td class='name'>"+room.dormName+"<br>"+room.roomNo+"号室</td>";
+  for(var i=0;i<days;i++){
+   var d=new Date(base);d.setDate(base.getDate()+i);
+   var ds=ymd(d),txt="",cl=dateClass(d)+" vacant";
+   var match=dorms.find(function(r){
+    if(r.dormName!==room.dormName||r.roomNo!==room.roomNo)return false;
+    var active=false;
+    if(r.moveIn&&r.moveOut){active=ds>=r.moveIn&&ds<=r.moveOut}
+    else if(r.moveIn&&!r.moveOut){active=ds>=r.moveIn}
+    else if(!r.moveIn&&r.status==="入寮中"){active=true}
+    return active&&r.status!=="空室";
+   });
+   if(match){txt=match.residentName||"入居中";cl=dateClass(d)+" occupied"}
+   var marks=[];
+   dorms.forEach(function(r){
+    if(r.dormName===room.dormName&&r.roomNo===room.roomNo){
+     if(r.moveIn===ds){marks.push("入");cl+=" in"}
+     if(r.moveOut===ds){marks.push("退");cl+=" out"}
+     if(r.cleanDate===ds){marks.push("清");cl+=" clean"}
+     if(r.cleanStatus==="清掃済み"&&r.cleanDoneDate===ds){marks.push("済");cl+=" cleanDone"}
+    }
+   });
+   if(marks.length)txt=(txt?txt+" ":"")+marks.join("/");
+   html+="<td class='"+cl+"'>"+txt+"</td>";
+  }
+  html+="</tr>";
+ });
+ html+="</tbody></table>";
+ el("dormMonthlyTable").innerHTML=html;
+}
+function dormEvents(ds){var ins=[],outs=[],cleans=[];dorms.forEach(function(r){var label=(r.dormName+" "+r.roomNo+"号室 "+(r.residentName||"")).trim();if(r.moveIn===ds)ins.push(label);if(r.moveOut===ds)outs.push(label);if(r.cleanDate===ds)cleans.push(r.dormName+" "+r.roomNo+"号室")});return{ins:ins,outs:outs,cleans:cleans}}
+function generateText(){var base=parseDate(el("updateDate").value||today()),days=Number(el("exportDays").value||31);var lines=[md(base)+"更新",""],cur=null;for(var i=0;i<days;i++){var d=new Date(base);d.setDate(base.getDate()+i);var ds=ymd(d);if(cur!==d.getMonth()){cur=d.getMonth();if(lines[lines.length-1]!="")lines.push("");lines.push((d.getMonth()+1)+"月")}var t=totals(ds);lines.push(d.getDate()+"日("+wds[d.getDay()]+") "+fmt(t.calc)+"("+t.real+")")}lines.push("");lines.push("※()内は実際の人数");lines.push("※()外は0.5人計算の人数");lines.push("※10時間以上=1人 / 7時間以下=0.5人");var newNames=staff.filter(function(p){return p.newbie}).map(function(p){return p.name});if(newNames.length){lines.push("");lines.push("【新人】");newNames.forEach(function(n){lines.push(n)})}
+var residents={};dorms.forEach(function(r){var baseDs=ymd(base);var active=false;if(r.moveIn&&r.moveOut){active=baseDs>=r.moveIn&&baseDs<=r.moveOut}else if(r.moveIn&&!r.moveOut){active=baseDs>=r.moveIn}else if(!r.moveIn&&r.status==="入寮中"){active=true}if(active&&r.status!=="空室"){if(!residents[r.dormName])residents[r.dormName]=[];residents[r.dormName].push(r.roomNo+"号室 "+(r.residentName||"入居中"))}});
+if(Object.keys(residents).length){lines.push("");lines.push("【現在の入居状況】");Object.keys(residents).sort().forEach(function(dn){lines.push(dn);residents[dn].forEach(function(x){lines.push(x)})})}
+var dormLines=["","【寮予定】"],has=false;for(i=0;i<days;i++){d=new Date(base);d.setDate(base.getDate()+i);var ev=dormEvents(ymd(d));if(ev.ins.length||ev.outs.length||ev.cleans.length){has=true;dormLines.push("");dormLines.push((d.getMonth()+1)+"/"+d.getDate()+"("+wds[d.getDay()]+")");if(ev.ins.length){dormLines.push("入寮予定");ev.ins.forEach(function(x){dormLines.push(x)})}if(ev.outs.length){dormLines.push("退寮予定");ev.outs.forEach(function(x){dormLines.push(x)})}if(ev.cleans.length){dormLines.push("清掃予定");ev.cleans.forEach(function(x){dormLines.push(x)})}}}if(has)lines=lines.concat(dormLines);el("output").value=lines.join("\n")}
+function copyText(){if(!el("output").value)generateText();el("output").select();document.execCommand("copy");alert("コピーしました")}
+function sendLine(){if(!el("output").value)generateText();location.href="https://line.me/R/msg/text/?"+encodeURIComponent(el("output").value)}
+init();
 </script>
-</body></html>
+</body>
+</html>
