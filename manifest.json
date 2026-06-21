@@ -1,10 +1,10 @@
 {
-  "name": "G-SPOT管理システム Ver.2.1",
+  "name": "G-SPOT管理システム",
   "short_name": "G-SPOT管理",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f4f6fb",
-  "theme_color": "#2563eb",
+  "background_color": "#f5f5f7",
+  "theme_color": "#f5f5f7",
   "icons": [
     {
       "src": "icon-192.png",

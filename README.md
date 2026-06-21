@@ -1,1 +1,1 @@
-G-SPOT管理システム 統合最終版。GitHub Pagesにはindex.htmlをアップロードしてください。
+G-SPOT管理システム Ver.3 完成版。index.html / manifest.json / sw.js をGitHubで上書きしてください。
