@@ -50,6 +50,10 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   .stats{grid-template-columns:repeat(2,1fr)}.row,.row3,.grid2{grid-template-columns:1fr}
   th,td{padding:6px 7px;font-size:12px}.name{min-width:92px}.editorRow{grid-template-columns:72px 1fr 1fr 52px}
 }
+
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:99;display:flex;align-items:flex-end;justify-content:center}
+.modalBox{background:#fff;width:min(720px,100%);max-height:88vh;overflow:auto;border-radius:26px 26px 0 0;padding:18px;box-shadow:0 -12px 40px rgba(0,0,0,.18)}
+
 </style>
 </head>
 <body>
@@ -96,7 +100,7 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   <div class="row"><div><label>源氏名</label><input id="name" placeholder="例：いずな"></div><div><label>新人</label><select id="newbie"><option value="0">通常</option><option value="1">新人</option></select></div></div>
   <div class="row"><div><label>開始日</label><input id="start" type="date"></div><div><label>終了日</label><input id="end" type="date"></div></div>
   <div class="row"><div><label>出勤開始</label><select id="timeStart"></select></div><div><label>出勤終了</label><select id="timeEnd"></select></div></div>
-  <button class="primary" onclick="addStaff()">登録</button>
+  <label>備考</label><textarea id="staffNote" placeholder="出勤に関する備考"></textarea><button class="primary" onclick="addStaff()">登録</button>
  </div>
  <div class="card"><h2>出勤一覧</h2><div id="staffList"></div></div>
 </section>
@@ -123,7 +127,7 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   <div class="row"><div><label>名前</label><input id="residentName" placeholder="例：いずな"></div><div><label>状態</label><select id="roomStatus"><option>入寮中</option><option>空室</option><option>予約</option></select></div></div>
   <div class="row3"><div><label>入寮日</label><input id="moveIn" type="date"></div><div><label>退寮日</label><input id="moveOut" type="date"></div><div><label>清掃日</label><input id="cleanDate" type="date"></div></div>
   <div class="row"><div><label>清掃状態</label><select id="cleanStatus"><option>未清掃</option><option>清掃予定</option><option>清掃済み</option></select></div><div><label>清掃済み日</label><input id="cleanDoneDate" type="date"></div></div>
-  <button class="primary" onclick="addDorm()">登録</button>
+  <label>備考</label><textarea id="dormNote" placeholder="寮・清掃に関する備考"></textarea><button class="primary" onclick="addDorm()">登録</button>
  </div>
  <div class="card"><h2>寮一覧</h2><div id="dormList"></div></div>
 </section>
@@ -159,6 +163,37 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 </section>
 
 </div>
+
+<div id="modal" class="modal hidden">
+  <div class="modalBox">
+    <h2 id="modalTitle">寮編集</h2>
+    <input type="hidden" id="modalDormId">
+    <div class="row">
+      <div><label>寮名</label><select id="modalDormName" onchange="updateModalRoomSelect()"></select></div>
+      <div><label>部屋番号</label><select id="modalRoomNo"></select></div>
+    </div>
+    <div class="row">
+      <div><label>名前</label><input id="modalResident"></div>
+      <div><label>状態</label><select id="modalStatus"><option>入寮中</option><option>空室</option><option>予約</option></select></div>
+    </div>
+    <div class="row3">
+      <div><label>入寮日</label><input id="modalMoveIn" type="date"></div>
+      <div><label>退寮日</label><input id="modalMoveOut" type="date"></div>
+      <div><label>清掃日</label><input id="modalCleanDate" type="date"></div>
+    </div>
+    <div class="row">
+      <div><label>清掃状態</label><select id="modalCleanStatus"><option>未清掃</option><option>清掃予定</option><option>清掃済み</option></select></div>
+      <div><label>清掃済み日</label><input id="modalCleanDoneDate" type="date"></div>
+    </div>
+    <label>備考</label><textarea id="modalNote"></textarea>
+    <div class="row3">
+      <button class="primary" onclick="saveDormModal()">保存</button>
+      <button class="danger" onclick="deleteDormModal()">削除</button>
+      <button onclick="closeModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
 <script>
 if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}))}
 const holidays={"2026-01-01":"元日","2026-01-12":"成人の日","2026-02-11":"建国記念の日","2026-02-23":"天皇誕生日","2026-03-20":"春分の日","2026-04-29":"昭和の日","2026-05-03":"憲法記念日","2026-05-04":"みどりの日","2026-05-05":"こどもの日","2026-05-06":"振替休日","2026-07-20":"海の日","2026-08-11":"山の日","2026-09-21":"敬老の日","2026-09-22":"国民の休日","2026-09-23":"秋分の日","2026-10-12":"スポーツの日","2026-11-03":"文化の日","2026-11-23":"勤労感謝の日"};
@@ -189,8 +224,8 @@ function renderStats(){let ds=today();let occ=0,vac=0;syncMasterFromDorms(false)
 function exportBackup(){let backup={staff,dorms,dormMaster,createdAt:new Date().toISOString()};let blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="gspot_backup.json";a.click();URL.revokeObjectURL(a.href)}
 function importBackup(ev){let file=ev.target.files[0];if(!file)return;let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(Array.isArray(d.staff))staff=d.staff;if(Array.isArray(d.dorms))dorms=d.dorms;if(Array.isArray(d.dormMaster))dormMaster=d.dormMaster;save();init();alert("復元しました")}catch(e){alert("復元できませんでした")}};r.readAsText(file)}
 function showStorageInfo(){el("storageInfo").value=JSON.stringify({staff:staff.length,dorms:dorms.length,dormMaster:dormMaster.length,keys:Object.keys(localStorage)},null,2)}
-function addStaff(){let name=el("name").value.trim();if(!name)return alert("源氏名を入力してください");staff.push({id:Date.now(),name,newbie:el("newbie").value==="1",start:el("start").value,end:el("end").value,timeStart:el("timeStart").value,timeEnd:el("timeEnd").value,overrides:{}});el("name").value="";save();renderStaff();renderMonthly();renderEditStaffSelect()}
-function renderStaff(){let box=el("staffList");box.innerHTML=staff.length?"":"<p class='note'>登録なし</p>";staff.forEach(p=>{let div=document.createElement("div");div.className="item";div.innerHTML=`<b>${esc(p.name)}</b>${p.newbie?"<span class='badge new'>新人</span>":""}<div class='note'>${p.start}〜${p.end} / ${shortRange(p.timeStart,p.timeEnd)}</div><div class='row3'><button class='sub' onclick='openStaffMonth(${p.id})'>月間編集</button><button onclick='toggleNewbie(${p.id})'>新人切替</button><button class='danger' onclick='removeStaff(${p.id})'>削除</button></div>`;box.appendChild(div)})}
+function addStaff(){let name=el("name").value.trim();if(!name)return alert("源氏名を入力してください");staff.push({id:Date.now(),name,newbie:el("newbie").value==="1",start:el("start").value,end:el("end").value,timeStart:el("timeStart").value,timeEnd:el("timeEnd").value,note:el("staffNote").value,overrides:{}});el("name").value="";if(el("staffNote"))el("staffNote").value="";save();renderStaff();renderMonthly();renderEditStaffSelect()}
+function renderStaff(){let box=el("staffList");box.innerHTML=staff.length?"":"<p class='note'>登録なし</p>";staff.forEach(p=>{let div=document.createElement("div");div.className="item";div.innerHTML=`<b>${esc(p.name)}</b>${p.newbie?"<span class='badge new'>新人</span>":""}<div class='note'>${p.start}〜${p.end} / ${shortRange(p.timeStart,p.timeEnd)}</div>${p.note?`<div class="note">備考：${esc(p.note)}</div>`:""}<div class='row3'><button class='sub' onclick='openStaffMonth(${p.id})'>月間編集</button><button onclick='toggleNewbie(${p.id})'>新人切替</button><button class='danger' onclick='removeStaff(${p.id})'>削除</button></div>`;box.appendChild(div)})}
 function openStaffMonth(id){showPage("shiftEdit");el("editStaffSelect").value=String(id);renderShiftEditor()}
 function toggleNewbie(id){let p=staff.find(x=>x.id===id);if(p){p.newbie=!p.newbie;save();renderStaff();renderMonthly()}}
 function removeStaff(id){if(confirm("削除しますか？")){staff=staff.filter(x=>x.id!==id);save();renderStaff();renderMonthly();renderEditStaffSelect()}}
@@ -206,16 +241,64 @@ function removeMaster(id){if(confirm("削除しますか？")){dormMaster=dormMa
 function importMasterText(){let rows=el("masterImportText").value.split(/\n+/).map(x=>x.trim()).filter(Boolean).map(l=>(l.includes("\t")?l.split("\t"):l.split(",")).map(x=>x.trim()));let c=0;for(let r of rows){if(r[0]&&r[1]&&!dormMaster.some(m=>m.dormName===r[0]&&m.roomNo===r[1])){dormMaster.push({id:Date.now()+Math.random(),dormName:r[0],roomNo:r[1]});c++}}save();renderMaster();updateDormSelect();alert(c+"件登録しました")}
 function updateDormSelect(){let ds=el("dormSelect");if(!ds)return;let cur=ds.value;let names=[...new Set(dormMaster.map(m=>m.dormName))].sort();ds.innerHTML=names.length?"":"<option>先に寮設定</option>";names.forEach(n=>{let o=document.createElement("option");o.value=n;o.textContent=n;ds.appendChild(o)});if(names.includes(cur))ds.value=cur;updateRoomSelect()}
 function updateRoomSelect(){let rs=el("roomSelect"),ds=el("dormSelect");if(!rs||!ds)return;let rooms=dormMaster.filter(m=>m.dormName===ds.value).map(m=>m.roomNo).sort((a,b)=>a.localeCompare(b,'ja'));rs.innerHTML="";rooms.forEach(r=>{let o=document.createElement("option");o.value=r;o.textContent=r+"号室";rs.appendChild(o)})}
-function addDorm(){let dn=el("dormSelect").value,rn=el("roomSelect").value;if(!dn||!rn)return alert("寮と部屋を選択してください");dorms.push({id:Date.now(),dormName:dn,roomNo:rn,residentName:el("residentName").value.trim(),status:el("roomStatus").value,moveIn:el("moveIn").value,moveOut:el("moveOut").value,cleanDate:el("cleanDate").value,cleanStatus:el("cleanStatus").value,cleanDoneDate:el("cleanDoneDate").value});el("residentName").value="";save();renderDorm();renderDormMonthly();renderVacancy()}
+function addDorm(){let dn=el("dormSelect").value,rn=el("roomSelect").value;if(!dn||!rn)return alert("寮と部屋を選択してください");dorms.push({id:Date.now(),dormName:dn,roomNo:rn,residentName:el("residentName").value.trim(),status:el("roomStatus").value,moveIn:el("moveIn").value,moveOut:el("moveOut").value,cleanDate:el("cleanDate").value,cleanStatus:el("cleanStatus").value,cleanDoneDate:el("cleanDoneDate").value,note:el("dormNote").value});el("residentName").value="";if(el("dormNote"))el("dormNote").value="";save();renderDorm();renderDormMonthly();renderVacancy()}
 function cleanBadge(r){let st=r.cleanStatus||"未清掃";if(st==="清掃済み")return`<span class='badge ok'>清掃済 ${esc(r.cleanDoneDate||"")}</span>`;if(st==="清掃予定")return`<span class='badge warn'>清掃予定 ${esc(r.cleanDate||"")}</span>`;return"<span class='badge ng'>未清掃</span>"}
-function renderDorm(){let box=el("dormList");box.innerHTML=dorms.length?"":"<p class='note'>登録なし</p>";dorms.sort((a,b)=>(a.dormName+a.roomNo).localeCompare(b.dormName+b.roomNo,'ja')).forEach(r=>{let div=document.createElement("div");div.className="item";div.innerHTML=`<b>${esc(r.dormName)}-${esc(r.roomNo)}</b><span class='badge'>${esc(r.status)}</span>${cleanBadge(r)}<div class='note'>${esc(r.residentName||"-")} / 入:${esc(r.moveIn||"-")} / 退:${esc(r.moveOut||"-")}</div><div class='row3'><button class='sub' onclick='editDorm(${r.id})'>編集</button><button onclick='markClean(${r.id})'>清掃済</button><button class='danger' onclick='removeDorm(${r.id})'>削除</button></div>`;box.appendChild(div)})}
+function renderDorm(){let box=el("dormList");box.innerHTML=dorms.length?"":"<p class='note'>登録なし</p>";dorms.sort((a,b)=>(a.dormName+a.roomNo).localeCompare(b.dormName+b.roomNo,'ja')).forEach(r=>{let div=document.createElement("div");div.className="item";div.innerHTML=`<b>${esc(r.dormName)}-${esc(r.roomNo)}</b><span class='badge'>${esc(r.status)}</span>${cleanBadge(r)}<div class='note'>${esc(r.residentName||"-")} / 入:${esc(r.moveIn||"-")} / 退:${esc(r.moveOut||"-")}</div>${r.note?`<div class="note">備考：${esc(r.note)}</div>`:""}<div class='row3'><button class='sub' onclick='openDormModalById(${r.id})'>編集</button><button onclick='markClean(${r.id})'>清掃済</button><button class='danger' onclick='removeDorm(${r.id})'>削除</button></div>`;box.appendChild(div)})}
 function editDorm(id){let r=dorms.find(x=>x.id===id);if(!r)return;r.residentName=prompt("名前",r.residentName)||r.residentName;r.moveIn=prompt("入寮日",r.moveIn)||r.moveIn;r.moveOut=prompt("退寮日",r.moveOut)||r.moveOut;r.cleanDate=prompt("清掃日",r.cleanDate)||r.cleanDate;r.cleanStatus=prompt("清掃状態：未清掃 / 清掃予定 / 清掃済み",r.cleanStatus||"未清掃")||r.cleanStatus;r.cleanDoneDate=prompt("清掃済み日",r.cleanDoneDate||"")||r.cleanDoneDate;save();renderDorm();renderDormMonthly();renderVacancy()}
 function markClean(id){let r=dorms.find(x=>x.id===id);if(r){r.cleanStatus="清掃済み";r.cleanDoneDate=today();save();renderDorm();renderDormMonthly();renderVacancy()}}
 function removeDorm(id){if(confirm("削除しますか？")){dorms=dorms.filter(x=>x.id!==id);save();renderDorm();renderDormMonthly();renderVacancy()}}
 function renderVacancy(){let box=el("vacancyList");if(!box)return;let ds=today();syncMasterFromDorms(false);let groups={"清掃済み":[],"清掃予定":[],"未清掃":[]};for(let room of dormMaster){if(occupiedRecord(room,ds))continue;let related=dorms.filter(r=>r.dormName===room.dormName&&r.roomNo===room.roomNo).sort((a,b)=>(b.cleanDoneDate||b.cleanDate||"").localeCompare(a.cleanDoneDate||a.cleanDate||""))[0]||{};let st=related.cleanStatus||"未清掃";if(!groups[st])groups[st]=[];groups[st].push(room.dormName+"-"+room.roomNo)}box.innerHTML=`<div class='item'><b>🟢 清掃済</b><br>${groups["清掃済み"].map(x=>`<span class='badge ok'>${esc(x)}</span>`).join("")||"<span class='note'>なし</span>"}</div><div class='item'><b>🟠 清掃予定</b><br>${groups["清掃予定"].map(x=>`<span class='badge warn'>${esc(x)}</span>`).join("")||"<span class='note'>なし</span>"}</div><div class='item'><b>🔴 未清掃</b><br>${groups["未清掃"].map(x=>`<span class='badge ng'>${esc(x)}</span>`).join("")||"<span class='note'>なし</span>"}</div>`}
 function renderDashboard(){let ev=dormEvents(today());el("dashboard").innerHTML=`<div class='item'><b>入寮</b><br>${ev.ins.length?ev.ins.map(esc).join("<br>"):"<span class='note'>なし</span>"}</div><div class='item'><b>退寮</b><br>${ev.outs.length?ev.outs.map(esc).join("<br>"):"<span class='note'>なし</span>"}</div><div class='item'><b>清掃</b><br>${ev.cleans.length?ev.cleans.map(esc).join("<br>"):"<span class='note'>なし</span>"}</div>`}
 function renderMonthly(){let base=parseDate(el("monthBase").value||today()),days=+el("daysCount").value||31;el("monthTitle").textContent=(base.getMonth()+1)+"月出勤";let h="<table><thead><tr><th class='name' rowspan='2'>源氏名</th>";for(let i=0;i<days;i++){let d=new Date(base);d.setDate(base.getDate()+i);h+=`<th class='${dateClass(d)}'>${d.getDate()}日</th>`}h+="</tr><tr>";for(let i=0;i<days;i++){let d=new Date(base);d.setDate(base.getDate()+i);h+=`<th class='${dateClass(d)}'>${wds[d.getDay()]}</th>`}h+="</tr></thead><tbody>";for(let p of staff){h+=`<tr><td class='name'>${esc(p.name)}${p.newbie?" 🆕":""}</td>`;for(let i=0;i<days;i++){let d=new Date(base);d.setDate(base.getDate()+i);let ds=ymd(d),w=workFor(p,ds),cls=dateClass(d);if(!w)h+=`<td class='${cls} shiftCell'>休</td>`;else{let wc=w.hours>=10?"green":(w.hours<=8?"orange":"");h+=`<td class='${cls} ${wc} shiftCell' onclick='openStaffMonth(${p.id})'>${shortRange(w.timeStart,w.timeEnd)}</td>`}}h+="</tr>"}h+="<tr><td class='name'>合計</td>";for(let i=0;i<days;i++){let d=new Date(base);d.setDate(base.getDate()+i);let t=totals(ymd(d));h+=`<td class='${dateClass(d)}'><b>${fmt(t.calc)}</b><br>(${t.real})</td>`}h+="</tr></tbody></table>";el("monthlyTable").innerHTML=h}
-function renderDormMonthly(){let base=parseDate(el("monthBase").value||today()),days=+el("daysCount").value||31;syncMasterFromDorms(false);let rows=(dormMaster.length?dormMaster:dorms).slice().sort((a,b)=>(a.dormName+a.roomNo).localeCompare(b.dormName+b.roomNo,'ja'));let h="<table><thead><tr><th class='name' rowspan='2'>寮-部屋</th>";for(let i=0;i<days;i++){let d=new Date(base);d.setDate(base.getDate()+i);h+=`<th class='${dateClass(d)}'>${d.getDate()}日</th>`}h+="</tr><tr>";for(let i=0;i<days;i++){let d=new Date(base);d.setDate(base.getDate()+i);h+=`<th class='${dateClass(d)}'>${wds[d.getDay()]}</th>`}h+="</tr></thead><tbody>";for(let room of rows){h+=`<tr><td class='name'>${esc(room.dormName)}-${esc(room.roomNo)}</td>`;for(let i=0;i<days;i++){let d=new Date(base);d.setDate(base.getDate()+i);let ds=ymd(d),txt="",cls=dateClass(d)+" vacant";let active=occupiedRecord(room,ds);if(active){txt=active.residentName||"入居中";cls=dateClass(d)+" occupied"}let outs=dorms.filter(r=>r.dormName===room.dormName&&r.roomNo===room.roomNo&&r.moveOut===ds).map(r=>"退:"+r.residentName);let ins=dorms.filter(r=>r.dormName===room.dormName&&r.roomNo===room.roomNo&&r.moveIn===ds).map(r=>"入:"+r.residentName);let marks=[];if(outs.length){marks.push(...outs);cls+=" out"}if(ins.length){marks.push(...ins);cls+=" in"}for(let r of dorms){if(r.dormName===room.dormName&&r.roomNo===room.roomNo){if(r.cleanDate===ds){marks.push("清");cls+=" clean"}if(r.cleanStatus==="清掃済み"&&r.cleanDoneDate===ds){marks.push("済");cls+=" done"}}}if(marks.length)txt=marks.join("→");h+=`<td class='${cls}'>${esc(txt)}</td>`}h+="</tr>"}h+="</tbody></table>";el("dormMonthlyTable").innerHTML=h}
+function renderDormMonthly(){let base=parseDate(el("monthBase").value||today()),days=+el("daysCount").value||31;syncMasterFromDorms(false);let rows=(dormMaster.length?dormMaster:dorms).slice().sort((a,b)=>(a.dormName+a.roomNo).localeCompare(b.dormName+b.roomNo,'ja'));let h="<table><thead><tr><th class='name' rowspan='2'>寮-部屋</th>";for(let i=0;i<days;i++){let d=new Date(base);d.setDate(base.getDate()+i);h+=`<th class='${dateClass(d)}'>${d.getDate()}日</th>`}h+="</tr><tr>";for(let i=0;i<days;i++){let d=new Date(base);d.setDate(base.getDate()+i);h+=`<th class='${dateClass(d)}'>${wds[d.getDay()]}</th>`}h+="</tr></thead><tbody>";for(let room of rows){h+=`<tr><td class='name'>${esc(room.dormName)}-${esc(room.roomNo)}</td>`;for(let i=0;i<days;i++){let d=new Date(base);d.setDate(base.getDate()+i);let ds=ymd(d),txt="",cls=dateClass(d)+" vacant";let active=occupiedRecord(room,ds);if(active){txt=active.residentName||"入居中";cls=dateClass(d)+" occupied"}let outs=dorms.filter(r=>r.dormName===room.dormName&&r.roomNo===room.roomNo&&r.moveOut===ds).map(r=>"退:"+r.residentName);let ins=dorms.filter(r=>r.dormName===room.dormName&&r.roomNo===room.roomNo&&r.moveIn===ds).map(r=>"入:"+r.residentName);let marks=[];if(outs.length){marks.push(...outs);cls+=" out"}if(ins.length){marks.push(...ins);cls+=" in"}for(let r of dorms){if(r.dormName===room.dormName&&r.roomNo===room.roomNo){if(r.cleanDate===ds){marks.push("清");cls+=" clean"}if(r.cleanStatus==="清掃済み"&&r.cleanDoneDate===ds){marks.push("済");cls+=" done"}}}if(marks.length)txt=marks.join("→");h+=`<td class='${cls} dormCell' onclick='openDormModalByText("${esc(room.dormName)}","${esc(room.roomNo)}","${ds}")'>${esc(txt)}</td>`}h+="</tr>"}h+="</tbody></table>";el("dormMonthlyTable").innerHTML=h}
+
+function openDormModalByText(dn,rn,ds){openDormModal({dormName:dn,roomNo:rn},ds)}
+function openDormModal(room,ds){
+  let rec=dorms.find(r=>r.dormName===room.dormName&&r.roomNo===room.roomNo&&((r.moveIn&&r.moveOut&&ds>=r.moveIn&&ds<=r.moveOut)||r.moveIn===ds||r.moveOut===ds||r.cleanDate===ds));
+  if(rec)openDormModalById(rec.id,ds);else openDormModalNew(room,ds);
+}
+function openDormModalById(id,focusDate){
+  let r=dorms.find(x=>String(x.id)===String(id)); if(!r)return;
+  fillModalOptions(r.dormName,r.roomNo);
+  el("modalDormId").value=r.id; el("modalTitle").textContent=r.dormName+"-"+r.roomNo+" 編集";
+  el("modalResident").value=r.residentName||""; el("modalStatus").value=r.status||"入寮中";
+  el("modalMoveIn").value=r.moveIn||focusDate||today(); el("modalMoveOut").value=r.moveOut||"";
+  el("modalCleanDate").value=r.cleanDate||focusDate||today(); el("modalCleanStatus").value=r.cleanStatus||"未清掃";
+  el("modalCleanDoneDate").value=r.cleanDoneDate||""; el("modalNote").value=r.note||"";
+  el("modal").classList.remove("hidden");
+}
+function openDormModalNew(room,ds){
+  fillModalOptions(room.dormName,room.roomNo);
+  el("modalDormId").value=""; el("modalTitle").textContent=room.dormName+"-"+room.roomNo+" 新規";
+  el("modalResident").value=""; el("modalStatus").value="入寮中";
+  el("modalMoveIn").value=ds||today(); el("modalMoveOut").value="";
+  el("modalCleanDate").value=ds||today(); el("modalCleanStatus").value="未清掃";
+  el("modalCleanDoneDate").value=""; el("modalNote").value="";
+  el("modal").classList.remove("hidden");
+}
+function fillModalOptions(dn,rn){
+  let s=el("modalDormName"); s.innerHTML="";
+  [...new Set(dormMaster.map(m=>m.dormName))].sort().forEach(n=>{let o=document.createElement("option");o.value=n;o.textContent=n;s.appendChild(o)});
+  s.value=dn; updateModalRoomSelect(); el("modalRoomNo").value=rn;
+}
+function updateModalRoomSelect(){
+  let rs=el("modalRoomNo"),dn=el("modalDormName").value; rs.innerHTML="";
+  dormMaster.filter(m=>m.dormName===dn).map(m=>m.roomNo).sort((a,b)=>a.localeCompare(b,'ja')).forEach(r=>{let o=document.createElement("option");o.value=r;o.textContent=r+"号室";rs.appendChild(o)});
+}
+function saveDormModal(){
+  let id=el("modalDormId").value; let r=id?dorms.find(x=>String(x.id)===String(id)):null;
+  if(!r){r={id:Date.now()};dorms.push(r)}
+  r.dormName=el("modalDormName").value; r.roomNo=el("modalRoomNo").value; r.residentName=el("modalResident").value.trim();
+  r.status=el("modalStatus").value; r.moveIn=el("modalMoveIn").value; r.moveOut=el("modalMoveOut").value;
+  r.cleanDate=el("modalCleanDate").value; r.cleanStatus=el("modalCleanStatus").value; r.cleanDoneDate=el("modalCleanDoneDate").value; r.note=el("modalNote").value;
+  save(); closeModal(); renderDorm(); renderDormMonthly(); renderVacancy(); renderStats(); renderDashboard();
+}
+function deleteDormModal(){
+  let id=el("modalDormId").value;
+  if(id&&confirm("削除しますか？")){dorms=dorms.filter(x=>String(x.id)!==String(id));save();closeModal();renderDorm();renderDormMonthly();renderVacancy();renderStats();}
+}
+function closeModal(){el("modal").classList.add("hidden")}
+
 function dormEvents(ds){let ins=[],outs=[],cleans=[],done=[];for(let r of dorms){let label=`${r.dormName}-${r.roomNo} ${r.residentName||""}`.trim();if(r.moveIn===ds)ins.push(label);if(r.moveOut===ds)outs.push(label);if(r.cleanDate===ds)cleans.push(`${r.dormName}-${r.roomNo}`);if(r.cleanStatus==="清掃済み"&&r.cleanDoneDate===ds)done.push(`${r.dormName}-${r.roomNo}`)}return{ins,outs,cleans,done}}
 function generateText(){let base=parseDate(el("updateDate").value||today()),days=+el("exportDays").value||31,lines=[md(base)+"更新",""],cur=null;for(let i=0;i<days;i++){let d=new Date(base);d.setDate(base.getDate()+i);if(cur!==d.getMonth()){cur=d.getMonth();if(lines[lines.length-1]!="")lines.push("");lines.push((d.getMonth()+1)+"月")}let t=totals(ymd(d));lines.push(`${d.getDate()}日(${wds[d.getDay()]}) ${fmt(t.calc)}(${t.real})`)}lines.push("","※()内は実人数","※()外は0.5人計算人数");let ev=dormEvents(ymd(base));if(ev.ins.length||ev.outs.length||ev.cleans.length||ev.done.length){lines.push("","【本日の寮予定】");if(ev.ins.length){lines.push("","入寮");ev.ins.forEach(x=>lines.push(x))}if(ev.outs.length){lines.push("","退寮");ev.outs.forEach(x=>lines.push(x))}if(ev.cleans.length){lines.push("","清掃予定");ev.cleans.forEach(x=>lines.push(x))}if(ev.done.length){lines.push("","清掃済み");ev.done.forEach(x=>lines.push(x))}}let ds=ymd(base),groups={"清掃済み":[],"清掃予定":[],"未清掃":[]};syncMasterFromDorms(false);for(let room of dormMaster){if(occupiedRecord(room,ds))continue;let related=dorms.filter(r=>r.dormName===room.dormName&&r.roomNo===room.roomNo).sort((a,b)=>(b.cleanDoneDate||b.cleanDate||"").localeCompare(a.cleanDoneDate||a.cleanDate||""))[0]||{};let st=related.cleanStatus||"未清掃";(groups[st]||(groups[st]=[])).push(room.dormName+"-"+room.roomNo)}lines.push("","【空室情報】");if(groups["清掃済み"].length){lines.push("","🟢 清掃済");groups["清掃済み"].forEach(x=>lines.push(x))}if(groups["清掃予定"].length){lines.push("","🟠 清掃予定");groups["清掃予定"].forEach(x=>lines.push(x))}if(groups["未清掃"].length){lines.push("","🔴 未清掃");groups["未清掃"].forEach(x=>lines.push(x))}el("output").value=lines.join("\n")}
 function copyText(){if(!el("output").value)generateText();el("output").select();document.execCommand("copy");alert("コピーしました")}

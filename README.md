@@ -1,1 +1,1 @@
-G-SPOT管理システム Ver.3 完成版。index.html / manifest.json / sw.js をGitHubで上書きしてください。
+G-SPOT管理システム Ver.3.1 完成版。月間寮表編集・備考欄対応。
