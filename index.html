@@ -54,6 +54,14 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:99;display:flex;align-items:flex-end;justify-content:center}
 .modalBox{background:#fff;width:min(720px,100%);max-height:88vh;overflow:auto;border-radius:26px 26px 0 0;padding:18px;box-shadow:0 -12px 40px rgba(0,0,0,.18)}
 
+
+.simpleMenu{justify-content:space-between}
+.simpleMenu button{min-width:94px;text-align:center}
+@media(max-width:760px){
+  .simpleMenu{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;overflow:visible}
+  .simpleMenu button{min-width:0;padding:9px 6px;font-size:12px}
+  .row3{grid-template-columns:1fr 1fr 1fr}
+}
 </style>
 </head>
 <body>
@@ -62,18 +70,13 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   <p>出勤・寮・清掃・月間表・AI書き出し</p>
 </header>
 <div class="wrap">
-  <div class="menu">
-    <button id="tab_home" class="active" onclick="showPage('home')">ホーム</button>
-    <button id="tab_staff" onclick="showPage('staff')">出勤</button>
-    <button id="tab_shiftEdit" onclick="showPage('shiftEdit')">月間編集</button>
-    <button id="tab_dorm" onclick="showPage('dorm')">寮</button>
-    <button id="tab_master" onclick="showPage('master')">寮設定</button>
-    <button id="tab_vacancy" onclick="showPage('vacancy')">空室</button>
-    <button id="tab_monthly" onclick="showPage('monthly')">月間表</button>
-    <button id="tab_ai" onclick="showPage('ai')">AI書出</button>
-    <button id="tab_backup" onclick="showPage('backup')">保存</button>
-  </div>
-
+  <div class="menu simpleMenu">
+<button id="tab_home" class="active" onclick="showPage('home')">ホーム</button>
+<button id="tab_staff" onclick="showPage('staff')">出勤</button>
+<button id="tab_dormHub" onclick="showPage('dormHub')">寮</button>
+<button id="tab_monthlyHub" onclick="showPage('monthlyHub')">月間表</button>
+<button id="tab_ai" onclick="showPage('ai')">AI書き出し</button>
+</div>
 <section id="home" class="page">
   <div class="card">
     <h2>ホーム</h2>
@@ -93,6 +96,30 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
     <button onclick="showPage('backup')">バックアップ</button>
   </div>
   <div class="card"><h2>本日の確認</h2><div id="dashboard"></div></div>
+</section>
+
+
+<section id="dormHub" class="page hidden">
+  <div class="card">
+    <h2>寮</h2>
+    <div class="grid2">
+      <button class="primary" onclick="showPage('dorm')">寮管理</button>
+      <button class="sub" onclick="showPage('vacancy')">空室</button>
+      <button class="sub" onclick="showPage('master')">寮設定</button>
+      <button onclick="showPage('home')">ホームへ戻る</button>
+    </div>
+  </div>
+</section>
+
+<section id="monthlyHub" class="page hidden">
+  <div class="card">
+    <h2>月間表</h2>
+    <div class="grid2">
+      <button class="primary" onclick="showPage('monthly')">月間表を見る</button>
+      <button class="sub" onclick="showPage('shiftEdit')">月間表編集</button>
+      <button onclick="showPage('home')">ホームへ戻る</button>
+    </div>
+  </div>
 </section>
 
 <section id="staff" class="page hidden">
