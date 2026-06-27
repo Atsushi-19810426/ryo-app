@@ -287,7 +287,7 @@ function addDorm(){let dn=el("dormSelect").value,rn=el("roomSelect").value;if(!d
 function cleanBadge(r){let st=r.cleanStatus||"未清掃";if(st==="清掃済み")return`<span class='badge ok'>清掃済 ${esc(r.cleanDoneDate||"")}</span>`;if(st==="清掃予定")return`<span class='badge warn'>清掃予定 ${esc(r.cleanDate||"")}</span>`;return"<span class='badge ng'>未清掃</span>"}
 function renderDorm(){let box=el("dormList");box.innerHTML=dorms.length?"":"<p class='note'>登録なし</p>";dorms.sort((a,b)=>(a.dormName+a.roomNo).localeCompare(b.dormName+b.roomNo,'ja')).forEach(r=>{let div=document.createElement("div");div.className="item";div.innerHTML=`<b>${esc(r.dormName)}-${esc(r.roomNo)}</b><span class='badge'>${esc(r.status)}</span>${cleanBadge(r)}<div class='note'>${esc(r.residentName||"-")} / 入:${esc(r.moveIn||"-")} / 退:${esc(r.moveOut||"-")}</div>${r.note?`<div class="note">備考：${esc(r.note)}</div>`:""}<div class='row3'><button class='sub' onclick='openDormModalById(${r.id})'>編集</button><button onclick='markClean(${r.id})'>清掃済</button><button class='danger' onclick='removeDorm(${r.id})'>削除</button></div>`;box.appendChild(div)})}
 function editDorm(id){let r=dorms.find(x=>x.id===id);if(!r)return;r.residentName=prompt("名前",r.residentName)||r.residentName;r.moveIn=prompt("入寮日",r.moveIn)||r.moveIn;r.moveOut=prompt("退寮日",r.moveOut)||r.moveOut;r.cleanDate=prompt("清掃日",r.cleanDate)||r.cleanDate;r.cleanStatus=prompt("清掃状態：未清掃 / 清掃予定 / 清掃済み",r.cleanStatus||"未清掃")||r.cleanStatus;r.cleanDoneDate=prompt("清掃済み日",r.cleanDoneDate||"")||r.cleanDoneDate;save();renderDorm();renderDormMonthly();renderVacancy()}
-function markClean(id){let r=dorms.find(x=>x.id===id);if(r){r.cleanStatus="清掃済み";r.cleanDoneDate=today();save();renderDorm();renderDormMonthly();renderVacancy()}}
+function markClean(id){let r=dorms.find(x=>x.id===id);if(r){r.cleanStatus="清掃済み";r.cleanDoneDate=today();save();renderDorm();renderDormMonthly();if(typeof renderVacancy==="function")renderVacancy();if(typeof renderStats==="function")renderStats();if(typeof renderDashboard==="function")renderDashboard();}}
 function removeDorm(id){if(confirm("削除しますか？")){dorms=dorms.filter(x=>x.id!==id);save();renderDorm();renderDormMonthly();renderVacancy()}}
 function renderVacancy(){let box=el("vacancyList");if(!box)return;let ds=today();syncMasterFromDorms(false);let groups={"清掃済み":[],"清掃予定":[],"未清掃":[]};for(let room of dormMaster){if(occupiedRecord(room,ds))continue;let related=dorms.filter(r=>r.dormName===room.dormName&&r.roomNo===room.roomNo).sort((a,b)=>(b.cleanDoneDate||b.cleanDate||"").localeCompare(a.cleanDoneDate||a.cleanDate||""))[0]||{};let st=related.cleanStatus||"未清掃";if(!groups[st])groups[st]=[];groups[st].push(room.dormName+"-"+room.roomNo)}box.innerHTML=`<div class='item'><b>🟢 清掃済</b><br>${groups["清掃済み"].map(x=>`<span class='badge ok'>${esc(x)}</span>`).join("")||"<span class='note'>なし</span>"}</div><div class='item'><b>🟠 清掃予定</b><br>${groups["清掃予定"].map(x=>`<span class='badge warn'>${esc(x)}</span>`).join("")||"<span class='note'>なし</span>"}</div><div class='item'><b>🔴 未清掃</b><br>${groups["未清掃"].map(x=>`<span class='badge ng'>${esc(x)}</span>`).join("")||"<span class='note'>なし</span>"}</div>`}
 function renderDashboard(){let ev=dormEvents(today());el("dashboard").innerHTML=`<div class='item'><b>入寮</b><br>${ev.ins.length?ev.ins.map(esc).join("<br>"):"<span class='note'>なし</span>"}</div><div class='item'><b>退寮</b><br>${ev.outs.length?ev.outs.map(esc).join("<br>"):"<span class='note'>なし</span>"}</div><div class='item'><b>清掃</b><br>${ev.cleans.length?ev.cleans.map(esc).join("<br>"):"<span class='note'>なし</span>"}</div>`}
@@ -295,44 +295,50 @@ function renderMonthly(){let base=parseDate(el("monthBase").value||today()),days
 
 function cleanDisplayForRoom(room, ds){
   var related = dorms.filter(function(r){
-    return r.dormName===room.dormName && r.roomNo===room.roomNo;
+    return String(r.dormName||"")===String(room.dormName||"") && String(r.roomNo||"")===String(room.roomNo||"");
   });
 
-  var latestDone = related.filter(function(r){
-    return r.cleanStatus==="清掃済み" && r.cleanDoneDate && r.cleanDoneDate<=ds;
-  }).sort(function(a,b){
-    return b.cleanDoneDate.localeCompare(a.cleanDoneDate);
-  })[0];
+  // 同じ寮・部屋の最新清掃済み日だけを見る
+  var latestDoneDate = "";
+  related.forEach(function(r){
+    if(r.cleanStatus==="清掃済み" && r.cleanDoneDate && r.cleanDoneDate<=ds){
+      if(!latestDoneDate || r.cleanDoneDate>latestDoneDate){ latestDoneDate = r.cleanDoneDate; }
+    }
+  });
 
-  if(latestDone){
+  if(latestDoneDate){
+    // 清掃済み日より後の次回入寮が来るまでは、ずっと「済」
     var nextInAfterDone = related.filter(function(r){
-      return r.moveIn && r.moveIn>latestDone.cleanDoneDate && r.status!=="空室";
+      return r.moveIn && r.moveIn>latestDoneDate && r.status!=="空室";
     }).sort(function(a,b){
       return a.moveIn.localeCompare(b.moveIn);
     })[0];
 
     if(!nextInAfterDone || ds<nextInAfterDone.moveIn){
-      return {txt:"済", cls:" done"};
+      return {txt:"済", cls:" cleanDone"};
     }
   }
 
-  var latestOut = related.filter(function(r){
-    return r.moveOut && r.moveOut<=ds;
-  }).sort(function(a,b){
-    return b.moveOut.localeCompare(a.moveOut);
-  })[0];
+  // 最新退寮日を部屋単位で見る
+  var latestOutDate = "";
+  related.forEach(function(r){
+    if(r.moveOut && r.moveOut<=ds){
+      if(!latestOutDate || r.moveOut>latestOutDate){ latestOutDate = r.moveOut; }
+    }
+  });
 
-  if(latestOut){
-    var doneAfterOut = related.find(function(r){
-      return r.cleanStatus==="清掃済み" && r.cleanDoneDate && r.cleanDoneDate>=latestOut.moveOut && r.cleanDoneDate<=ds;
+  if(latestOutDate){
+    var doneAfterOut = related.some(function(r){
+      return r.cleanStatus==="清掃済み" && r.cleanDoneDate && r.cleanDoneDate>=latestOutDate && r.cleanDoneDate<=ds;
     });
 
     var nextInAfterOut = related.filter(function(r){
-      return r.moveIn && r.moveIn>latestOut.moveOut && r.status!=="空室";
+      return r.moveIn && r.moveIn>latestOutDate && r.status!=="空室";
     }).sort(function(a,b){
       return a.moveIn.localeCompare(b.moveIn);
     })[0];
 
+    // 退寮後、清掃済み前、次の入寮前までは「未」
     if(!doneAfterOut && (!nextInAfterOut || ds<nextInAfterOut.moveIn)){
       return {txt:"未", cls:" clean"};
     }
