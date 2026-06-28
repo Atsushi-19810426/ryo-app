@@ -983,7 +983,7 @@ init();
     </label>
     <label>備考</label>
     <textarea id="shiftEditPopupNote" placeholder="テキスト入力欄"></textarea>
-    <button class="shiftEditPopupBtn" onclick="closeShiftEditPopup()">保存</button>
+    <button class="shiftEditPopupBtn" onclick="saveShiftEditPopup()">保存</button>
   </div>
 </div>
 
@@ -1096,11 +1096,11 @@ init();
       }
     }catch(e){}
     if(!name && window.__lastShiftEditName)name=window.__lastShiftEditName;
-    var list=(window.staff||[]).filter(function(p){return String(p.name||"").trim()===String(name||"").trim();});
+    var list=(staff||[]).filter(function(p){return String(p.name||"").trim()===String(name||"").trim();});
     return list.find(function(p){return typeof workFor==="function" && !!workFor(p,ds);}) ||
            list.find(function(p){return ds>=p.start&&ds<=p.end;}) ||
-           (window.staff||[]).find(function(p){return typeof workFor==="function" && !!workFor(p,ds);}) ||
-           (window.staff||[])[0] || null;
+           (staff||[]).find(function(p){return typeof workFor==="function" && !!workFor(p,ds);}) ||
+           (staff||[])[0] || null;
   }
 
   function getCellInfoFromEventTarget(td){
@@ -1180,10 +1180,10 @@ init();
 
   window.saveShiftEditPopup=function(){
     var ds=window.__lastShiftEditDate || today();
-    var p=(window.staff||[]).find(function(x){return String(x.id)===String(window.__lastShiftEditStaffId);});
+    var p=(staff||[]).find(function(x){return String(x.id)===String(window.__lastShiftEditStaffId);});
     if(!p){
       var name=window.__lastShiftEditName||"";
-      p=(window.staff||[]).filter(function(x){return String(x.name||"").trim()===String(name).trim();})[0];
+      p=(staff||[]).filter(function(x){return String(x.name||"").trim()===String(name).trim();})[0];
     }
     if(!p)return;
     if(!p.overrides)p.overrides={};
@@ -1197,6 +1197,7 @@ init();
     if(typeof closeShiftEditPopup==="function")closeShiftEditPopup();
     if(typeof renderMonthly==="function")renderMonthly();
     if(typeof renderStats==="function")renderStats();
+    if(typeof generateText==="function" && document.getElementById("output") && document.getElementById("output").value){generateText();}
   };
 
   function bindShiftSavePopup(){
