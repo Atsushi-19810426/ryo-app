@@ -375,6 +375,19 @@ function bindPopupTestOnce(){
 }
 
 bindPopupTestOnce();
+
+function openPopupTest(info){
+  var box=document.getElementById("popupTestBox");
+  var txt=document.getElementById("popupTestText");
+  if(txt){txt.textContent=info||"クリック反応あり";}
+  if(box){box.classList.remove("hidden");box.style.display="flex";}
+  else{alert(info||"クリック反応あり");}
+}
+function closePopupTest(){
+  var box=document.getElementById("popupTestBox");
+  if(box){box.classList.add("hidden");box.style.display="none";}
+}
+
 init();alert("復元しました")}catch(e){alert("復元できませんでした")}};r.readAsText(file)}
 function showStorageInfo(){el("storageInfo").value=JSON.stringify({staff:staff.length,dorms:dorms.length,dormMaster:dormMaster.length,keys:Object.keys(localStorage)},null,2)}
 function addStaff(){let name=el("name").value.trim();if(!name)return alert("源氏名を入力してください");staff.push({id:Date.now(),name,newbie:el("newbie").value==="1",start:el("start").value,end:el("end").value,timeStart:el("timeStart").value,timeEnd:el("timeEnd").value,note:el("staffNote").value,overrides:{}});el("name").value="";if(el("staffNote"))el("staffNote").value="";save();renderStaff();renderMonthly();renderEditStaffSelect()}
