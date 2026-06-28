@@ -1,9 +1,18 @@
-G-SPOT管理システム Ver.58。月間出勤表は未登録日も追加しやすく修正。寮月間表セルから入寮期間・清掃状態を編集可能。保存キー・読込キー・表レイアウト変更なし。
+# GSPOT Ver61 Cloud Share
 
-Ver59 ベース作業開始版
+Ver60安定版をベースに、保存キーを変えずに他デバイス共有機能を追加しました。
 
-## Ver60 StableBase TouchGuard
-- Ver59安定版ベース。保存キーは newAppStaffV1 / newAppDormV1 / dormMasterV1 のまま維持。
-- iPhoneスクロール時に月間出勤・寮月間ポップアップが誤表示される問題を対策。
-- 月間出勤は未登録日の「休」セルもタップ編集可能。保存時に対象スタッフの期間を自動拡張。
-- 寮月間表は各日セルから入寮日・退寮日・清掃日・清掃状態を直接編集可能。
+## 追加内容
+- PC / iPhone / iPad 共有用の「共有設定」追加
+- Google Apps Script WebアプリURL保存
+- この端末から共有へ保存
+- 共有からこの端末へ読込
+- 従来のJSONバックアップ/復元は維持
+- Ver59/Ver60のlocalStorage保存キーは維持
+
+## 重要
+アプリだけでは端末間の自動同期は完了しません。
+同梱の `GSPOT_Ver61_GoogleAppsScript.txt` をGoogleスプレッドシートのApps Scriptへ設定してください。
+
+## 公開URL
+https://atsushi-19810426.github.io/ryo-app/?v=61
