@@ -1,6 +1,1 @@
-G-SPOT管理システム Ver63
-
-出勤管理の保存キー newAppStaffV1 を維持し、AI紹介文メーカーを追加した版です。
-GitHub Pages には index.html / manifest.json / sw.js をアップロードしてください。
-公開URL: https://atsushi-19810426.github.io/ryo-app/
-確認URL: https://atsushi-19810426.github.io/ryo-app/
+G-SPOT管理システム Ver64。出勤管理・寮管理・寮月間表・空室確認を維持したまま、AI紹介文メーカーを追加。保存キー newAppStaffV1 / newAppDormV1 / dormMasterV1 は維持。
