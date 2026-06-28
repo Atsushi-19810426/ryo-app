@@ -961,5 +961,56 @@ init();
   </div>
 </div>
 
+
+<script>
+(function(){
+  function bindShiftCellAlert(){
+    var box=document.getElementById("monthlyTable");
+    if(!box || box.__shiftAlertBound)return;
+    box.__shiftAlertBound=true;
+    box.addEventListener("click",function(e){
+      var td=e.target.closest("td");
+      if(!td)return;
+      var text=(td.textContent||"").trim();
+      if(td.className.indexOf("shiftCell")>=0 || text==="休" || /\d{1,2}(:30)?-\d{1,2}/.test(text)){
+        alert("セル反応あり：" + text);
+      }
+    },true);
+    box.addEventListener("touchend",function(e){
+      var td=e.target.closest("td");
+      if(!td)return;
+      var text=(td.textContent||"").trim();
+      if(td.className.indexOf("shiftCell")>=0 || text==="休" || /\d{1,2}(:30)?-\d{1,2}/.test(text)){
+        alert("タップ反応あり：" + text);
+      }
+    },true);
+  }
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(bindShiftCellAlert,300);
+    setTimeout(bindShiftCellAlert,1200);
+  });
+  window.addEventListener("load",function(){
+    setTimeout(bindShiftCellAlert,300);
+    setTimeout(bindShiftCellAlert,1500);
+  });
+  var oldShowPage=window.showPage;
+  if(typeof oldShowPage==="function"){
+    window.showPage=function(id){
+      var r=oldShowPage.apply(this,arguments);
+      if(id==="monthly")setTimeout(bindShiftCellAlert,300);
+      return r;
+    };
+  }
+  var oldRenderMonthly=window.renderMonthly;
+  if(typeof oldRenderMonthly==="function"){
+    window.renderMonthly=function(){
+      var r=oldRenderMonthly.apply(this,arguments);
+      setTimeout(bindShiftCellAlert,100);
+      return r;
+    };
+  }
+})();
+</script>
+
 </body>
 </html>
