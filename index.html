@@ -98,6 +98,18 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 .shiftEditPopupBox textarea{height:58px}
 .shiftEditPopupBtn{width:100%;background:#007aff;color:#fff;border:0;border-radius:12px;padding:12px;font-weight:bold;margin-top:10px}
 
+
+.dormEditPopup{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:2147483647;display:none;align-items:center;justify-content:center}
+.dormEditPopupBox{background:#fff;border-radius:18px;padding:16px;width:min(380px,92%);box-shadow:0 18px 50px rgba(0,0,0,.25)}
+.dormEditPopupHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.dormEditPopupHead b{font-size:18px}
+.dormEditPopupClose{background:#f3f4f6;color:#111;border:0;border-radius:999px;padding:5px 10px;font-weight:bold;box-shadow:none}
+.dormEditPopupRow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.dormEditPopupBox input,.dormEditPopupBox select,.dormEditPopupBox textarea{width:100%;border:1px solid #e5e7eb;border-radius:10px;padding:9px;font-size:14px;background:#fff}
+.dormEditPopupBox textarea{height:52px}
+.dormEditPopupBtn{width:100%;background:#007aff;color:#fff;border:0;border-radius:12px;padding:12px;font-weight:bold;margin-top:10px}
+#dormMonthlyTable td:not(.name){cursor:pointer}
+
 </style>
 </head>
 <body>
@@ -1293,7 +1305,7 @@ init();
   function parseTimeFromCell(text, fallbackStart, fallbackEnd){
     var st=fallbackStart||"10:00", en=fallbackEnd||"00:00", off=false;
     var t=String(text||"").trim();
-    if(t==="休"){off=true;return {st:st,en:en,off:off};}
+    if(t==="休"){off=false;return {st:st,en:en,off:off};}
     var parts=t.split("-");
     function norm(x){
       if(!x)return "";
@@ -1445,6 +1457,150 @@ init();
     window.renderMonthly=function(){
       var r=oldRenderMonthly.apply(this,arguments);
       setTimeout(bindFinalPopupSave,100);
+      return r;
+    };
+  }
+})();
+</script>
+
+
+<div id="dormEditPopup" class="dormEditPopup">
+  <div class="dormEditPopupBox">
+    <div class="dormEditPopupHead">
+      <b id="dormEditPopupTitle">寮編集</b>
+      <button class="dormEditPopupClose" onclick="closeDormEditPopup()">×</button>
+    </div>
+    <input type="hidden" id="dormEditDormName">
+    <input type="hidden" id="dormEditRoomNo">
+    <input type="hidden" id="dormEditDate">
+    <label>名前</label>
+    <input id="dormEditResident" placeholder="入寮者名">
+    <div class="dormEditPopupRow">
+      <div><label>入寮日</label><input id="dormEditMoveIn" type="date"></div>
+      <div><label>退寮日</label><input id="dormEditMoveOut" type="date"></div>
+    </div>
+    <div class="dormEditPopupRow">
+      <div><label>清掃日</label><input id="dormEditCleanDate" type="date"></div>
+      <div><label>清掃状態</label><select id="dormEditCleanStatus"><option>未清掃</option><option>清掃予定</option><option>清掃済み</option></select></div>
+    </div>
+    <label>備考</label>
+    <textarea id="dormEditNote" placeholder="備考"></textarea>
+    <button class="dormEditPopupBtn" onclick="saveDormEditPopup()">保存</button>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  function getDormCellDate(td){
+    try{
+      var base=parseDate(el("monthBase").value||today());
+      var dayOffset=td.cellIndex-1;
+      var d=new Date(base);
+      d.setDate(base.getDate()+dayOffset);
+      return ymd(d);
+    }catch(e){return today();}
+  }
+  function getDormRoomFromCell(td){
+    var tr=td.closest("tr");
+    var nameCell=tr?tr.querySelector("td.name"):null;
+    var raw=nameCell?(nameCell.textContent||"").trim():"";
+    var idx=raw.lastIndexOf("-");
+    if(idx<0)return {dormName:"",roomNo:""};
+    return {dormName:raw.slice(0,idx),roomNo:raw.slice(idx+1)};
+  }
+  function findDormRecord(dn,rn,ds){
+    var related=(dorms||[]).filter(function(r){
+      return String(r.dormName||"")===String(dn||"") && String(r.roomNo||"")===String(rn||"");
+    });
+    return related.find(function(r){return r.moveIn&&r.moveOut&&ds>=r.moveIn&&ds<=r.moveOut;}) ||
+           related.find(function(r){return r.moveIn===ds || r.moveOut===ds || r.cleanDate===ds || r.cleanDoneDate===ds;}) ||
+           related.sort(function(a,b){return String(b.moveIn||b.moveOut||b.cleanDate||"").localeCompare(String(a.moveIn||a.moveOut||a.cleanDate||""));})[0] ||
+           null;
+  }
+  window.openDormEditPopup=function(td){
+    var room=getDormRoomFromCell(td);
+    var ds=getDormCellDate(td);
+    var rec=findDormRecord(room.dormName,room.roomNo,ds);
+
+    window.__dormEditRecordId=rec?rec.id:"";
+    el("dormEditDormName").value=room.dormName;
+    el("dormEditRoomNo").value=room.roomNo;
+    el("dormEditDate").value=ds;
+    el("dormEditPopupTitle").textContent=room.dormName+"-"+room.roomNo+" / "+ds;
+
+    el("dormEditResident").value=rec?(rec.residentName||""):"";
+    el("dormEditMoveIn").value=rec?(rec.moveIn||ds):ds;
+    el("dormEditMoveOut").value=rec?(rec.moveOut||""):"";
+    el("dormEditCleanDate").value=rec?(rec.cleanDate||ds):ds;
+    el("dormEditCleanStatus").value=rec?(rec.cleanStatus||"未清掃"):"未清掃";
+    el("dormEditNote").value=rec?(rec.note||""):"";
+
+    var box=el("dormEditPopup");
+    if(box)box.style.display="flex";
+  };
+  window.closeDormEditPopup=function(){
+    var box=el("dormEditPopup");
+    if(box)box.style.display="none";
+  };
+  window.saveDormEditPopup=function(){
+    var id=window.__dormEditRecordId;
+    var rec=(dorms||[]).find(function(r){return String(r.id)===String(id);});
+    if(!rec){
+      rec={id:Date.now()};
+      dorms.push(rec);
+    }
+    rec.dormName=el("dormEditDormName").value;
+    rec.roomNo=el("dormEditRoomNo").value;
+    rec.residentName=el("dormEditResident").value.trim();
+    rec.status=rec.residentName?"入寮中":"空室";
+    rec.moveIn=el("dormEditMoveIn").value;
+    rec.moveOut=el("dormEditMoveOut").value;
+    rec.cleanDate=el("dormEditCleanDate").value;
+    rec.cleanStatus=el("dormEditCleanStatus").value;
+    rec.cleanDoneDate=(rec.cleanStatus==="清掃済み")?(rec.cleanDoneDate||today()):"";
+    rec.note=el("dormEditNote").value||"";
+    save();
+    closeDormEditPopup();
+    if(typeof renderDorm==="function")renderDorm();
+    if(typeof renderDormMonthly==="function")renderDormMonthly();
+    if(typeof renderVacancy==="function")renderVacancy();
+    if(typeof renderStats==="function")renderStats();
+  };
+  function bindDormMonthlyEdit(){
+    var box=el("dormMonthlyTable");
+    if(!box||box.__dormMonthlyEditBound)return;
+    box.__dormMonthlyEditBound=true;
+    box.addEventListener("click",function(e){
+      var td=e.target.closest("td");
+      if(!td||td.classList.contains("name"))return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      openDormEditPopup(td);
+    },true);
+    box.addEventListener("touchend",function(e){
+      var td=e.target.closest("td");
+      if(!td||td.classList.contains("name"))return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      openDormEditPopup(td);
+    },true);
+  }
+  document.addEventListener("DOMContentLoaded",function(){setTimeout(bindDormMonthlyEdit,500);setTimeout(bindDormMonthlyEdit,1500);});
+  window.addEventListener("load",function(){setTimeout(bindDormMonthlyEdit,500);setTimeout(bindDormMonthlyEdit,1500);});
+  var oldShowPage=window.showPage;
+  if(typeof oldShowPage==="function"){
+    window.showPage=function(id){
+      var r=oldShowPage.apply(this,arguments);
+      if(id==="monthly")setTimeout(bindDormMonthlyEdit,300);
+      return r;
+    };
+  }
+  var oldRenderDormMonthly=window.renderDormMonthly;
+  if(typeof oldRenderDormMonthly==="function"){
+    window.renderDormMonthly=function(){
+      var r=oldRenderDormMonthly.apply(this,arguments);
+      setTimeout(bindDormMonthlyEdit,100);
       return r;
     };
   }
