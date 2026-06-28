@@ -983,7 +983,7 @@ init();
     </label>
     <label>備考</label>
     <textarea id="shiftEditPopupNote" placeholder="テキスト入力欄"></textarea>
-    <button class="shiftEditPopupBtn" onclick="saveShiftEditPopup()">保存</button>
+    <button class="shiftEditPopupBtn" onclick="saveShiftEditPopupFinal()">保存</button>
   </div>
 </div>
 
@@ -1248,6 +1248,203 @@ init();
     window.renderMonthly=function(){
       var r=oldRenderMonthly.apply(this,arguments);
       setTimeout(bindShiftSavePopup,100);
+      return r;
+    };
+  }
+})();
+</script>
+
+
+<script>
+(function(){
+  function getMonthlyDateByCell(td){
+    try{
+      var base=parseDate(el("monthBase").value||today());
+      var dayOffset=td.cellIndex-1;
+      var d=new Date(base);
+      d.setDate(base.getDate()+dayOffset);
+      return ymd(d);
+    }catch(e){
+      return today();
+    }
+  }
+
+  function getCastNameByCell(td){
+    try{
+      var tr=td.closest("tr");
+      var nameCell=tr ? tr.querySelector("td.name") : null;
+      return nameCell ? (nameCell.textContent||"").replace("🆕","").trim() : "";
+    }catch(e){
+      return "";
+    }
+  }
+
+  function findCastForPopup(name, ds){
+    var list=(staff||[]).filter(function(p){
+      return String(p.name||"").trim()===String(name||"").trim();
+    });
+    return list.find(function(p){return typeof workFor==="function" && !!workFor(p,ds);}) ||
+           list.find(function(p){return ds>=p.start && ds<=p.end;}) ||
+           list[0] ||
+           (staff||[])[0] ||
+           null;
+  }
+
+  function parseTimeFromCell(text, fallbackStart, fallbackEnd){
+    var st=fallbackStart||"10:00", en=fallbackEnd||"00:00", off=false;
+    var t=String(text||"").trim();
+    if(t==="休"){off=true;return {st:st,en:en,off:off};}
+    var parts=t.split("-");
+    function norm(x){
+      if(!x)return "";
+      if(x.indexOf(":")>=0){
+        var a=x.split(":");
+        return String(Number(a[0])).padStart(2,"0")+":"+(a[1]||"00");
+      }
+      return String(Number(x)).padStart(2,"0")+":00";
+    }
+    if(parts.length===2){
+      st=norm(parts[0])||st;
+      en=norm(parts[1])||en;
+    }
+    return {st:st,en:en,off:off};
+  }
+
+  function ensurePopupButton(){
+    var box=document.getElementById("shiftEditPopup");
+    if(!box)return;
+    var btn=box.querySelector(".shiftEditPopupBtn");
+    if(btn){
+      btn.textContent="保存";
+      btn.onclick=function(){ saveShiftEditPopupFinal(); };
+    }
+  }
+
+  window.openShiftEditPopupFinal=function(td){
+    var ds=getMonthlyDateByCell(td);
+    var name=getCastNameByCell(td);
+    var p=findCastForPopup(name,ds);
+    if(!p){ alert("対象CASTが見つかりません"); return; }
+
+    window.__shiftPopupStaffId=p.id;
+    window.__shiftPopupDate=ds;
+
+    if(!p.overrides)p.overrides={};
+    var ov=p.overrides[ds]||{};
+    var parsed=parseTimeFromCell((td.textContent||"").trim(), p.timeStart||"10:00", p.timeEnd||"00:00");
+
+    var st=ov.timeStart || parsed.st || p.timeStart || "10:00";
+    var en=ov.timeEnd || parsed.en || p.timeEnd || "00:00";
+    var off=(ov.off!==undefined) ? !!ov.off : !!parsed.off;
+
+    var d=parseDate(ds);
+    var title=document.getElementById("shiftEditPopupTitle");
+    if(title)title.textContent=(name||p.name)+" / "+md(d)+"（"+wds[d.getDay()]+"）";
+
+    makeTimeOptions(document.getElementById("shiftEditPopupStart"), st);
+    makeTimeOptions(document.getElementById("shiftEditPopupEnd"), en);
+
+    var offEl=document.getElementById("shiftEditPopupOff");
+    if(offEl)offEl.checked=off;
+
+    var noteEl=document.getElementById("shiftEditPopupNote");
+    if(noteEl)noteEl.value=ov.note||"";
+
+    ensurePopupButton();
+
+    var popup=document.getElementById("shiftEditPopup");
+    if(popup)popup.style.display="flex";
+  };
+
+  window.saveShiftEditPopupFinal=function(){
+    var p=(staff||[]).find(function(x){
+      return String(x.id)===String(window.__shiftPopupStaffId);
+    });
+    var ds=window.__shiftPopupDate;
+    if(!p||!ds){ alert("保存対象が見つかりません"); return; }
+
+    if(!p.overrides)p.overrides={};
+
+    p.overrides[ds]={
+      timeStart:document.getElementById("shiftEditPopupStart").value,
+      timeEnd:document.getElementById("shiftEditPopupEnd").value,
+      off:!!document.getElementById("shiftEditPopupOff").checked,
+      note:(document.getElementById("shiftEditPopupNote").value||"")
+    };
+
+    // 範囲外の日を編集した場合は、表示・AI書き出しに反映されるよう範囲を拡張
+    if(!p.start || ds<p.start)p.start=ds;
+    if(!p.end || ds>p.end)p.end=ds;
+
+    save();
+
+    if(typeof closeShiftEditPopup==="function")closeShiftEditPopup();
+    else{
+      var popup=document.getElementById("shiftEditPopup");
+      if(popup)popup.style.display="none";
+    }
+
+    if(typeof renderMonthly==="function")renderMonthly();
+    if(typeof renderStats==="function")renderStats();
+    if(typeof generateText==="function" && document.getElementById("output") && document.getElementById("output").value){
+      generateText();
+    }
+  };
+
+  function bindFinalPopupSave(){
+    var box=document.getElementById("monthlyTable");
+    if(!box || box.__finalPopupSaveBound)return;
+    box.__finalPopupSaveBound=true;
+
+    box.addEventListener("click",function(e){
+      var td=e.target.closest("td");
+      if(!td)return;
+      var text=(td.textContent||"").trim();
+      if(td.className.indexOf("shiftCell")>=0 || text==="休" || /\d{1,2}(:30)?-\d{1,2}/.test(text)){
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.openShiftEditPopupFinal(td);
+      }
+    },true);
+
+    box.addEventListener("touchend",function(e){
+      var td=e.target.closest("td");
+      if(!td)return;
+      var text=(td.textContent||"").trim();
+      if(td.className.indexOf("shiftCell")>=0 || text==="休" || /\d{1,2}(:30)?-\d{1,2}/.test(text)){
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.openShiftEditPopupFinal(td);
+      }
+    },true);
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(bindFinalPopupSave,300);
+    setTimeout(bindFinalPopupSave,1200);
+    setTimeout(ensurePopupButton,500);
+  });
+
+  window.addEventListener("load",function(){
+    setTimeout(bindFinalPopupSave,300);
+    setTimeout(bindFinalPopupSave,1500);
+    setTimeout(ensurePopupButton,500);
+  });
+
+  var oldShowPage=window.showPage;
+  if(typeof oldShowPage==="function"){
+    window.showPage=function(id){
+      var r=oldShowPage.apply(this,arguments);
+      if(id==="monthly")setTimeout(bindFinalPopupSave,300);
+      return r;
+    };
+  }
+
+  var oldRenderMonthly=window.renderMonthly;
+  if(typeof oldRenderMonthly==="function"){
+    window.renderMonthly=function(){
+      var r=oldRenderMonthly.apply(this,arguments);
+      setTimeout(bindFinalPopupSave,100);
       return r;
     };
   }
