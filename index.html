@@ -191,7 +191,7 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 <section id="monthly" class="page hidden">
  <div class="card"><h2 id="monthTitle">月間出勤</h2>
   <div class="row"><div><label>表示開始日</label><input id="monthBase" type="date" onchange="renderMonthly();renderDormMonthly();"></div><div><label>表示日数</label><select id="daysCount" onchange="renderMonthly();renderDormMonthly();"><option>31</option><option>30</option><option>14</option><option>7</option></select></div></div>
-  <p class="note">月間表のセルをタップすると編集できます。</p><p class="note">月間表のセルをタップすると編集できます。</p><div class="tableWrap" id="monthlyTable"></div>
+  <p class="note">月間表のセルをタップすると編集できます。</p><p class="note">月間表のセルをタップすると編集できます。</p><button id="popupDebugButton" class="sub" type="button" style="margin:6px 0 10px" onclick="gspotPopupDebugOpen('ボタン反応あり')">ポップアップ確認</button><div class="tableWrap" id="monthlyTable"></div>
  </div>
  <div class="card"><h2>寮 月間表</h2><div class="tableWrap" id="dormMonthlyTable"></div></div>
 </section>
