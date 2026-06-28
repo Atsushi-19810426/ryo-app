@@ -706,50 +706,134 @@ function cleanDisplayForRoom(room, ds){
 }
 
 function renderDormMonthly(){
-  let base=parseDate(el("monthBase").value||today()),days=+el("daysCount").value||31;
-  syncMasterFromDorms(false);
-  let rows=(dormMaster.length?dormMaster:dorms).slice().sort((a,b)=>(a.dormName+a.roomNo).localeCompare(b.dormName+b.roomNo,'ja'));
-  let h="<table><thead><tr><th class='name' rowspan='2'>寮-部屋</th>";
-  for(let i=0;i<days;i++){let d=new Date(base);d.setDate(base.getDate()+i);h+=`<th class='${dateClass(d)}'>${d.getDate()}日</th>`}
-  h+="</tr><tr>";
-  for(let i=0;i<days;i++){let d=new Date(base);d.setDate(base.getDate()+i);h+=`<th class='${dateClass(d)}'>${wds[d.getDay()]}</th>`}
-  h+="</tr></thead><tbody>";
+  try{
+    var base=parseDate(el("monthBase").value||today());
+    var days=Number(el("daysCount").value||31);
 
-  for(let room of rows){
-    h+=`<tr><td class='name'>${esc(room.dormName)}-${esc(room.roomNo)}</td>`;
-    for(let i=0;i<days;i++){
-      let d=new Date(base);d.setDate(base.getDate()+i);
-      let ds=ymd(d),txt="",cls=dateClass(d)+" vacant";
-      let active=occupiedRecord(room,ds);
-
-      if(active){
-        txt=active.residentName||"入居中";
-        cls=dateClass(d)+" occupied";
-      }else{
-        let cleanState=cleanDisplayForRoom(room,ds);
-        if(cleanState){txt=cleanState.txt;cls+=cleanState.cls}
-      }
-
-      let outs=dorms.filter(r=>r.dormName===room.dormName&&r.roomNo===room.roomNo&&r.moveOut===ds).map(r=>"退:"+r.residentName);
-      let ins=dorms.filter(r=>r.dormName===room.dormName&&r.roomNo===room.roomNo&&r.moveIn===ds).map(r=>"入:"+r.residentName);
-      let marks=[];
-      if(outs.length){marks.push(...outs);cls+=" out"}
-      if(ins.length){marks.push(...ins);cls+=" in"}
-
-      for(let r of dorms){
-        if(r.dormName===room.dormName&&r.roomNo===room.roomNo){
-          if(r.cleanDate===ds && txt!=="未"){marks.push("清");cls+=" clean"}
-          if(r.cleanStatus==="清掃済み"&&r.cleanDoneDate===ds && txt!=="済"){marks.push("済");cls+=" done"}
-        }
-      }
-
-      if(marks.length)txt=marks.join("→");
-      h+=`<td class='${cls} dormCell' onclick='openDormModalByText("${esc(room.dormName)}","${esc(room.roomNo)}","${ds}")'>${esc(txt)}</td>`;
+    if(typeof syncMasterFromDorms==="function"){
+      try{syncMasterFromDorms(false);}catch(e){}
     }
-    h+="</tr>";
+
+    var rows=[];
+    if(Array.isArray(dormMaster) && dormMaster.length){
+      rows=dormMaster.slice();
+    }else if(Array.isArray(dorms) && dorms.length){
+      var seen={};
+      dorms.forEach(function(r){
+        var dn=String(r.dormName||"");
+        var rn=String(r.roomNo||"");
+        if(!dn&&!rn)return;
+        var key=dn+"__"+rn;
+        if(!seen[key]){
+          seen[key]=true;
+          rows.push({dormName:dn,roomNo:rn});
+        }
+      });
+    }
+
+    rows.sort(function(a,b){
+      return (String(a.dormName||"")+String(a.roomNo||"")).localeCompare(String(b.dormName||"")+String(b.roomNo||""),"ja");
+    });
+
+    var h="<table><thead><tr><th class='name' rowspan='2'>寮-部屋</th>";
+    for(var i=0;i<days;i++){
+      var d=new Date(base);d.setDate(base.getDate()+i);
+      h+="<th class='"+dateClass(d)+"'>"+d.getDate()+"日</th>";
+    }
+    h+="</tr><tr>";
+    for(i=0;i<days;i++){
+      d=new Date(base);d.setDate(base.getDate()+i);
+      h+="<th class='"+dateClass(d)+"'>"+wds[d.getDay()]+"</th>";
+    }
+    h+="</tr></thead><tbody>";
+
+    rows.forEach(function(room){
+      var dn=String(room.dormName||"");
+      var rn=String(room.roomNo||"");
+      h+="<tr><td class='name'>"+esc(dn)+"-"+esc(rn)+"</td>";
+
+      for(var i=0;i<days;i++){
+        var d=new Date(base);d.setDate(base.getDate()+i);
+        var ds=ymd(d);
+        var cls=dateClass(d)+" vacant";
+        var txt="";
+
+        var active=null;
+        try{
+          active = (typeof occupiedRecord==="function") ? occupiedRecord({dormName:dn,roomNo:rn},ds) : null;
+        }catch(e){ active=null; }
+
+        if(active){
+          txt=active.residentName||"入居中";
+          cls=dateClass(d)+" occupied";
+        }else{
+          var related=(Array.isArray(dorms)?dorms:[]).filter(function(r){
+            return String(r.dormName||"")===dn && String(r.roomNo||"")===rn;
+          });
+
+          var latestDoneDate="";
+          related.forEach(function(r){
+            if(r.cleanStatus==="清掃済み" && r.cleanDoneDate && r.cleanDoneDate<=ds){
+              if(!latestDoneDate || r.cleanDoneDate>latestDoneDate)latestDoneDate=r.cleanDoneDate;
+            }
+          });
+
+          if(latestDoneDate){
+            var nextIn=related.filter(function(r){
+              return r.moveIn && r.moveIn>latestDoneDate && r.status!=="空室";
+            }).sort(function(a,b){return a.moveIn.localeCompare(b.moveIn);})[0];
+            if(!nextIn || ds<nextIn.moveIn){
+              txt="済";
+              cls+=" done";
+            }
+          }
+
+          if(!txt){
+            var latestOutDate="";
+            related.forEach(function(r){
+              if(r.moveOut && r.moveOut<=ds){
+                if(!latestOutDate || r.moveOut>latestOutDate)latestOutDate=r.moveOut;
+              }
+            });
+
+            if(latestOutDate){
+              var doneAfter=related.some(function(r){
+                return r.cleanStatus==="清掃済み" && r.cleanDoneDate && r.cleanDoneDate>=latestOutDate && r.cleanDoneDate<=ds;
+              });
+              var nextInOut=related.filter(function(r){
+                return r.moveIn && r.moveIn>latestOutDate && r.status!=="空室";
+              }).sort(function(a,b){return a.moveIn.localeCompare(b.moveIn);})[0];
+
+              if(!doneAfter && (!nextInOut || ds<nextInOut.moveIn)){
+                txt="未";
+                cls+=" clean";
+              }
+            }
+          }
+        }
+
+        var marks=[];
+        (Array.isArray(dorms)?dorms:[]).forEach(function(r){
+          if(String(r.dormName||"")!==dn || String(r.roomNo||"")!==rn)return;
+          if(r.moveOut===ds){marks.push("退:"+String(r.residentName||""));}
+          if(r.moveIn===ds){marks.push("入:"+String(r.residentName||""));}
+          if(r.cleanDate===ds && txt!=="未"){marks.push("清");}
+          if(r.cleanStatus==="清掃済み" && r.cleanDoneDate===ds && txt!=="済"){marks.push("済");}
+        });
+        if(marks.length)txt=marks.join("→");
+
+        h+="<td class='"+cls+"'>"+esc(txt)+"</td>";
+      }
+      h+="</tr>";
+    });
+
+    h+="</tbody></table>";
+    var box=el("dormMonthlyTable");
+    if(box)box.innerHTML=h;
+  }catch(err){
+    var box=el("dormMonthlyTable");
+    if(box)box.innerHTML="<div style='padding:14px;color:#b91c1c;font-weight:bold'>寮月間表の表示エラー："+esc(err.message||err)+"</div>";
   }
-  h+="</tbody></table>";
-  el("dormMonthlyTable").innerHTML=h;
 }
 
 function openDormModalByText(dn,rn,ds){openDormModal({dormName:dn,roomNo:rn},ds)}
