@@ -66,6 +66,10 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 .shiftEditCell{cursor:pointer}
 .shiftModal{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:120;display:flex;align-items:flex-end;justify-content:center}
 .shiftModalBox{background:#fff;width:min(620px,100%);max-height:84vh;overflow:auto;border-radius:26px 26px 0 0;padding:18px;box-shadow:0 -12px 40px rgba(0,0,0,.18)}
+
+.shiftEditCell{cursor:pointer}
+.shiftModal{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:120;display:flex;align-items:flex-end;justify-content:center}
+.shiftModalBox{background:#fff;width:min(620px,100%);max-height:84vh;overflow:auto;border-radius:26px 26px 0 0;padding:18px;box-shadow:0 -12px 40px rgba(0,0,0,.18)}
 </style>
 </head>
 <body>
@@ -170,7 +174,7 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 <section id="monthly" class="page hidden">
  <div class="card"><h2 id="monthTitle">月間出勤</h2>
   <div class="row"><div><label>表示開始日</label><input id="monthBase" type="date" onchange="renderMonthly();renderDormMonthly();"></div><div><label>表示日数</label><select id="daysCount" onchange="renderMonthly();renderDormMonthly();"><option>31</option><option>30</option><option>14</option><option>7</option></select></div></div>
-  <p class="note">出勤セルをタップすると開始・終了・休みを変更できます。</p><div class="tableWrap" id="monthlyTable"></div>
+  <p class="note">出勤セルをタップすると開始・終了・休みを変更できます。</p><p class="note">セルをクリック/タップすると開始・終了・休みを変更できます。</p><div class="tableWrap" id="monthlyTable"></div>
  </div>
  <div class="card"><h2>寮 月間表</h2><div class="tableWrap" id="dormMonthlyTable"></div></div>
 </section>
@@ -343,31 +347,120 @@ function clearShiftModal(){
 }
 function closeShiftModal(){el("shiftModal").classList.add("hidden");}
 
+
+function castGroupsForMonthly(){
+  var map={};
+  staff.forEach(function(p){
+    var key=String(p.name||"").trim()||"未設定";
+    if(!map[key])map[key]=[];
+    map[key].push(p);
+  });
+  return Object.keys(map).sort(function(a,b){return a.localeCompare(b,"ja")}).map(function(name){
+    return {name:name,list:map[name].sort(function(a,b){return String(a.start||"").localeCompare(String(b.start||""));})};
+  });
+}
+function workForCastGroup(group,ds){
+  var hit=null;
+  group.list.forEach(function(p){
+    var w=workFor(p,ds);
+    if(w&&!hit)hit={staff:p,work:w};
+  });
+  return hit;
+}
+function findCastForDate(name,ds){
+  var list=staff.filter(function(p){return String(p.name||"").trim()===String(name||"").trim();});
+  return list.find(function(p){return !!workFor(p,ds);}) ||
+         list.find(function(p){return ds>=p.start&&ds<=p.end;}) ||
+         list[0] || null;
+}
+function openShiftCellByName(name,ds){
+  var p=findCastForDate(name,ds);
+  if(p)openShiftCell(p.id,ds);
+}
+function openShiftCell(id,ds){
+  var p=staff.find(function(x){return String(x.id)===String(id);});
+  if(!p)return;
+  if(!p.overrides)p.overrides={};
+  var ov=p.overrides[ds]||{};
+  el("shiftCellStaffId").value=p.id;
+  el("shiftCellDate").value=ds;
+  el("shiftCellDateView").value=ds;
+  el("shiftCellTitle").textContent=p.name+" / "+ds;
+  makeTimeOptions(el("shiftCellStart"),ov.timeStart||p.timeStart||"10:00");
+  makeTimeOptions(el("shiftCellEnd"),ov.timeEnd||p.timeEnd||"00:00");
+  el("shiftCellOff").checked=!!ov.off;
+  el("shiftCellModal").classList.remove("hidden");
+}
+function changeShiftCellDate(){
+  openShiftCell(el("shiftCellStaffId").value,el("shiftCellDateView").value);
+}
+function saveShiftCell(){
+  var p=staff.find(function(x){return String(x.id)===String(el("shiftCellStaffId").value);});
+  var ds=el("shiftCellDate").value;
+  if(!p||!ds)return;
+  if(!p.overrides)p.overrides={};
+  p.overrides[ds]={
+    timeStart:el("shiftCellStart").value,
+    timeEnd:el("shiftCellEnd").value,
+    off:el("shiftCellOff").checked
+  };
+  save();
+  closeShiftCellModal();
+  renderMonthly();
+  if(typeof renderStats==="function")renderStats();
+}
+function clearShiftCell(){
+  var p=staff.find(function(x){return String(x.id)===String(el("shiftCellStaffId").value);});
+  var ds=el("shiftCellDate").value;
+  if(p&&p.overrides&&p.overrides[ds])delete p.overrides[ds];
+  save();
+  closeShiftCellModal();
+  renderMonthly();
+  if(typeof renderStats==="function")renderStats();
+}
+function closeShiftCellModal(){
+  el("shiftCellModal").classList.add("hidden");
+}
+
 function renderMonthly(){
   var base=parseDate(el("monthBase").value||today()),days=Number(el("daysCount").value||31);
   el("monthTitle").textContent=(base.getMonth()+1)+"月出勤";
   var h="<table><thead><tr><th class='name' rowspan='2'>源氏名</th>";
-  for(var i=0;i<days;i++){var d=new Date(base);d.setDate(base.getDate()+i);h+="<th class='"+dateClass(d)+"'>"+d.getDate()+"日</th>"}
+  for(var i=0;i<days;i++){
+    var d=new Date(base);d.setDate(base.getDate()+i);
+    h+="<th class='"+dateClass(d)+"'>"+d.getDate()+"日</th>";
+  }
   h+="</tr><tr>";
-  for(i=0;i<days;i++){d=new Date(base);d.setDate(base.getDate()+i);h+="<th class='"+dateClass(d)+"'>"+wds[d.getDay()]+"</th>"}
+  for(i=0;i<days;i++){
+    d=new Date(base);d.setDate(base.getDate()+i);
+    h+="<th class='"+dateClass(d)+"'>"+wds[d.getDay()]+"</th>";
+  }
   h+="</tr></thead><tbody>";
-  groupedCastList().forEach(function(g){
-    var isNew=g.list.some(function(p){return p.newbie});
+
+  var groups=castGroupsForMonthly();
+  groups.forEach(function(g){
+    var isNew=g.list.some(function(p){return p.newbie;});
     h+="<tr><td class='name'>"+esc(g.name)+(isNew?" 🆕":"")+"</td>";
     for(var i=0;i<days;i++){
       var d=new Date(base);d.setDate(base.getDate()+i);
-      var ds=ymd(d),hit=workForGroup(g,ds),cls=dateClass(d);
+      var ds=ymd(d),hit=workForCastGroup(g,ds),cls=dateClass(d);
       if(!hit){
-        h+="<td class='"+cls+" shiftCell shiftEditCell' onclick='openShiftModalByGroup("+JSON.stringify(g.name)+","+JSON.stringify(ds)+")'>休</td>";
+        h+="<td class='"+cls+" shiftCell shiftEditCell' onclick='openShiftCellByName("+JSON.stringify(g.name)+","+JSON.stringify(ds)+")'>休</td>";
       }else{
-        var w=hit.work,wc=w.hours>=10?"green":(w.hours<=8?"orange":"");
-        h+="<td class='"+cls+" "+wc+" shiftCell shiftEditCell' onclick='openShiftModal("+JSON.stringify(hit.staff.id)+","+JSON.stringify(ds)+")'>"+shortRange(w.timeStart,w.timeEnd)+"</td>";
+        var w=hit.work;
+        var wc=w.hours>=10?"green":(w.hours<=8?"orange":"");
+        h+="<td class='"+cls+" "+wc+" shiftCell shiftEditCell' onclick='openShiftCell("+JSON.stringify(hit.staff.id)+","+JSON.stringify(ds)+")'>"+shortRange(w.timeStart,w.timeEnd)+"</td>";
       }
     }
     h+="</tr>";
   });
+
   h+="<tr><td class='name'>合計</td>";
-  for(i=0;i<days;i++){d=new Date(base);d.setDate(base.getDate()+i);var t=totals(ymd(d));h+="<td class='"+dateClass(d)+"'><b>"+fmt(t.calc)+"</b><br>("+t.real+")</td>"}
+  for(i=0;i<days;i++){
+    d=new Date(base);d.setDate(base.getDate()+i);
+    var t=totals(ymd(d));
+    h+="<td class='"+dateClass(d)+"'><b>"+fmt(t.calc)+"</b><br>("+t.real+")</td>";
+  }
   h+="</tr></tbody></table>";
   el("monthlyTable").innerHTML=h;
 }
