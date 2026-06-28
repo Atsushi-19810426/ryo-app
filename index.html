@@ -101,7 +101,7 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   </div>
   <div class="grid2">
     <button class="primary" onclick="showPage('staff')">出勤登録</button>
-    <button class="sub" onclick="showPage('monthly')">月間表で編集</button>
+    <button class="sub" onclick="showPage('shiftEdit')">月間表で編集</button>
     <button class="sub" onclick="showPage('dorm')">入寮登録</button>
     <button class="sub" onclick="showPage('vacancy')">空室確認</button>
     <button class="good" onclick="showPage('ai')">AI書き出し</button>
@@ -128,7 +128,7 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
     <h2>月間表</h2>
     <div class="grid2">
       <button class="primary" onclick="showPage('monthly')">月間表を見る</button>
-      <button class="sub" onclick="showPage('monthly')">月間表で編集</button>
+      <button class="sub" onclick="showPage('shiftEdit')">月間表で編集</button>
       <button onclick="showPage('home')">ホームへ戻る</button>
     </div>
   </div>
@@ -145,7 +145,7 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 </section>
 
 <section id="shiftEdit" class="page hidden">
- <div class="card"><h2>月間表で直接編集</h2>
+ <div class="card"><h2>月間表で編集</h2>
   <div class="row"><div><label>スタッフ</label><select id="editStaffSelect" onchange="renderShiftEditor()"></select></div><div><label>開始日</label><input id="editBase" type="date" onchange="renderShiftEditor()"></div></div>
   <div id="shiftEditor"></div>
  </div>
@@ -178,7 +178,7 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 <section id="monthly" class="page hidden">
  <div class="card"><h2 id="monthTitle">月間出勤</h2>
   <div class="row"><div><label>表示開始日</label><input id="monthBase" type="date" onchange="renderMonthly();renderDormMonthly();"></div><div><label>表示日数</label><select id="daysCount" onchange="renderMonthly();renderDormMonthly();"><option>31</option><option>30</option><option>14</option><option>7</option></select></div></div>
-  <p class="note">出勤セルをタップすると開始・終了・休みを変更できます。</p><p class="note">月間表のセル内で開始・終了・休みを直接変更できます。</p><div class="tableWrap" id="monthlyTable"></div>
+  <p class="note">出勤セルをタップすると開始・終了・休みを変更できます。</p><p class="note">月間表は確認用です。編集は「月間表で編集」から行います。</p><div class="tableWrap" id="monthlyTable"></div>
  </div>
  <div class="card"><h2>寮 月間表</h2><div class="tableWrap" id="dormMonthlyTable"></div></div>
 </section>
@@ -427,21 +427,27 @@ function renderMonthly(){
   }
   h+="</tr></thead><tbody>";
 
-  monthlyCastGroups().forEach(function(g){
+  var groups = (typeof castGroupsForMonthly==="function") ? castGroupsForMonthly() :
+    (typeof groupedCastList==="function") ? groupedCastList() :
+    staff.map(function(p){return {name:p.name,list:[p]};});
+
+  groups.forEach(function(g){
     var isNew=g.list.some(function(p){return p.newbie;});
     h+="<tr><td class='name'>"+esc(g.name)+(isNew?" 🆕":"")+"</td>";
     for(var i=0;i<days;i++){
       var d=new Date(base);d.setDate(base.getDate()+i);
-      var ds=ymd(d),hit=monthlyGroupWork(g,ds),cls=dateClass(d),p=null,w=null,st="10:00",en="00:00",off=true,wc="";
-      if(hit){
-        p=hit.staff; w=hit.work; st=w.timeStart; en=w.timeEnd; off=false;
-        wc=w.hours>=10?"green":(w.hours<=8?"orange":"");
+      var ds=ymd(d),cls=dateClass(d),hit=null;
+      g.list.forEach(function(p){
+        var w=workFor(p,ds);
+        if(w&&!hit)hit={staff:p,work:w};
+      });
+      if(!hit){
+        h+="<td class='"+cls+" shiftCell'>休</td>";
       }else{
-        p=monthlyFindStaff(g.name,ds);
-        var ov=p&&p.overrides?p.overrides[ds]:null;
-        if(ov){st=ov.timeStart||st;en=ov.timeEnd||en;off=!!ov.off;}
+        var w=hit.work;
+        var wc=w.hours>=10?"green":(w.hours<=8?"orange":"");
+        h+="<td class='"+cls+" "+wc+" shiftCell'>"+shortRange(w.timeStart,w.timeEnd)+"</td>";
       }
-      h+="<td class='"+cls+" "+wc+" shiftCell'>"+inlineShiftEditor(p?p.id:"",g.name,ds,st,en,off)+"</td>";
     }
     h+="</tr>";
   });
