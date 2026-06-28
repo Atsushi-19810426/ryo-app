@@ -1,31 +1,1663 @@
 <!DOCTYPE html>
-<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"><title>G-SPOT管理システム Ver64</title><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#f5f5f7"><style>
-:root{--bg:#f5f5f7;--card:#fff;--text:#111827;--sub:#6b7280;--line:#e5e7eb;--blue:#007aff;--red:#ef4444;--green:#16a34a;--gold:#b8871f;--shadow:0 10px 30px rgba(0,0,0,.07);--radius:22px}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;font-weight:600}header{position:sticky;top:0;z-index:20;background:rgba(245,245,247,.94);backdrop-filter:blur(18px);border-bottom:1px solid rgba(0,0,0,.06);padding:18px 18px 12px}h1{font-size:24px;margin:0;letter-spacing:-.03em}header p{margin:4px 0 0;color:var(--sub);font-size:12px}.wrap{max-width:1280px;margin:auto;padding:12px 12px 70px}.menu{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;padding:2px 0 12px;position:sticky;top:76px;z-index:19;background:var(--bg)}button{border:0;border-radius:16px;padding:11px 10px;background:#fff;color:#111827;box-shadow:0 4px 16px rgba(0,0,0,.06);font-weight:800;font-size:13px}button.active,.primary{background:var(--blue);color:#fff}.good{background:var(--green);color:#fff}.danger{background:var(--red);color:#fff}.sub{background:#eef2ff;color:#1d4ed8}.gold{background:linear-gradient(135deg,#b8871f,#e6c36a);color:#fff}.card{background:var(--card);border:1px solid rgba(0,0,0,.05);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}h2{font-size:22px;margin:0 0 14px}h3{font-size:16px;margin:14px 0 8px}label{display:block;font-size:12px;color:var(--sub);margin:8px 0 5px}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:16px;padding:13px;font-size:16px;background:#fff;color:#111827;font-weight:650}textarea{height:180px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;line-height:1.55}.out{height:420px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.note{font-size:12px;color:var(--sub);line-height:1.5}.hidden{display:none!important}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.stat{background:#f9fafb;border-radius:18px;padding:14px;text-align:center}.stat span{display:block;font-size:12px;color:var(--sub)}.stat b{font-size:28px}.item{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px;margin-bottom:10px}.badge{display:inline-block;border-radius:999px;padding:4px 9px;font-size:11px;margin:2px;background:#f3f4f6}.ok{background:#dcfce7;color:#166534}.warn{background:#fff7ed;color:#9a3412}.ng{background:#fee2e2;color:#991b1b}.info{background:#e0f2fe;color:#075985}.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:#fff;max-height:72vh}table{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%}th,td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:7px 8px;text-align:center;font-size:12px;white-space:nowrap;vertical-align:middle}th{background:#fafafa}.name{position:sticky;left:0;background:#fff!important;text-align:left!important;z-index:3;min-width:96px;font-weight:900}.sat{background:#eaf3ff!important}.sun{background:#fff0f0!important}.work{background:#dcfce7!important;color:#166534;font-weight:900}.short{background:#fff7ed!important;color:#9a3412;font-weight:900}.vacant{background:#fafafa!important;color:#9ca3af}.occupied{background:#f0fdf4!important;color:#166534;font-weight:900}.in{background:#e8f5ff!important;color:#075985;font-weight:900}.outcell{background:#fff1f2!important;color:#9f1239;font-weight:900}.clean{background:#f2ecff!important;color:#5b21b6;font-weight:900}.photoBox{border:1px dashed #cbd5e1;border-radius:18px;padding:12px;background:#fafafa;text-align:center}.photoBox img{max-width:100%;max-height:260px;border-radius:16px;display:none;margin:auto}.modal{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:99;display:flex;align-items:flex-end;justify-content:center}.modalBox{background:#fff;width:min(720px,100%);max-height:88vh;overflow:auto;border-radius:26px 26px 0 0;padding:18px;box-shadow:0 -12px 40px rgba(0,0,0,.18)}@media(max-width:760px){h1{font-size:21px}.wrap{padding:10px 8px 60px}.menu{top:70px;grid-template-columns:repeat(4,1fr)}.menu button{font-size:12px;padding:9px 6px}.row,.row3,.grid2{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.card{padding:16px;border-radius:20px}th,td{font-size:11px;padding:6px}.name{min-width:86px}}
-</style></head><body><header><h1>G-SPOT管理システム</h1><p>Ver64 / 出勤・寮はそのまま + AI紹介文メーカー</p></header><div class="wrap"><div class="menu"><button id="tab_home" class="active" onclick="showPage('home')">ホーム</button><button id="tab_staff" onclick="showPage('staff')">出勤</button><button id="tab_dorm" onclick="showPage('dorm')">寮</button><button id="tab_monthly" onclick="showPage('monthly')">月間表</button><button id="tab_ai" onclick="showPage('ai')">AI書き出し</button><button id="tab_profile" onclick="showPage('profile')">紹介文</button><button id="tab_backup" onclick="showPage('backup')">保存</button></div>
-<section id="home" class="page"><div class="card"><h2>ホーム</h2><div class="stats"><div class="stat"><span>登録人数</span><b id="statStaff">0</b></div><div class="stat"><span>本日出勤</span><b id="statToday">0</b></div><div class="stat"><span>入居中</span><b id="statOccupied">0</b></div><div class="stat"><span>空室</span><b id="statVacant">0</b></div><div class="stat"><span>学習文</span><b id="statLearn">0</b></div></div><p class="note">出勤キー newAppStaffV1、寮キー newAppDormV1 / dormMasterV1 を維持。既存データを壊さず、紹介文メーカーだけ追加します。</p><div class="grid2"><button class="primary" onclick="showPage('staff')">出勤登録</button><button class="sub" onclick="showPage('dorm')">寮管理</button><button class="sub" onclick="showPage('monthly')">月間表</button><button class="gold" onclick="showPage('profile')">紹介文を作る</button></div></div><div class="card"><h2>本日の確認</h2><div id="dashboard"></div></div></section>
-<section id="staff" class="page hidden"><div class="card"><h2>出勤登録</h2><div class="row"><div><label>源氏名</label><input id="name" placeholder="例：いずな"></div><div><label>新人</label><select id="newbie"><option value="0">通常</option><option value="1">新人</option></select></div></div><div class="row"><div><label>開始日</label><input id="start" type="date"></div><div><label>終了日</label><input id="end" type="date"></div></div><div class="row"><div><label>出勤開始</label><select id="timeStart"></select></div><div><label>出勤終了</label><select id="timeEnd"></select></div></div><label>備考</label><textarea id="staffNote" placeholder="出勤に関する備考"></textarea><button class="primary" onclick="addStaff()">登録</button></div><div class="card"><h2>出勤一覧</h2><div id="staffList"></div></div></section>
-<section id="dorm" class="page hidden"><div class="grid2"><div class="card"><h2>寮設定</h2><div class="row"><div><label>寮名</label><input id="masterDormName" placeholder="例：トキワ"></div><div><label>部屋番号</label><input id="masterRoomNo" placeholder="例：101"></div></div><button class="sub" onclick="addDormRoomMaster()">部屋を追加</button><label>一括登録</label><textarea id="masterImportText" placeholder="トキワ,101&#10;トキワ,102"></textarea><button class="sub" onclick="importMasterText()">一括登録</button></div><div class="card"><h2>寮管理登録</h2><div class="row"><div><label>寮名</label><select id="dormSelect" onchange="updateRoomSelect()"></select></div><div><label>部屋番号</label><select id="roomSelect"></select></div></div><div class="row"><div><label>名前/源氏名</label><input id="residentName" placeholder="例：いずな"></div><div><label>状態</label><select id="roomStatus"><option>入寮中</option><option>予約</option><option>空室</option></select></div></div><div class="row3"><div><label>入寮日</label><input id="moveIn" type="date"></div><div><label>退寮日</label><input id="moveOut" type="date"></div><div><label>清掃日</label><input id="cleanDate" type="date"></div></div><div class="row"><div><label>清掃状態</label><select id="cleanStatus"><option>未清掃</option><option>清掃予定</option><option>清掃済み</option></select></div><div><label>清掃済み日</label><input id="cleanDoneDate" type="date"></div></div><label>備考</label><textarea id="dormNote"></textarea><button class="primary" onclick="addDorm()">寮情報を登録</button></div></div><div class="card"><h2>寮一覧</h2><div id="dormList"></div></div><div class="card"><h2>空室確認</h2><div id="vacancyList"></div></div><div class="card"><h2>登録済み部屋</h2><div id="masterList"></div></div></section>
-<section id="monthly" class="page hidden"><div class="card"><h2 id="monthTitle">月間出勤</h2><div class="row"><div><label>表示開始日</label><input id="monthBase" type="date" onchange="renderMonthly();renderDormMonthly()"></div><div><label>表示日数</label><select id="daysCount" onchange="renderMonthly();renderDormMonthly()"><option>31</option><option>30</option><option>14</option><option>7</option></select></div></div><div class="tableWrap" id="monthlyTable"></div></div><div class="card"><h2>寮 月間表</h2><p class="note">入居中は名前を表示。入寮日は「入」、退寮日は「退」、清掃日は「清」を表示します。</p><div class="tableWrap" id="dormMonthlyTable"></div></div></section>
-<section id="ai" class="page hidden"><div class="card"><h2>AI書き出し</h2><div class="row"><div><label>更新日</label><input id="updateDate" type="date"></div><div><label>日数</label><select id="exportDays"><option>31</option><option>30</option><option>14</option><option>7</option></select></div></div><div class="row"><button class="primary" onclick="generateText()">作成</button><button class="good" onclick="copyId('output')">コピー</button></div><button class="sub" onclick="sendLine()">LINEで送る</button><textarea id="output" class="out"></textarea></div></section>
-<section id="profile" class="page hidden"><div class="grid2"><div class="card"><h2>AI紹介文メーカー</h2><div class="photoBox"><input type="file" accept="image/*" onchange="previewPhoto(event)"><img id="photoPreview"><p class="note">写真は端末内プレビュー用。雰囲気タグを入力すると文章に反映します。</p></div><div class="row"><div><label>源氏名</label><input id="pName" placeholder="例：いずな"></div><div><label>年齢</label><input id="pAge" placeholder="例：24"></div></div><div class="row3"><div><label>身長</label><input id="pTall" placeholder="155"></div><div><label>バスト</label><input id="pBust" placeholder="84D"></div><div><label>W/H</label><input id="pWh" placeholder="56/85"></div></div><div class="row"><div><label>前職</label><input id="pJob" placeholder="例：看護師"></div><div><label>タイプ</label><select id="pType"><option>高級感</option><option>清楚系</option><option>可愛い系</option><option>色気系</option><option>癒し系</option><option>新人速報</option><option>小悪魔系</option></select></div></div><label>雰囲気タグ</label><input id="pTags" placeholder="例：色白, 小柄, 愛嬌, はにかむ笑顔"><label>性格・趣味・コメント</label><textarea id="pMemo" placeholder="明るく人懐っこい、料理と旅行が好き…など"></textarea><button class="gold" onclick="generateProfile()">紹介文を生成</button></div><div class="card"><h2>生成結果</h2><div id="checkBadges"></div><textarea id="result" class="out"></textarea><div class="grid2"><button class="good" onclick="copyId('result')">コピー</button><button class="sub" onclick="saveProfileResult()">完成文として保存</button><button onclick="generateProfile()">別パターン</button><button class="sub" onclick="makePrompt()">AI用プロンプト</button></div></div></div><div class="grid2"><div class="card"><h2>学習BOX</h2><div class="row"><div><label>分類</label><select id="lType"><option>高級感</option><option>清楚系</option><option>可愛い系</option><option>色気系</option><option>癒し系</option><option>新人速報</option></select></div><div><label>評価</label><select id="lRate"><option value="5">★★★★★</option><option value="4">★★★★</option><option value="3">★★★</option></select></div></div><textarea id="lText" placeholder="参考文章を貼り付け"></textarea><button class="primary" onclick="addLearn()">学習保存</button></div><div class="card"><h2>NG・表現ローテーション</h2><label>NGワード</label><textarea id="ngWords"></textarea><div class="row"><div><label>出だし候補</label><textarea id="openers"></textarea></div><div><label>締め候補</label><textarea id="closers"></textarea></div></div><button class="sub" onclick="saveParts()">保存</button></div></div><div class="grid2"><div class="card"><h2>学習済み文章</h2><div id="learnList"></div></div><div class="card"><h2>完成文保存</h2><div id="savedList"></div></div></div></section>
-<section id="backup" class="page hidden"><div class="card"><h2>バックアップ</h2><div class="grid2"><button class="good" onclick="exportBackup()">全体バックアップ</button><button class="good" onclick="exportProfileData()">紹介文バックアップ</button></div><label>全体復元</label><input type="file" accept=".json" onchange="importBackup(event)"><label>紹介文復元</label><input type="file" accept=".json" onchange="importProfileData(event)"><button class="sub" onclick="showStorageInfo()">保存状態</button><textarea id="storageInfo"></textarea></div></section>
-</div><div id="modal" class="modal hidden"><div class="modalBox"><h2>寮編集</h2><input type="hidden" id="modalDormId"><div class="row"><div><label>寮名</label><input id="modalDormName"></div><div><label>部屋番号</label><input id="modalRoomNo"></div></div><div class="row"><div><label>名前</label><input id="modalResident"></div><div><label>状態</label><select id="modalStatus"><option>入寮中</option><option>予約</option><option>空室</option></select></div></div><div class="row3"><div><label>入寮日</label><input id="modalMoveIn" type="date"></div><div><label>退寮日</label><input id="modalMoveOut" type="date"></div><div><label>清掃日</label><input id="modalCleanDate" type="date"></div></div><div class="row"><div><label>清掃状態</label><select id="modalCleanStatus"><option>未清掃</option><option>清掃予定</option><option>清掃済み</option></select></div><div><label>清掃済み日</label><input id="modalCleanDoneDate" type="date"></div></div><label>備考</label><textarea id="modalNote"></textarea><div class="row3"><button class="primary" onclick="saveDormModal()">保存</button><button class="danger" onclick="deleteDormModal()">削除</button><button onclick="closeModal()">閉じる</button></div></div></div>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>G-SPOT管理システム</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#f5f5f7">
+<style>
+:root{
+  --bg:#f5f5f7;--card:#fff;--text:#111827;--sub:#6b7280;--line:#e5e7eb;
+  --blue:#007aff;--green:#dff7e8;--greenText:#137333;--orange:#fff1dc;--orangeText:#9a5a00;
+  --red:#ffe4e6;--redText:#9f1239;--purple:#eee7ff;--purpleText:#5b21b6;
+  --shadow:0 10px 30px rgba(0,0,0,.07);--radius:22px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;font-weight:600}
+header{position:sticky;top:0;z-index:20;background:rgba(245,245,247,.92);backdrop-filter:blur(18px);border-bottom:1px solid rgba(0,0,0,.06);padding:18px 18px 12px}
+h1{font-size:24px;letter-spacing:-.03em;margin:0}
+header p{margin:4px 0 0;color:var(--sub);font-size:12px;font-weight:600}
+.wrap{max-width:1280px;margin:auto;padding:12px 12px 60px}
+.menu{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;position:sticky;top:76px;z-index:19;background:var(--bg)}
+.menu button{flex:0 0 auto}
+button{border:0;border-radius:16px;padding:11px 14px;background:#fff;color:#111827;box-shadow:0 4px 16px rgba(0,0,0,.06);font-weight:800;font-size:14px}
+button.active,.primary{background:var(--blue);color:white}.good{background:#16a34a;color:white}.danger{background:#ef4444;color:white}.sub{background:#eef2ff;color:#1d4ed8}
+.card{background:var(--card);border:1px solid rgba(0,0,0,.05);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+h2{font-size:22px;letter-spacing:-.03em;margin:0 0 14px}
+h3{font-size:16px;margin:14px 0 8px}
+label{display:block;font-size:12px;color:var(--sub);margin:8px 0 5px}
+input,select,textarea{width:100%;border:1px solid var(--line);border-radius:16px;padding:13px;font-size:16px;background:#fff;color:#111827;font-weight:650}
+textarea{height:300px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;line-height:1.55}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.note{font-size:12px;color:var(--sub);line-height:1.5}.hidden{display:none!important}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{background:#f9fafb;border-radius:18px;padding:14px;text-align:center}.stat span{display:block;font-size:12px;color:var(--sub)}.stat b{font-size:28px;letter-spacing:-.03em}
+.item{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px;margin-bottom:10px}
+.badge{display:inline-block;border-radius:999px;padding:3px 9px;font-size:11px;margin:2px;background:#f3f4f6;color:#374151}.new{background:#fff7ed;color:#9a3412}.ok{background:var(--green);color:var(--greenText)}.warn{background:var(--orange);color:var(--orangeText)}.ng{background:var(--red);color:var(--redText)}.info{background:#e0f2fe;color:#075985}
+.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:#fff;max-height:72vh}
+table{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%}
+th,td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:7px 8px;text-align:center;font-size:12px;white-space:nowrap;vertical-align:middle}
+th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;background:#fff!important;text-align:left!important;min-width:96px;font-weight:900}
+.sat{background:#eaf3ff!important}.sun,.holiday{background:#fff0f0!important}
+.green{background:var(--green)!important;color:var(--greenText);font-weight:900}.orange{background:var(--orange)!important;color:var(--orangeText);font-weight:900}
+.vacant{background:#fafafa!important;color:#9ca3af}.occupied{background:#f0fdf4!important;color:#166534;font-weight:900}
+.in{background:#e8f5ff!important;color:#075985;font-weight:900}.out{background:#fff1f2!important;color:#9f1239;font-weight:900}.clean{background:#f2ecff!important;color:#5b21b6;font-weight:900}.done{background:#e0f2fe!important;color:#075985;font-weight:900}
+.shiftCell{cursor:pointer;min-width:54px;font-size:11px;line-height:1.2}
+.editorRow{display:grid;grid-template-columns:80px 1fr 1fr 58px;gap:6px;align-items:end;border-bottom:1px solid var(--line);padding:8px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:760px){
+  h1{font-size:22px}.wrap{padding:10px 8px 50px}.card{padding:16px;border-radius:20px}.menu{top:70px}
+  .stats{grid-template-columns:repeat(2,1fr)}.row,.row3,.grid2{grid-template-columns:1fr}
+  th,td{padding:6px 7px;font-size:12px}.name{min-width:92px}.editorRow{grid-template-columns:72px 1fr 1fr 52px}
+}
+
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:99;display:flex;align-items:flex-end;justify-content:center}
+.modalBox{background:#fff;width:min(720px,100%);max-height:88vh;overflow:auto;border-radius:26px 26px 0 0;padding:18px;box-shadow:0 -12px 40px rgba(0,0,0,.18)}
+
+
+.simpleMenu{justify-content:space-between}
+.simpleMenu button{min-width:94px;text-align:center}
+@media(max-width:760px){
+  .simpleMenu{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;overflow:visible}
+  .simpleMenu button{min-width:0;padding:9px 6px;font-size:12px}
+  .row3{grid-template-columns:1fr 1fr 1fr}
+}
+
+.shiftEditCell{cursor:pointer}
+.shiftModal{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:120;display:flex;align-items:flex-end;justify-content:center}
+.shiftModalBox{background:#fff;width:min(620px,100%);max-height:84vh;overflow:auto;border-radius:26px 26px 0 0;padding:18px;box-shadow:0 -12px 40px rgba(0,0,0,.18)}
+
+.inlineShiftBox{display:flex;gap:4px;align-items:center;justify-content:center;min-width:122px}
+.inlineShiftBox select{width:auto;min-width:52px;padding:4px 6px;border-radius:8px;font-size:12px}
+.inlineShiftBox label{display:flex;align-items:center;gap:3px;margin:0;font-size:11px;color:#111827}
+.inlineShiftBox input{width:auto}
+.shiftCell{min-width:122px}
+@media(max-width:760px){.inlineShiftBox{min-width:112px}.inlineShiftBox select{font-size:11px;min-width:48px;padding:4px}.shiftCell{min-width:112px}}
+
+
+.shiftPopup{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding-top:42px}
+.shiftPopupBox{background:#fff;width:min(360px,calc(100% - 24px));border-radius:18px;padding:14px;box-shadow:0 16px 50px rgba(0,0,0,.25);border:1px solid #e5e7eb}
+.shiftPopupHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.shiftPopupHead b{font-size:16px}
+.shiftPopupClose{box-shadow:none;background:#f3f4f6;border-radius:999px;padding:4px 10px}
+.shiftPopupRow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.shiftPopupBox select,.shiftPopupBox input,.shiftPopupBox textarea{font-size:14px;padding:8px;border-radius:10px}
+.shiftPopupBox textarea{height:52px}
+.shiftCell{cursor:pointer}
+
+
+#popupTestBox.hidden{display:none!important}
+
+.shiftEditPopup{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:2147483647;display:none;align-items:center;justify-content:center}
+.shiftEditPopupBox{background:#fff;border-radius:18px;padding:16px;width:min(360px,92%);box-shadow:0 18px 50px rgba(0,0,0,.25)}
+.shiftEditPopupHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.shiftEditPopupHead b{font-size:18px}
+.shiftEditPopupClose{background:#f3f4f6;color:#111;border:0;border-radius:999px;padding:5px 10px;font-weight:bold;box-shadow:none}
+.shiftEditPopupRow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.shiftEditPopupBox select,.shiftEditPopupBox textarea{width:100%;border:1px solid #e5e7eb;border-radius:10px;padding:9px;font-size:14px;background:#fff}
+.shiftEditPopupBox textarea{height:58px}
+.shiftEditPopupBtn{width:100%;background:#007aff;color:#fff;border:0;border-radius:12px;padding:12px;font-weight:bold;margin-top:10px}
+
+
+.dormEditPopup{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:2147483647;display:none;align-items:center;justify-content:center}
+.dormEditPopupBox{background:#fff;border-radius:18px;padding:16px;width:min(380px,92%);box-shadow:0 18px 50px rgba(0,0,0,.25)}
+.dormEditPopupHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.dormEditPopupHead b{font-size:18px}
+.dormEditPopupClose{background:#f3f4f6;color:#111;border:0;border-radius:999px;padding:5px 10px;font-weight:bold;box-shadow:none}
+.dormEditPopupRow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.dormEditPopupBox input,.dormEditPopupBox select,.dormEditPopupBox textarea{width:100%;border:1px solid #e5e7eb;border-radius:10px;padding:9px;font-size:14px;background:#fff}
+.dormEditPopupBox textarea{height:52px}
+.dormEditPopupBtn{width:100%;background:#007aff;color:#fff;border:0;border-radius:12px;padding:12px;font-weight:bold;margin-top:10px}
+#dormMonthlyTable td:not(.name){cursor:pointer}
+
+</style>
+</head>
+<body>
+
+
+</div>
+
+<header>
+  <h1>G-SPOT管理システム</h1>
+  <p>出勤・寮・清掃・月間表・AI書き出し</p>
+</header>
+<div class="wrap">
+  <div class="menu simpleMenu">
+<button id="tab_home" class="active" onclick="showPage('home')">ホーム</button>
+<button id="tab_staff" onclick="showPage('staff')">出勤</button>
+<button id="tab_dormHub" onclick="showPage('dormHub')">寮</button>
+<button id="tab_monthlyHub" onclick="showPage('monthlyHub')">月間表</button>
+<button id="tab_ai" onclick="showPage('ai')">AI書き出し</button>
+</div>
+<section id="home" class="page">
+  <div class="card">
+    <h2>ホーム</h2>
+    <div class="stats">
+      <div class="stat"><span>本日出勤</span><b id="statToday">0</b></div>
+      <div class="stat"><span>新人</span><b id="statNewbie">0</b></div>
+      <div class="stat"><span>入居中</span><b id="statOccupied">0</b></div>
+      <div class="stat"><span>空室</span><b id="statVacant">0</b></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <button class="primary" onclick="showPage('staff')">出勤登録</button>
+    
+    <button class="sub" onclick="showPage('dorm')">入寮登録</button>
+    <button class="sub" onclick="showPage('vacancy')">空室確認</button>
+    <button class="good" onclick="showPage('ai')">AI書き出し</button>
+    <button onclick="showPage('backup')">バックアップ</button>
+  </div>
+  <div class="card"><h2>本日の確認</h2><div id="dashboard"></div></div>
+</section>
+
+
+<section id="dormHub" class="page hidden">
+  <div class="card">
+    <h2>寮</h2>
+    <div class="grid2">
+      <button class="primary" onclick="showPage('dorm')">寮管理</button>
+      <button class="sub" onclick="showPage('vacancy')">空室</button>
+      <button class="sub" onclick="showPage('master')">寮設定</button>
+      <button onclick="showPage('home')">ホームへ戻る</button>
+    </div>
+  </div>
+</section>
+
+<section id="monthlyHub" class="page hidden">
+  <div class="card">
+    <h2>月間表</h2>
+    <div class="grid2">
+      <button class="primary" onclick="showPage('monthly')">月間表を見る</button>
+      
+      <button onclick="showPage('home')">ホームへ戻る</button>
+    </div>
+  </div>
+</section>
+
+<section id="staff" class="page hidden">
+ <div class="card"><h2>出勤登録</h2>
+  <div class="row"><div><label>源氏名</label><input id="name" placeholder="例：いずな"></div><div><label>新人</label><select id="newbie"><option value="0">通常</option><option value="1">新人</option></select></div></div>
+  <div class="row"><div><label>開始日</label><input id="start" type="date"></div><div><label>終了日</label><input id="end" type="date"></div></div>
+  <div class="row"><div><label>出勤開始</label><select id="timeStart"></select></div><div><label>出勤終了</label><select id="timeEnd"></select></div></div>
+  <label>備考</label><textarea id="staffNote" placeholder="出勤に関する備考"></textarea><button class="primary" onclick="addStaff()">登録</button>
+ </div>
+ <div class="card"><h2>出勤一覧</h2><div id="staffList"></div></div>
+</section>
+
+<section id="shiftEdit" class="page hidden">
+ <div class="card"><h2>月間表で編集</h2>
+  <div class="row"><div><label>スタッフ</label><select id="editStaffSelect" onchange="renderShiftEditor()"></select></div><div><label>開始日</label><input id="editBase" type="date" onchange="renderShiftEditor()"></div></div>
+  <div id="shiftEditor"></div>
+ </div>
+</section>
+
+<section id="master" class="page hidden">
+ <div class="card"><h2>寮設定</h2>
+  <div class="row"><div><label>寮名</label><input id="masterDormName" placeholder="例：トキワ"></div><div><label>部屋番号</label><input id="masterRoomNo" placeholder="例：103"></div></div>
+  <button class="primary" onclick="addDormRoomMaster()">追加</button>
+  <h3>一括登録</h3><textarea id="masterImportText" placeholder="トキワ,103&#10;トキワ,106"></textarea><button class="sub" onclick="importMasterText()">一括登録</button>
+ </div>
+ <div class="card"><h2>登録済み</h2><div id="masterList"></div></div>
+</section>
+
+<section id="dorm" class="page hidden">
+ <div class="card"><h2>寮管理</h2>
+  <div class="row"><div><label>寮名</label><select id="dormSelect" onchange="updateRoomSelect()"></select></div><div><label>部屋番号</label><select id="roomSelect"></select></div></div>
+  <div class="row"><div><label>名前</label><input id="residentName" placeholder="例：いずな"></div><div><label>状態</label><select id="roomStatus"><option>入寮中</option><option>空室</option><option>予約</option></select></div></div>
+  <div class="row3"><div><label>入寮日</label><input id="moveIn" type="date"></div><div><label>退寮日</label><input id="moveOut" type="date"></div><div><label>清掃日</label><input id="cleanDate" type="date"></div></div>
+  <div class="row"><div><label>清掃状態</label><select id="cleanStatus"><option>未清掃</option><option>清掃予定</option><option>清掃済み</option></select></div><div><label>清掃済み日</label><input id="cleanDoneDate" type="date"></div></div>
+  <label>備考</label><textarea id="dormNote" placeholder="寮・清掃に関する備考"></textarea><button class="primary" onclick="addDorm()">登録</button>
+ </div>
+ <div class="card"><h2>寮一覧</h2><div id="dormList"></div></div>
+</section>
+
+<section id="vacancy" class="page hidden">
+ <div class="card"><h2>空室ダッシュボード</h2><div id="vacancyList"></div></div>
+</section>
+
+<section id="monthly" class="page hidden">
+ <div class="card"><h2 id="monthTitle">月間出勤</h2>
+  <div class="row"><div><label>表示開始日</label><input id="monthBase" type="date" onchange="renderMonthly();renderDormMonthly();"></div><div><label>表示日数</label><select id="daysCount" onchange="renderMonthly();renderDormMonthly();"><option>31</option><option>30</option><option>14</option><option>7</option></select></div></div>
+  <p class="note">月間表のセルをタップすると編集できます。</p><p class="note">表示順：次回出勤が近い順 → 期間終了が近い順 → 出勤時間が早い順</p><p class="note">月間表のセルをタップすると編集できます。</p><div class="tableWrap" id="monthlyTable"></div>
+ </div>
+ <div class="card"><h2>寮 月間表</h2><div class="tableWrap" id="dormMonthlyTable"></div></div>
+</section>
+
+<section id="ai" class="page hidden">
+ <div class="card"><h2>AI書き出し</h2>
+  <div class="row"><div><label>更新日</label><input id="updateDate" type="date"></div><div><label>日数</label><select id="exportDays"><option>31</option><option>30</option><option>14</option><option>7</option></select></div></div>
+  <div class="row"><button class="primary" onclick="generateText()">作成</button><button class="good" onclick="copyText()">コピー</button></div>
+  <button class="sub" onclick="sendLine()">LINEで送る</button>
+  <textarea id="output"></textarea>
+ </div>
+</section>
+
+<section id="backup" class="page hidden">
+ <div class="card"><h2>バックアップ</h2>
+  <button class="good" onclick="exportBackup()">バックアップ作成</button>
+  <label>復元</label><input type="file" accept=".json" onchange="importBackup(event)">
+  <button class="sub" onclick="showStorageInfo()">保存状態</button>
+  <textarea id="storageInfo"></textarea>
+ </div>
+</section>
+
+</div>
+
+<div id="modal" class="modal hidden">
+  <div class="modalBox">
+    <h2 id="modalTitle">寮編集</h2>
+    <input type="hidden" id="modalDormId">
+    <div class="row">
+      <div><label>寮名</label><select id="modalDormName" onchange="updateModalRoomSelect()"></select></div>
+      <div><label>部屋番号</label><select id="modalRoomNo"></select></div>
+    </div>
+    <div class="row">
+      <div><label>名前</label><input id="modalResident"></div>
+      <div><label>状態</label><select id="modalStatus"><option>入寮中</option><option>空室</option><option>予約</option></select></div>
+    </div>
+    <div class="row3">
+      <div><label>入寮日</label><input id="modalMoveIn" type="date"></div>
+      <div><label>退寮日</label><input id="modalMoveOut" type="date"></div>
+      <div><label>清掃日</label><input id="modalCleanDate" type="date"></div>
+    </div>
+    <div class="row">
+      <div><label>清掃状態</label><select id="modalCleanStatus"><option>未清掃</option><option>清掃予定</option><option>清掃済み</option></select></div>
+      <div><label>清掃済み日</label><input id="modalCleanDoneDate" type="date"></div>
+    </div>
+    <label>備考</label><textarea id="modalNote"></textarea>
+    <div class="row3">
+      <button class="primary" onclick="saveDormModal()">保存</button>
+      <button class="danger" onclick="deleteDormModal()">削除</button>
+      <button onclick="closeModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
 <script>
-const wds=['日','月','火','水','木','金','土'];function el(id){return document.getElementById(id)}function pad(n){return String(n).padStart(2,'0')}function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}function today(){return ymd(new Date())}function parseDate(s){let a=String(s||today()).split('-');return new Date(+a[0],+a[1]-1,+a[2])}function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}function get(id){return el(id)?.value.trim()||''}function loadFirst(keys){for(let k of keys){try{let raw=localStorage.getItem(k);if(raw){let v=JSON.parse(raw);if(Array.isArray(v))return v}}catch(e){}}return []}
-let staff=loadFirst(['newAppStaffV1','staffDataStable','staffDataUnifiedV1','managementAppDataV4','staffData']);let dorms=loadFirst(['newAppDormV1','dormDataStable','dormDataUnifiedV1','dormDataV1','ryokanDormDataV1','dormData']);let dormMaster=loadFirst(['dormMasterV1','roomMasterV1']);
-function save(){localStorage.setItem('newAppStaffV1',JSON.stringify(staff));localStorage.setItem('newAppDormV1',JSON.stringify(dorms));localStorage.setItem('dormMasterV1',JSON.stringify(dormMaster));renderStats()}function dateClass(d){return d.getDay()==0?'sun':d.getDay()==6?'sat':''}function diffHours(a,b){if(!a||!b)return 0;let A=a.split(':'),B=b.split(':'),s=+A[0]*60+(+A[1]||0),e=+B[0]*60+(+B[1]||0);if(e<s)e+=1440;return Math.max(0,(e-s)/60)}function makeTimeOptions(sel,val){if(!sel)return;sel.innerHTML='';for(let h=0;h<24;h++){for(let m of ['00','30']){let v=pad(h)+':'+m,o=document.createElement('option');o.value=v;o.textContent=(+h)+':'+m;sel.appendChild(o)}}sel.value=val||'10:00'}
-function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));el(id).classList.remove('hidden');let tab=el('tab_'+id);if(tab)tab.classList.add('active');if(id==='staff')renderStaff();if(id==='dorm'){syncMasterFromDorms();updateDormSelect();renderDorm();renderMaster();renderVacancy()}if(id==='monthly'){renderMonthly();renderDormMonthly()}if(id==='backup')renderProfileLists();renderStats();renderDashboard()}
-function addStaff(){let name=get('name');if(!name)return alert('源氏名を入力してください');staff.push({id:Date.now(),name,newbie:el('newbie').value==='1',start:get('start'),end:get('end'),timeStart:get('timeStart'),timeEnd:get('timeEnd'),note:get('staffNote')});['name','staffNote'].forEach(i=>el(i).value='');save();renderStaff()}function delStaff(id){if(confirm('削除しますか？')){staff=staff.filter(x=>String(x.id)!==String(id));save();renderStaff();renderMonthly()}}function renderStaff(){el('staffList').innerHTML=staff.length?staff.map(x=>`<div class="item"><b>${esc(x.name)} ${x.newbie?'🆕':''}</b><p class="note">${esc(x.start)}〜${esc(x.end)} / ${esc(x.timeStart)}-${esc(x.timeEnd)} ${x.note?'/ '+esc(x.note):''}</p><button class="danger" onclick="delStaff('${x.id}')">削除</button></div>`).join(''):'<p class="note">まだ登録がありません</p>'}function isWork(p,ds){return p.start&&p.end&&ds>=p.start&&ds<=p.end}
-function renderMonthly(){let base=parseDate(get('monthBase')||today()),days=+get('daysCount')||31;el('monthTitle').textContent=(base.getMonth()+1)+'月出勤';let h='<table><thead><tr><th class="name">源氏名</th>';for(let i=0;i<days;i++){let d=new Date(base);d.setDate(base.getDate()+i);h+=`<th class="${dateClass(d)}">${d.getDate()}<br>${wds[d.getDay()]}</th>`}h+='</tr></thead><tbody>';staff.forEach(p=>{h+=`<tr><td class="name">${esc(p.name)}${p.newbie?' 🆕':''}</td>`;for(let i=0;i<days;i++){let d=new Date(base);d.setDate(base.getDate()+i);let ds=ymd(d),cls=dateClass(d);if(isWork(p,ds)){let hrs=diffHours(p.timeStart,p.timeEnd);h+=`<td class="${cls} ${hrs<=7?'short':'work'}">${esc(p.timeStart)}-${esc(p.timeEnd)}</td>`}else h+=`<td class="${cls}">休</td>`}h+='</tr>'});h+='</tbody></table>';el('monthlyTable').innerHTML=h}
-function syncMasterFromDorms(){dorms.forEach(r=>{if(r.dormName&&r.roomNo&&!dormMaster.some(m=>m.dormName===r.dormName&&m.roomNo===r.roomNo))dormMaster.push({id:Date.now()+Math.random(),dormName:r.dormName,roomNo:r.roomNo})});save()}function addDormRoomMaster(){let dormName=get('masterDormName'),roomNo=get('masterRoomNo');if(!dormName||!roomNo)return alert('寮名と部屋番号を入力してください');if(!dormMaster.some(x=>x.dormName===dormName&&x.roomNo===roomNo))dormMaster.push({id:Date.now(),dormName,roomNo});el('masterDormName').value='';el('masterRoomNo').value='';save();updateDormSelect();renderMaster()}function importMasterText(){let arr=get('masterImportText').split(/\n+/).map(x=>x.trim()).filter(Boolean);arr.forEach(line=>{let [d,r]=line.split(/[，,\t ]+/);if(d&&r&&!dormMaster.some(x=>x.dormName===d&&x.roomNo===r))dormMaster.push({id:Date.now()+Math.random(),dormName:d,roomNo:r})});el('masterImportText').value='';save();updateDormSelect();renderMaster()}function delMaster(id){dormMaster=dormMaster.filter(x=>String(x.id)!==String(id));save();updateDormSelect();renderMaster();renderVacancy()}
-function updateDormSelect(){let ds=[...new Set(dormMaster.map(x=>x.dormName).filter(Boolean))];if(!ds.length){dormMaster=['101','102','103','104','105','201','202','203','204','205'].map((r,i)=>({id:Date.now()+i,dormName:'寮',roomNo:r}));ds=['寮'];save()}el('dormSelect').innerHTML=ds.map(d=>`<option>${esc(d)}</option>`).join('');updateRoomSelect()}function updateRoomSelect(){let d=get('dormSelect');let rooms=dormMaster.filter(x=>x.dormName===d).map(x=>x.roomNo);el('roomSelect').innerHTML=rooms.map(r=>`<option>${esc(r)}</option>`).join('')}function addDorm(){let dormName=get('dormSelect'),roomNo=get('roomSelect'),residentName=get('residentName');if(!dormName||!roomNo)return alert('寮名と部屋番号を入力してください');dorms.push({id:Date.now(),dormName,roomNo,residentName,status:get('roomStatus')||'入寮中',moveIn:get('moveIn'),moveOut:get('moveOut'),cleanDate:get('cleanDate'),cleanStatus:get('cleanStatus'),cleanDoneDate:get('cleanDoneDate'),note:get('dormNote')});['residentName','dormNote'].forEach(i=>el(i).value='');save();renderDorm();renderVacancy();renderDormMonthly()}
-function delDorm(id){if(confirm('削除しますか？')){dorms=dorms.filter(x=>String(x.id)!==String(id));save();renderDorm();renderVacancy();renderDormMonthly()}}function renderDorm(){el('dormList').innerHTML=dorms.length?dorms.map(r=>`<div class="item"><b>${esc(r.dormName)} ${esc(r.roomNo)}　${esc(r.residentName||'')}</b><p class="note">${esc(r.status)} / 入:${esc(r.moveIn)} 退:${esc(r.moveOut)} 清:${esc(r.cleanDate)} ${r.cleanStatus?' / '+esc(r.cleanStatus):''}</p><div class="grid2"><button class="sub" onclick="openDormModal('${r.id}')">編集</button><button class="danger" onclick="delDorm('${r.id}')">削除</button></div></div>`).join(''):'<p class="note">まだ登録がありません</p>'}
-function renderMaster(){el('masterList').innerHTML=dormMaster.length?dormMaster.map(x=>`<div class="item"><b>${esc(x.dormName)} ${esc(x.roomNo)}</b><button class="danger" onclick="delMaster('${x.id}')">削除</button></div>`).join(''):'<p class="note">寮設定がありません</p>'}function occupiedRecord(room,ds){return dorms.find(r=>r.dormName===room.dormName&&r.roomNo===room.roomNo&&r.status!=='空室'&&((r.moveIn&&r.moveOut&&ds>=r.moveIn&&ds<=r.moveOut)||(r.moveIn&&!r.moveOut&&ds>=r.moveIn)||(!r.moveIn&&r.status==='入寮中')))}function renderVacancy(){let ds=today();el('vacancyList').innerHTML=dormMaster.map(room=>{let o=occupiedRecord(room,ds);return `<div class="item"><b>${esc(room.dormName)} ${esc(room.roomNo)}</b> <span class="badge ${o?'ok':'info'}">${o?'入居中':'空室'}</span><p class="note">${o?esc(o.residentName||'名前未入力'):'本日空室'}</p></div>`}).join('')||'<p class="note">部屋設定がありません</p>'}
-function renderDormMonthly(){let base=parseDate(get('monthBase')||today()),days=+get('daysCount')||31;let rooms=[...dormMaster].sort((a,b)=>(a.dormName+a.roomNo).localeCompare(b.dormName+b.roomNo,'ja'));let h='<table><thead><tr><th class="name">寮/部屋</th>';for(let i=0;i<days;i++){let d=new Date(base);d.setDate(base.getDate()+i);h+=`<th class="${dateClass(d)}">${d.getDate()}<br>${wds[d.getDay()]}</th>`}h+='</tr></thead><tbody>';rooms.forEach(room=>{h+=`<tr><td class="name">${esc(room.dormName)} ${esc(room.roomNo)}</td>`;for(let i=0;i<days;i++){let d=new Date(base);d.setDate(base.getDate()+i);let ds=ymd(d),cls=dateClass(d),txt='空',add='vacant';let rec=occupiedRecord(room,ds);if(rec){txt=esc(rec.residentName||'入居');add='occupied'}let events=dorms.filter(r=>r.dormName===room.dormName&&r.roomNo===room.roomNo);let marks=[];events.forEach(r=>{if(r.moveIn===ds)marks.push('入');if(r.moveOut===ds)marks.push('退');if(r.cleanDate===ds)marks.push('清')});if(marks.length){txt=(rec?txt+' ':'')+marks.join('/');add=marks.includes('退')?'outcell':marks.includes('清')?'clean':'in'}h+=`<td class="${cls} ${add}">${txt}</td>`}h+='</tr>'});h+='</tbody></table>';el('dormMonthlyTable').innerHTML=h}
-function openDormModal(id){let r=dorms.find(x=>String(x.id)===String(id));if(!r)return;el('modalDormId').value=r.id;el('modalDormName').value=r.dormName||'';el('modalRoomNo').value=r.roomNo||'';el('modalResident').value=r.residentName||'';el('modalStatus').value=r.status||'入寮中';el('modalMoveIn').value=r.moveIn||'';el('modalMoveOut').value=r.moveOut||'';el('modalCleanDate').value=r.cleanDate||'';el('modalCleanStatus').value=r.cleanStatus||'未清掃';el('modalCleanDoneDate').value=r.cleanDoneDate||'';el('modalNote').value=r.note||'';el('modal').classList.remove('hidden')}function closeModal(){el('modal').classList.add('hidden')}function saveDormModal(){let r=dorms.find(x=>String(x.id)===String(el('modalDormId').value));if(!r)return;Object.assign(r,{dormName:get('modalDormName'),roomNo:get('modalRoomNo'),residentName:get('modalResident'),status:get('modalStatus'),moveIn:get('modalMoveIn'),moveOut:get('modalMoveOut'),cleanDate:get('modalCleanDate'),cleanStatus:get('modalCleanStatus'),cleanDoneDate:get('modalCleanDoneDate'),note:get('modalNote')});save();closeModal();syncMasterFromDorms();renderDorm();renderVacancy();renderDormMonthly()}function deleteDormModal(){delDorm(el('modalDormId').value);closeModal()}
-function todaysCount(){let ds=today();return staff.filter(p=>isWork(p,ds)).length}function renderStats(){if(!el('statStaff'))return;let ds=today();let occ=0,vac=0;dormMaster.forEach(room=>occupiedRecord(room,ds)?occ++:vac++);el('statStaff').textContent=staff.length;el('statToday').textContent=todaysCount();el('statOccupied').textContent=occ;el('statVacant').textContent=vac;el('statLearn').textContent=profileDb.learn.length}function renderDashboard(){let ds=today(),out=[];let inToday=dorms.filter(r=>r.moveIn===ds),outToday=dorms.filter(r=>r.moveOut===ds),cleanToday=dorms.filter(r=>r.cleanDate===ds);out.push(`<span class="badge ok">本日出勤 ${todaysCount()}名</span><span class="badge info">入寮 ${inToday.length}件</span><span class="badge warn">退寮 ${outToday.length}件</span><span class="badge ng">清掃 ${cleanToday.length}件</span>`);el('dashboard').innerHTML=out.join('')}
-function generateText(){let base=parseDate(get('updateDate')||today()),days=+get('exportDays')||31,out='【出勤・寮 情報】\n';for(let i=0;i<days;i++){let d=new Date(base);d.setDate(base.getDate()+i);let ds=ymd(d),arr=staff.filter(p=>isWork(p,ds)),ins=dorms.filter(r=>r.moveIn===ds),outs=dorms.filter(r=>r.moveOut===ds),cls=dorms.filter(r=>r.cleanDate===ds);if(arr.length||ins.length||outs.length||cls.length){out+=`\n${d.getMonth()+1}/${d.getDate()}(${wds[d.getDay()]})\n`;if(arr.length){out+='■出勤\n';arr.forEach(p=>out+=`${p.newbie?'✨':''}${p.name} ${p.timeStart}-${p.timeEnd}\n`)}if(ins.length){out+='■入寮予定\n';ins.forEach(r=>out+=`${r.dormName} ${r.roomNo} ${r.residentName||''}\n`)}if(outs.length){out+='■退寮予定\n';outs.forEach(r=>out+=`${r.dormName} ${r.roomNo} ${r.residentName||''}\n`)}if(cls.length){out+='■清掃予定\n';cls.forEach(r=>out+=`${r.dormName} ${r.roomNo} ${r.residentName||''}\n`)}}}el('output').value=out.trim()}function sendLine(){generateText();location.href='https://line.me/R/msg/text/?'+encodeURIComponent(el('output').value)}function copyId(id){navigator.clipboard.writeText(el(id).value||'');alert('コピーしました')}
-function exportBackup(){let blob=new Blob([JSON.stringify({staff,dorms,dormMaster,profileDb,createdAt:new Date().toISOString()},null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='gspot_full_backup.json';a.click()}function importBackup(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(Array.isArray(d.staff))staff=d.staff;if(Array.isArray(d.dorms))dorms=d.dorms;if(Array.isArray(d.dormMaster))dormMaster=d.dormMaster;if(d.profileDb)profileDb=Object.assign(profileDb,d.profileDb);save();saveProfile();alert('復元しました');location.reload()}catch(err){alert('復元できませんでした')}};r.readAsText(f)}function showStorageInfo(){el('storageInfo').value=JSON.stringify({staff:staff.length,dorms:dorms.length,dormMaster:dormMaster.length,profileLearn:profileDb.learn.length,keys:Object.keys(localStorage)},null,2)}
-const PKEY='gspot_ai_profile_v64';let profileDb={learn:[],saved:[],ng:['まさに','禁断の果実','同じような文章'],openers:['ふっと目が合った瞬間、心を奪われるような存在感。','上品さと愛らしさを兼ね備えた注目の美女。','柔らかな雰囲気の奥に、確かな色気を感じさせる彼女。','初対面でも自然と惹き込まれる、印象的な笑顔の持ち主。'],closers:['ぜひ一度、その魅力を直接お確かめください。','ご予約はお早めに。きっと忘れられない時間になるはずです。','特別なひと時を、ぜひ彼女とお過ごしください。','今後の人気上昇が期待される注目の存在です。']};function loadProfile(){try{profileDb=Object.assign(profileDb,JSON.parse(localStorage.getItem(PKEY)||'{}'))}catch(e){};renderProfileForm()}function saveProfile(){localStorage.setItem(PKEY,JSON.stringify(profileDb));renderProfileForm();renderStats()}function lines(s){return String(s||'').split(/\n+/).map(x=>x.trim()).filter(Boolean)}function pick(a){return a[Math.floor(Math.random()*a.length)]||''}function previewPhoto(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{el('photoPreview').src=r.result;el('photoPreview').style.display='block'};r.readAsDataURL(f)}function sim(a,b){let A=new Set(String(a).split(/\W+/)),B=new Set(String(b).split(/\W+/));let hit=0;A.forEach(x=>{if(B.has(x))hit++});return A.size?Math.round(hit/Math.max(A.size,B.size)*100):0}function refPhrase(type){let arr=profileDb.learn.filter(x=>x.type===type).sort((a,b)=>b.rate-a.rate);if(!arr.length)arr=profileDb.learn.sort((a,b)=>b.rate-a.rate);if(!arr.length)return '';return pick(arr[0].text.split(/[。\n]/).filter(x=>x.length>15&&x.length<80))}function generateProfile(){let name=get('pName')||'〇〇',age=get('pAge'),type=get('pType'),size=[get('pTall')?'T'+get('pTall'):'',get('pBust')?'B'+get('pBust'):'',get('pWh')?'W/H'+get('pWh'):''].filter(Boolean).join('｜'),tags=get('pTags')||type,job=get('pJob'),memo=get('pMemo')||'自然体で接しやすく、初めての方でも安心してお過ごしいただける雰囲気です。',ref=refPhrase(type);let text=`${type==='新人速報'?'✦✧ G-SPOT土浦店 新人速報 ✧✦\n\n':''}${pick(profileDb.openers)}\n\n【${name}】さん${age?'／'+age+'歳':''}のご紹介です。\n${size?size+'\n\n':''}${tags}という言葉がよく似合う、印象に残る女性です。\n\n${memo}\n\n${job?'前職は'+job+'。その経験から感じられる落ち着きや気配りも、彼女ならではの魅力です。\n\n':''}${ref?'参考にしたい余韻として「'+ref+'」のような魅力も感じさせます。\n\n':''}見た目の美しさだけでなく、会話のしやすさや距離感の近さも魅力。\n一緒に過ごすほどに、また会いたくなる存在感があります。\n\n${pick(profileDb.closers)}`;el('result').value=text;checkProfile(text)}function checkProfile(text){let max=0;profileDb.saved.concat(profileDb.learn).forEach(x=>max=Math.max(max,sim(text,x.text||'')));let ng=profileDb.ng.filter(w=>text.includes(w));el('checkBadges').innerHTML=`<span class="badge ${max>=45?'ng':max>=30?'warn':'ok'}">類似度 ${max}%</span><span class="badge ${ng.length?'ng':'ok'}">NG ${ng.length}件</span>`}function saveProfileResult(){let text=get('result');if(!text)return;profileDb.saved.unshift({id:Date.now(),date:new Date().toLocaleString('ja-JP'),name:get('pName'),type:get('pType'),text});saveProfile();alert('保存しました')}function makePrompt(){el('result').value=`G-SPOT土浦店の女の子紹介文を作成。\n条件：同じ出だし・締めを避ける／高級感と色気／下品すぎない／予約したくなる文章。\n\n源氏名：${get('pName')}\n年齢：${get('pAge')}\nサイズ：T${get('pTall')} B${get('pBust')} W/H${get('pWh')}\n前職：${get('pJob')}\nタイプ：${get('pType')}\n雰囲気：${get('pTags')}\nメモ：${get('pMemo')}\n\n参考文体：\n${profileDb.learn.slice(0,3).map(x=>x.text).join('\n---\n')}`}function addLearn(){let text=get('lText');if(!text)return;profileDb.learn.unshift({id:Date.now(),date:new Date().toLocaleString('ja-JP'),type:get('lType'),rate:+get('lRate'),text});el('lText').value='';saveProfile()}function saveParts(){profileDb.ng=lines(el('ngWords').value);profileDb.openers=lines(el('openers').value);profileDb.closers=lines(el('closers').value);saveProfile()}function renderProfileForm(){if(el('ngWords')){el('ngWords').value=profileDb.ng.join('\n');el('openers').value=profileDb.openers.join('\n');el('closers').value=profileDb.closers.join('\n')}renderProfileLists()}function delLearn(id){profileDb.learn=profileDb.learn.filter(x=>String(x.id)!==String(id));saveProfile()}function delSaved(id){profileDb.saved=profileDb.saved.filter(x=>String(x.id)!==String(id));saveProfile()}function renderProfileLists(){if(!el('learnList'))return;el('learnList').innerHTML=profileDb.learn.map(x=>`<div class="item"><b>${esc(x.type)} ★${x.rate}</b><p class="note">${esc(x.date)}</p><p>${esc(x.text).slice(0,180)}</p><button class="danger" onclick="delLearn('${x.id}')">削除</button></div>`).join('')||'<p class="note">まだありません</p>';el('savedList').innerHTML=profileDb.saved.map(x=>`<div class="item"><b>${esc(x.name||x.type)}</b><p class="note">${esc(x.date)}</p><textarea>${esc(x.text)}</textarea><button class="danger" onclick="delSaved('${x.id}')">削除</button></div>`).join('')||'<p class="note">まだありません</p>'}function exportProfileData(){let blob=new Blob([JSON.stringify(profileDb,null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='gspot_profile_backup.json';a.click()}function importProfileData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{profileDb=Object.assign(profileDb,JSON.parse(r.result));saveProfile();alert('復元しました')}catch(err){alert('復元できませんでした')}};r.readAsText(f)}
-function init(){let d=new Date();['start','monthBase','updateDate','moveIn','cleanDate','cleanDoneDate'].forEach(id=>{if(el(id))el(id).value=today()});el('end').value=ymd(new Date(d.getFullYear(),d.getMonth(),d.getDate()+30));makeTimeOptions(el('timeStart'),'10:00');makeTimeOptions(el('timeEnd'),'00:00');loadProfile();syncMasterFromDorms();updateDormSelect();renderStaff();renderDorm();renderMaster();renderVacancy();renderMonthly();renderDormMonthly();renderStats();renderDashboard()}if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}init();
-</script></body></html>
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}))}
+const holidays={"2026-01-01":"元日","2026-01-12":"成人の日","2026-02-11":"建国記念の日","2026-02-23":"天皇誕生日","2026-03-20":"春分の日","2026-04-29":"昭和の日","2026-05-03":"憲法記念日","2026-05-04":"みどりの日","2026-05-05":"こどもの日","2026-05-06":"振替休日","2026-07-20":"海の日","2026-08-11":"山の日","2026-09-21":"敬老の日","2026-09-22":"国民の休日","2026-09-23":"秋分の日","2026-10-12":"スポーツの日","2026-11-03":"文化の日","2026-11-23":"勤労感謝の日"};
+const wds=["日","月","火","水","木","金","土"];
+function el(id){return document.getElementById(id)}
+function pad(n){return String(n).padStart(2,"0")}
+function ymd(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
+function md(d){return (d.getMonth()+1)+"/"+d.getDate()}
+function today(){return ymd(new Date())}
+function parseDate(s){let a=s.split("-");return new Date(+a[0],+a[1]-1,+a[2])}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
+function loadFirst(keys){for(let k of keys){try{let raw=localStorage.getItem(k);if(raw){let v=JSON.parse(raw);if(Array.isArray(v)&&v.length)return v}}catch(e){}}return []}
+let staff=loadFirst(["newAppStaffV1","staffDataStable","staffDataUnifiedV1","managementAppDataV4","staffData"]);
+let dorms=loadFirst(["newAppDormV1","dormDataStable","dormDataUnifiedV1","dormDataV1","ryokanDormDataV1","dormData"]);
+let dormMaster=loadFirst(["dormMasterV1","roomMasterV1"]);
+
+function backupBeforeUpdateOnce(){
+  try{
+    if(!localStorage.getItem("backup_before_update")){
+      localStorage.setItem("backup_before_update", JSON.stringify({
+        staff: staff,
+        dorms: dorms,
+        dormMaster: dormMaster,
+        createdAt: new Date().toISOString(),
+        version: "before_ver36"
+      }));
+    }
+  }catch(e){}
+}
+
+function save(){localStorage.setItem("newAppStaffV1",JSON.stringify(staff));localStorage.setItem("newAppDormV1",JSON.stringify(dorms));localStorage.setItem("dormMasterV1",JSON.stringify(dormMaster));renderStats()}
+function dateClass(d){let s=ymd(d);if(holidays[s])return"holiday";if(d.getDay()==0)return"sun";if(d.getDay()==6)return"sat";return""}
+function diffHours(a,b){if(!a||!b)return 0;let A=a.split(":"),B=b.split(":");let s=+A[0]*60+(+A[1]||0),e=+B[0]*60+(+B[1]||0);if(e<s)e+=1440;return Math.max(0,(e-s)/60)}
+function point(h){if(h<=0)return 0;if(h<=7)return .5;return 1}
+function fmt(n){return Number.isInteger(n)?String(n):n.toFixed(1)}
+function shortTime(t){if(!t)return"";let [h,m]=t.split(":");h=String(+h);return (m||"00")==="00"?h:h+":"+m}
+function shortRange(a,b){return shortTime(a)+"-"+shortTime(b)}
+function makeTimeOptions(sel,val){if(!sel)return;sel.innerHTML="";for(let h=0;h<24;h++){for(let m of ["00","30"]){let v=pad(h)+":"+m;let o=document.createElement("option");o.value=v;o.textContent=shortTime(v);sel.appendChild(o)}}if(val)sel.value=val}
+function showPage(id){document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));document.querySelectorAll(".menu button").forEach(b=>b.classList.remove("active"));el(id).classList.remove("hidden");el("tab_"+id).classList.add("active");if(id==="staff")renderStaff();if(id==="shiftEdit")renderShiftEditor();if(id==="master")renderMaster();if(id==="dorm"){syncMasterFromDorms();renderDorm();updateRoomSelect();updateDormSelect()}if(id==="vacancy")renderVacancy();if(id==="monthly"){renderMonthly();renderDormMonthly()}if(id==="ai"&&!el("updateDate").value)el("updateDate").value=today();renderStats();renderDashboard()}
+function init(){backupBeforeUpdateOnce();let d=new Date();["start","monthBase","editBase","updateDate","moveIn","cleanDate","cleanDoneDate"].forEach(id=>{if(el(id))el(id).value=today()});el("end").value=ymd(new Date(d.getFullYear(),d.getMonth(),d.getDate()+30));makeTimeOptions(el("timeStart"),"10:00");makeTimeOptions(el("timeEnd"),"00:00");syncMasterFromDorms();renderEditStaffSelect();renderStaff();renderMaster();renderDorm();renderMonthly();renderDormMonthly();updateDormSelect();renderStats();renderDashboard()}
+function occupiedRecord(room,ds){return dorms.find(r=>r.dormName===room.dormName&&r.roomNo===room.roomNo&&r.status!=="空室"&&((r.moveIn&&r.moveOut&&ds>=r.moveIn&&ds<=r.moveOut)||(r.moveIn&&!r.moveOut&&ds>=r.moveIn)||(!r.moveIn&&r.status==="入寮中")))}
+function renderStats(){let ds=today();let occ=0,vac=0;syncMasterFromDorms(false);for(let room of dormMaster){occupiedRecord(room,ds)?occ++:vac++}el("statToday").textContent=totals(ds).real;el("statNewbie").textContent=staff.filter(x=>x.newbie).length;el("statOccupied").textContent=occ;el("statVacant").textContent=vac}
+function exportBackup(){let backup={staff,dorms,dormMaster,createdAt:new Date().toISOString()};let blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="gspot_backup.json";a.click();URL.revokeObjectURL(a.href)}
+function importBackup(ev){let file=ev.target.files[0];if(!file)return;let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(Array.isArray(d.staff))staff=d.staff;if(Array.isArray(d.dorms))dorms=d.dorms;if(Array.isArray(d.dormMaster))dormMaster=d.dormMaster;save();
+function openShiftPopupByName(name,ds){
+  var p=monthFindStaff(name,ds);
+  if(p)openShiftPopup(p.id,ds);
+}
+function openShiftPopup(id,ds){
+  var p=staff.find(function(x){return String(x.id)===String(id);});
+  if(!p)return;
+  if(!p.overrides)p.overrides={};
+  var ov=p.overrides[ds]||{};
+  el("shiftPopupStaffId").value=p.id;
+  el("shiftPopupDate").value=ds;
+  el("shiftPopupDateView").value=ds;
+  var d=parseDate(ds);
+  el("shiftPopupTitle").textContent=md(d)+"（"+wds[d.getDay()]+"）";
+  makeTimeOptions(el("shiftPopupStart"),ov.timeStart||p.timeStart||"10:00");
+  makeTimeOptions(el("shiftPopupEnd"),ov.timeEnd||p.timeEnd||"00:00");
+  el("shiftPopupOff").checked=!!ov.off;
+  el("shiftPopupNote").value=ov.note||"";
+  el("shiftPopup").classList.remove("hidden");
+}
+function changeShiftPopupDate(){
+  openShiftPopup(el("shiftPopupStaffId").value,el("shiftPopupDateView").value);
+}
+function saveShiftPopup(){
+  var p=staff.find(function(x){return String(x.id)===String(el("shiftPopupStaffId").value);});
+  var ds=el("shiftPopupDate").value;
+  if(!p||!ds)return;
+  if(!p.overrides)p.overrides={};
+  p.overrides[ds]={
+    timeStart:el("shiftPopupStart").value,
+    timeEnd:el("shiftPopupEnd").value,
+    off:el("shiftPopupOff").checked,
+    note:el("shiftPopupNote").value||""
+  };
+  save();
+  closeShiftPopup();
+  renderMonthly();
+  if(typeof renderStats==="function")renderStats();
+}
+function clearShiftPopup(){
+  var p=staff.find(function(x){return String(x.id)===String(el("shiftPopupStaffId").value);});
+  var ds=el("shiftPopupDate").value;
+  if(p&&p.overrides&&p.overrides[ds])delete p.overrides[ds];
+  save();
+  closeShiftPopup();
+  renderMonthly();
+  if(typeof renderStats==="function")renderStats();
+}
+function closeShiftPopup(){el("shiftPopup").classList.add("hidden");}
+function bindShiftCellClick(){
+  document.addEventListener("click",function(e){
+    var cell=e.target.closest(".jsShiftCell");
+    if(!cell)return;
+    var ds=cell.getAttribute("data-date");
+    var sid=cell.getAttribute("data-staffid");
+    var cast=cell.getAttribute("data-cast");
+    if(sid){openShiftPopup(sid,ds);}
+    else{openShiftPopupByName(cast,ds);}
+  });
+}
+
+bindShiftCellClick();
+
+function openPopupTest(info){
+  var box=document.getElementById("popupTestBox");
+  var txt=document.getElementById("popupTestText");
+  if(txt)txt.textContent=info || "クリック反応あり";
+  if(box)box.classList.remove("hidden");
+}
+function closePopupTest(){
+  var box=document.getElementById("popupTestBox");
+  if(box)box.classList.add("hidden");
+}
+function bindPopupTestOnce(){
+  if(window.__popupTestBound)return;
+  window.__popupTestBound=true;
+  document.addEventListener("click",function(e){
+    var cell=e.target.closest("td.shiftCell");
+    if(!cell)return;
+    var text=(cell.textContent||"").trim();
+    openPopupTest("セルクリック反応あり： " + text);
+  },true);
+}
+
+bindPopupTestOnce();
+
+function openPopupTest(info){
+  var box=document.getElementById("popupTestBox");
+  var txt=document.getElementById("popupTestText");
+  if(txt){txt.textContent=info||"クリック反応あり";}
+  if(box){box.classList.remove("hidden");box.style.display="flex";}
+  else{alert(info||"クリック反応あり");}
+}
+function closePopupTest(){
+  var box=document.getElementById("popupTestBox");
+  if(box){box.classList.add("hidden");box.style.display="none";}
+}
+
+init();alert("復元しました")}catch(e){alert("復元できませんでした")}};r.readAsText(file)}
+function showStorageInfo(){el("storageInfo").value=JSON.stringify({staff:staff.length,dorms:dorms.length,dormMaster:dormMaster.length,keys:Object.keys(localStorage)},null,2)}
+function addStaff(){let name=el("name").value.trim();if(!name)return alert("源氏名を入力してください");staff.push({id:Date.now(),name,newbie:el("newbie").value==="1",start:el("start").value,end:el("end").value,timeStart:el("timeStart").value,timeEnd:el("timeEnd").value,note:el("staffNote").value,overrides:{}});el("name").value="";if(el("staffNote"))el("staffNote").value="";save();renderStaff();renderMonthly();renderEditStaffSelect()}
+function renderStaff(){let box=el("staffList");box.innerHTML=staff.length?"":"<p class='note'>登録なし</p>";staff.forEach(p=>{let div=document.createElement("div");div.className="item";div.innerHTML=`<b>${esc(p.name)}</b>${p.newbie?"<span class='badge new'>新人</span>":""}<div class='note'>${p.start}〜${p.end} / ${shortRange(p.timeStart,p.timeEnd)}</div>${p.note?`<div class="note">備考：${esc(p.note)}</div>`:""}<div class='row3'><button class='sub' onclick='openStaffMonth(${p.id})'>月間表で編集</button><button onclick='toggleNewbie(${p.id})'>新人切替</button><button class='danger' onclick='removeStaff(${p.id})'>削除</button></div>`;box.appendChild(div)})}
+function openStaffMonth(id){showPage("shiftEdit");el("editStaffSelect").value=String(id);renderShiftEditor()}
+function toggleNewbie(id){let p=staff.find(x=>x.id===id);if(p){p.newbie=!p.newbie;save();renderStaff();renderMonthly()}}
+function removeStaff(id){if(confirm("削除しますか？")){staff=staff.filter(x=>x.id!==id);save();renderStaff();renderMonthly();renderEditStaffSelect()}}
+function workFor(p,ds){if(ds<p.start||ds>p.end)return null;let ov=(p.overrides||{})[ds];if(ov&&ov.off)return null;let st=ov&&ov.timeStart?ov.timeStart:p.timeStart;let en=ov&&ov.timeEnd?ov.timeEnd:p.timeEnd;let h=diffHours(st,en);if(h<=0)return null;return{hours:h,point:point(h),timeStart:st,timeEnd:en}}
+function totals(ds){let real=0,calc=0,newbies=[];for(let p of staff){let w=workFor(p,ds);if(w){real++;calc+=w.point;if(p.newbie)newbies.push(p.name)}}return{real,calc,newbies}}
+function renderEditStaffSelect(){let s=el("editStaffSelect");if(!s)return;s.innerHTML="";staff.forEach(p=>{let o=document.createElement("option");o.value=p.id;o.textContent=p.name;s.appendChild(o)})}
+function renderShiftEditor(){renderEditStaffSelect();let box=el("shiftEditor");let p=staff.find(x=>String(x.id)===String(el("editStaffSelect").value));if(!p){box.innerHTML="<p class='note'>スタッフ登録がありません。</p>";return}let base=parseDate(el("editBase").value||today());let h="";for(let i=0;i<31;i++){let d=new Date(base);d.setDate(base.getDate()+i);let ds=ymd(d);let ov=(p.overrides||{})[ds]||{};h+=`<div class='editorRow'><div><b>${d.getMonth()+1}/${d.getDate()}</b><br><span class='note'>${wds[d.getDay()]}</span></div><div><label>開始</label><select id='st_${ds}'></select></div><div><label>終了</label><select id='en_${ds}'></select></div><div><label>休</label><input type='checkbox' id='off_${ds}' ${ov.off?"checked":""} onchange="saveDayShift('${p.id}','${ds}')"></div></div>`}box.innerHTML=h;for(let i=0;i<31;i++){let d=new Date(base);d.setDate(base.getDate()+i);let ds=ymd(d),ov=(p.overrides||{})[ds]||{};makeTimeOptions(el("st_"+ds),ov.timeStart||p.timeStart);makeTimeOptions(el("en_"+ds),ov.timeEnd||p.timeEnd);el("st_"+ds).onchange=()=>saveDayShift(p.id,ds);el("en_"+ds).onchange=()=>saveDayShift(p.id,ds)}}
+function saveDayShift(pid,ds){let p=staff.find(x=>String(x.id)===String(pid));if(!p)return;if(!p.overrides)p.overrides={};p.overrides[ds]={timeStart:el("st_"+ds).value,timeEnd:el("en_"+ds).value,off:el("off_"+ds).checked};save();renderMonthly()}
+function syncMasterFromDorms(doSave=true){for(let r of dorms){if(r.dormName&&r.roomNo&&!dormMaster.some(m=>m.dormName===r.dormName&&m.roomNo===r.roomNo)){dormMaster.push({id:Date.now()+Math.random(),dormName:r.dormName,roomNo:r.roomNo})}}if(doSave)localStorage.setItem("dormMasterV1",JSON.stringify(dormMaster))}
+function addDormRoomMaster(){let dn=el("masterDormName").value.trim(),rn=el("masterRoomNo").value.trim();if(!dn||!rn)return alert("寮名と部屋番号を入力してください");if(dormMaster.some(m=>m.dormName===dn&&m.roomNo===rn))return alert("登録済みです");dormMaster.push({id:Date.now(),dormName:dn,roomNo:rn});el("masterRoomNo").value="";save();renderMaster();updateDormSelect()}
+function renderMaster(){let box=el("masterList");box.innerHTML=dormMaster.length?"":"<p class='note'>登録なし</p>";let g={};dormMaster.forEach(m=>{(g[m.dormName]||(g[m.dormName]=[])).push(m)});Object.keys(g).sort().forEach(dn=>{let div=document.createElement("div");div.className="item";div.innerHTML=`<b>${esc(dn)}</b><div>${g[dn].sort((a,b)=>a.roomNo.localeCompare(b.roomNo,'ja')).map(m=>`<span class='badge info'>${esc(m.roomNo)} <button style='padding:1px 5px;box-shadow:none' onclick='removeMaster(${m.id})'>×</button></span>`).join("")}</div>`;box.appendChild(div)})}
+function removeMaster(id){if(confirm("削除しますか？")){dormMaster=dormMaster.filter(x=>x.id!==id);save();renderMaster();updateDormSelect()}}
+function importMasterText(){let rows=el("masterImportText").value.split(/\n+/).map(x=>x.trim()).filter(Boolean).map(l=>(l.includes("\t")?l.split("\t"):l.split(",")).map(x=>x.trim()));let c=0;for(let r of rows){if(r[0]&&r[1]&&!dormMaster.some(m=>m.dormName===r[0]&&m.roomNo===r[1])){dormMaster.push({id:Date.now()+Math.random(),dormName:r[0],roomNo:r[1]});c++}}save();renderMaster();updateDormSelect();alert(c+"件登録しました")}
+function updateDormSelect(){let ds=el("dormSelect");if(!ds)return;let cur=ds.value;let names=[...new Set(dormMaster.map(m=>m.dormName))].sort();ds.innerHTML=names.length?"":"<option>先に寮設定</option>";names.forEach(n=>{let o=document.createElement("option");o.value=n;o.textContent=n;ds.appendChild(o)});if(names.includes(cur))ds.value=cur;updateRoomSelect()}
+function updateRoomSelect(){let rs=el("roomSelect"),ds=el("dormSelect");if(!rs||!ds)return;let rooms=dormMaster.filter(m=>m.dormName===ds.value).map(m=>m.roomNo).sort((a,b)=>a.localeCompare(b,'ja'));rs.innerHTML="";rooms.forEach(r=>{let o=document.createElement("option");o.value=r;o.textContent=r+"号室";rs.appendChild(o)})}
+function addDorm(){let dn=el("dormSelect").value,rn=el("roomSelect").value;if(!dn||!rn)return alert("寮と部屋を選択してください");dorms.push({id:Date.now(),dormName:dn,roomNo:rn,residentName:el("residentName").value.trim(),status:el("roomStatus").value,moveIn:el("moveIn").value,moveOut:el("moveOut").value,cleanDate:el("cleanDate").value,cleanStatus:el("cleanStatus").value,cleanDoneDate:el("cleanDoneDate").value,note:el("dormNote").value});el("residentName").value="";if(el("dormNote"))el("dormNote").value="";save();renderDorm();renderDormMonthly();renderVacancy()}
+function cleanBadge(r){let st=r.cleanStatus||"未清掃";if(st==="清掃済み")return`<span class='badge ok'>清掃済 ${esc(r.cleanDoneDate||"")}</span>`;if(st==="清掃予定")return`<span class='badge warn'>清掃予定 ${esc(r.cleanDate||"")}</span>`;return"<span class='badge ng'>未清掃</span>"}
+function renderDorm(){let box=el("dormList");box.innerHTML=dorms.length?"":"<p class='note'>登録なし</p>";dorms.sort((a,b)=>(a.dormName+a.roomNo).localeCompare(b.dormName+b.roomNo,'ja')).forEach(r=>{let div=document.createElement("div");div.className="item";div.innerHTML=`<b>${esc(r.dormName)}-${esc(r.roomNo)}</b><span class='badge'>${esc(r.status)}</span>${cleanBadge(r)}<div class='note'>${esc(r.residentName||"-")} / 入:${esc(r.moveIn||"-")} / 退:${esc(r.moveOut||"-")}</div>${r.note?`<div class="note">備考：${esc(r.note)}</div>`:""}<div class='row3'><button class='sub' onclick='openDormModalById(${r.id})'>編集</button><button onclick='markClean(${r.id})'>清掃済</button><button class='danger' onclick='removeDorm(${r.id})'>削除</button></div>`;box.appendChild(div)})}
+function editDorm(id){let r=dorms.find(x=>x.id===id);if(!r)return;r.residentName=prompt("名前",r.residentName)||r.residentName;r.moveIn=prompt("入寮日",r.moveIn)||r.moveIn;r.moveOut=prompt("退寮日",r.moveOut)||r.moveOut;r.cleanDate=prompt("清掃日",r.cleanDate)||r.cleanDate;r.cleanStatus=prompt("清掃状態：未清掃 / 清掃予定 / 清掃済み",r.cleanStatus||"未清掃")||r.cleanStatus;r.cleanDoneDate=prompt("清掃済み日",r.cleanDoneDate||"")||r.cleanDoneDate;save();renderDorm();renderDormMonthly();renderVacancy()}
+function markClean(id){let r=dorms.find(x=>x.id===id);if(r){r.cleanStatus="清掃済み";r.cleanDoneDate=today();save();renderDorm();renderDormMonthly();if(typeof renderVacancy==="function")renderVacancy();if(typeof renderStats==="function")renderStats();if(typeof renderDashboard==="function")renderDashboard();}}
+function removeDorm(id){if(confirm("削除しますか？")){dorms=dorms.filter(x=>x.id!==id);save();renderDorm();renderDormMonthly();renderVacancy()}}
+function renderVacancy(){let box=el("vacancyList");if(!box)return;let ds=today();syncMasterFromDorms(false);let groups={"清掃済み":[],"清掃予定":[],"未清掃":[]};for(let room of dormMaster){if(occupiedRecord(room,ds))continue;let related=dorms.filter(r=>r.dormName===room.dormName&&r.roomNo===room.roomNo).sort((a,b)=>(b.cleanDoneDate||b.cleanDate||"").localeCompare(a.cleanDoneDate||a.cleanDate||""))[0]||{};let st=related.cleanStatus||"未清掃";if(!groups[st])groups[st]=[];groups[st].push(room.dormName+"-"+room.roomNo)}box.innerHTML=`<div class='item'><b>🟢 清掃済</b><br>${groups["清掃済み"].map(x=>`<span class='badge ok'>${esc(x)}</span>`).join("")||"<span class='note'>なし</span>"}</div><div class='item'><b>🟠 清掃予定</b><br>${groups["清掃予定"].map(x=>`<span class='badge warn'>${esc(x)}</span>`).join("")||"<span class='note'>なし</span>"}</div><div class='item'><b>🔴 未清掃</b><br>${groups["未清掃"].map(x=>`<span class='badge ng'>${esc(x)}</span>`).join("")||"<span class='note'>なし</span>"}</div>`}
+function renderDashboard(){let ev=dormEvents(today());el("dashboard").innerHTML=`<div class='item'><b>入寮</b><br>${ev.ins.length?ev.ins.map(esc).join("<br>"):"<span class='note'>なし</span>"}</div><div class='item'><b>退寮</b><br>${ev.outs.length?ev.outs.map(esc).join("<br>"):"<span class='note'>なし</span>"}</div><div class='item'><b>清掃</b><br>${ev.cleans.length?ev.cleans.map(esc).join("<br>"):"<span class='note'>なし</span>"}</div>`}
+
+function groupedCastList(){
+  var map={};
+  staff.forEach(function(p){
+    var key=String(p.name||"").trim()||"未設定";
+    if(!map[key])map[key]=[];
+    map[key].push(p);
+  });
+  return Object.keys(map).sort(function(a,b){return a.localeCompare(b,'ja')}).map(function(name){
+    return {name:name,list:map[name].sort(function(a,b){return String(a.start||"").localeCompare(String(b.start||""));})};
+  });
+}
+function workForGroup(group,ds){
+  var found=null;
+  group.list.forEach(function(p){var w=workFor(p,ds);if(w&&!found)found={staff:p,work:w};});
+  return found;
+}
+function findStaffForGroupDate(name,ds){
+  var list=staff.filter(function(p){return String(p.name||"").trim()===String(name||"").trim();});
+  return list.find(function(p){return !!workFor(p,ds);}) || list.find(function(p){return ds>=p.start&&ds<=p.end;}) || list[0] || null;
+}
+function openShiftModalByGroup(name,ds){var p=findStaffForGroupDate(name,ds);if(p)openShiftModal(p.id,ds);}
+function openShiftModal(id,ds){
+  var p=staff.find(function(x){return String(x.id)===String(id);});if(!p)return;
+  if(!p.overrides)p.overrides={};
+  var ov=p.overrides[ds]||{};
+  el("shiftModalStaffId").value=p.id;el("shiftModalDate").value=ds;el("shiftModalDateView").value=ds;
+  el("shiftModalTitle").textContent=p.name+" / "+ds;
+  makeTimeOptions(el("shiftModalStart"),ov.timeStart||p.timeStart||"10:00");
+  makeTimeOptions(el("shiftModalEnd"),ov.timeEnd||p.timeEnd||"00:00");
+  el("shiftModalOff").checked=!!ov.off;
+  el("shiftModal").classList.remove("hidden");
+}
+function shiftModalDateChanged(){openShiftModal(el("shiftModalStaffId").value,el("shiftModalDateView").value);}
+function saveShiftModal(){
+  var p=staff.find(function(x){return String(x.id)===String(el("shiftModalStaffId").value);});
+  var ds=el("shiftModalDate").value;if(!p||!ds)return;
+  if(!p.overrides)p.overrides={};
+  p.overrides[ds]={timeStart:el("shiftModalStart").value,timeEnd:el("shiftModalEnd").value,off:el("shiftModalOff").checked};
+  save();closeShiftModal();renderMonthly();renderStats();
+}
+function clearShiftModal(){
+  var p=staff.find(function(x){return String(x.id)===String(el("shiftModalStaffId").value);});
+  var ds=el("shiftModalDate").value;if(p&&p.overrides&&p.overrides[ds])delete p.overrides[ds];
+  save();closeShiftModal();renderMonthly();renderStats();
+}
+function closeShiftModal(){el("shiftModal").classList.add("hidden");}
+
+
+function monthlyCastGroups(){
+  var map={};
+  staff.forEach(function(p){
+    var key=String(p.name||"").trim()||"未設定";
+    if(!map[key])map[key]=[];
+    map[key].push(p);
+  });
+  return Object.keys(map).sort(function(a,b){return a.localeCompare(b,"ja")}).map(function(name){
+    return {name:name,list:map[name].sort(function(a,b){return String(a.start||"").localeCompare(String(b.start||""));})};
+  });
+}
+function monthlyGroupWork(group,ds){
+  var hit=null;
+  group.list.forEach(function(p){
+    var w=workFor(p,ds);
+    if(w&&!hit)hit={staff:p,work:w};
+  });
+  return hit;
+}
+function monthlyFindStaff(name,ds){
+  var list=staff.filter(function(p){return String(p.name||"").trim()===String(name||"").trim();});
+  return list.find(function(p){return !!workFor(p,ds);}) ||
+         list.find(function(p){return ds>=p.start&&ds<=p.end;}) ||
+         list[0] || null;
+}
+function timeOptionsHtml(selected){
+  var h="";
+  for(var hh=0;hh<24;hh++){
+    ["00","30"].forEach(function(mm){
+      var v=String(hh).padStart(2,"0")+":"+mm;
+      var label=(mm==="00"?String(hh):String(hh)+":"+mm);
+      h+="<option value='"+v+"' "+(v===selected?"selected":"")+">"+label+"</option>";
+    });
+  }
+  return h;
+}
+function inlineShiftEditor(staffId,castName,ds,st,en,off){
+  var idSafe=String(staffId||"new")+"_"+ds.replaceAll("-","");
+  return "<div class='inlineShiftBox'>"+
+    "<select id='st_"+idSafe+"' onchange='saveInlineShift("+JSON.stringify(staffId)+","+JSON.stringify(castName)+","+JSON.stringify(ds)+")'>"+timeOptionsHtml(st||"10:00")+"</select>"+
+    "<select id='en_"+idSafe+"' onchange='saveInlineShift("+JSON.stringify(staffId)+","+JSON.stringify(castName)+","+JSON.stringify(ds)+")'>"+timeOptionsHtml(en||"00:00")+"</select>"+
+    "<label><input type='checkbox' id='off_"+idSafe+"' "+(off?"checked":"")+" onchange='saveInlineShift("+JSON.stringify(staffId)+","+JSON.stringify(castName)+","+JSON.stringify(ds)+")'>休</label>"+
+    "</div>";
+}
+function saveInlineShift(staffId,castName,ds){
+  var p=staff.find(function(x){return String(x.id)===String(staffId);});
+  if(!p)p=monthlyFindStaff(castName,ds);
+  if(!p)return;
+  var idSafe=String(p.id||"new")+"_"+ds.replaceAll("-","");
+  if(!p.overrides)p.overrides={};
+  p.overrides[ds]={
+    timeStart:el("st_"+idSafe).value,
+    timeEnd:el("en_"+idSafe).value,
+    off:el("off_"+idSafe).checked
+  };
+  save();
+  renderStats();
+  // 表示崩れ防止のため全体再描画はしない。合計更新が必要な場合は表示開始日変更や更新で反映。
+}
+
+
+function monthCastGroups(){
+  var map={};
+  staff.forEach(function(p){
+    var key=String(p.name||"").trim()||"未設定";
+    if(!map[key])map[key]=[];
+    map[key].push(p);
+  });
+  return Object.keys(map).sort(function(a,b){return a.localeCompare(b,"ja")}).map(function(name){
+    return {name:name,list:map[name].sort(function(a,b){return String(a.start||"").localeCompare(String(b.start||""));})};
+  });
+}
+function monthWorkForGroup(group,ds){
+  var hit=null;
+  group.list.forEach(function(p){
+    var w=workFor(p,ds);
+    if(w&&!hit)hit={staff:p,work:w};
+  });
+  return hit;
+}
+function monthFindStaff(name,ds){
+  var list=staff.filter(function(p){return String(p.name||"").trim()===String(name||"").trim();});
+  return list.find(function(p){return !!workFor(p,ds);}) ||
+         list.find(function(p){return ds>=p.start&&ds<=p.end;}) ||
+         list[0] || null;
+}
+function openShiftPopupByName(name,ds){
+  var p=monthFindStaff(name,ds);
+  if(p)openShiftPopup(p.id,ds);
+}
+function openShiftPopup(id,ds){
+  var p=staff.find(function(x){return String(x.id)===String(id);});
+  if(!p)return;
+  if(!p.overrides)p.overrides={};
+  var ov=p.overrides[ds]||{};
+  el("shiftPopupStaffId").value=p.id;
+  el("shiftPopupDate").value=ds;
+  el("shiftPopupDateView").value=ds;
+  el("shiftPopupTitle").textContent=md(parseDate(ds))+"（"+wds[parseDate(ds).getDay()]+"）";
+  makeTimeOptions(el("shiftPopupStart"),ov.timeStart||p.timeStart||"10:00");
+  makeTimeOptions(el("shiftPopupEnd"),ov.timeEnd||p.timeEnd||"00:00");
+  el("shiftPopupOff").checked=!!ov.off;
+  el("shiftPopupNote").value=ov.note||"";
+  el("shiftPopup").classList.remove("hidden");
+}
+function changeShiftPopupDate(){
+  openShiftPopup(el("shiftPopupStaffId").value,el("shiftPopupDateView").value);
+}
+function saveShiftPopup(){
+  var p=staff.find(function(x){return String(x.id)===String(el("shiftPopupStaffId").value);});
+  var ds=el("shiftPopupDate").value;
+  if(!p||!ds)return;
+  if(!p.overrides)p.overrides={};
+  p.overrides[ds]={
+    timeStart:el("shiftPopupStart").value,
+    timeEnd:el("shiftPopupEnd").value,
+    off:el("shiftPopupOff").checked,
+    note:el("shiftPopupNote").value||""
+  };
+  save();
+  closeShiftPopup();
+  renderMonthly();
+  if(typeof renderStats==="function")renderStats();
+}
+function clearShiftPopup(){
+  var p=staff.find(function(x){return String(x.id)===String(el("shiftPopupStaffId").value);});
+  var ds=el("shiftPopupDate").value;
+  if(p&&p.overrides&&p.overrides[ds])delete p.overrides[ds];
+  save();
+  closeShiftPopup();
+  renderMonthly();
+  if(typeof renderStats==="function")renderStats();
+}
+function closeShiftPopup(){
+  el("shiftPopup").classList.add("hidden");
+}
+
+
+function minutesOfTime(t){
+  if(!t)return 99999;
+  let a=String(t).split(":");
+  return (+a[0]||0)*60+(+a[1]||0);
+}
+function nextWorkDateForGroup(group,base,days){
+  let best="";
+  for(let i=0;i<days;i++){
+    let d=new Date(base);d.setDate(base.getDate()+i);
+    let ds=ymd(d);
+    for(let p of group.list){
+      let w=workFor(p,ds);
+      if(w){best=ds;break;}
+    }
+    if(best)break;
+  }
+  return best || "9999-12-31";
+}
+function groupEndDate(group){
+  let dates=group.list.map(p=>p.end||"9999-12-31").filter(Boolean).sort();
+  return dates[0] || "9999-12-31";
+}
+function groupStartMinutes(group,base,days){
+  let next=nextWorkDateForGroup(group,base,days);
+  if(next==="9999-12-31"){
+    let mins=group.list.map(p=>minutesOfTime(p.timeStart)).sort((a,b)=>a-b)[0];
+    return mins==null?99999:mins;
+  }
+  let mins=[];
+  for(let p of group.list){
+    let w=workFor(p,next);
+    if(w)mins.push(minutesOfTime(w.timeStart));
+  }
+  mins.sort((a,b)=>a-b);
+  return mins.length?mins[0]:99999;
+}
+function sortMonthlyGroups(groups,base,days){
+  return groups.slice().sort(function(a,b){
+    let an=nextWorkDateForGroup(a,base,days);
+    let bn=nextWorkDateForGroup(b,base,days);
+    if(an!==bn)return an.localeCompare(bn);
+    let ae=groupEndDate(a);
+    let be=groupEndDate(b);
+    if(ae!==be)return ae.localeCompare(be);
+    let at=groupStartMinutes(a,base,days);
+    let bt=groupStartMinutes(b,base,days);
+    if(at!==bt)return at-bt;
+    return String(a.name||"").localeCompare(String(b.name||""),"ja");
+  });
+}
+
+function renderMonthly(){
+  var base=parseDate(el("monthBase").value||today()),days=Number(el("daysCount").value||31);
+  el("monthTitle").textContent=(base.getMonth()+1)+"月出勤";
+  var h="<table><thead><tr><th class='name' rowspan='2'>源氏名</th>";
+  for(var i=0;i<days;i++){
+    var d=new Date(base);d.setDate(base.getDate()+i);
+    h+="<th class='"+dateClass(d)+"'>"+d.getDate()+"日</th>";
+  }
+  h+="</tr><tr>";
+  for(i=0;i<days;i++){
+    d=new Date(base);d.setDate(base.getDate()+i);
+    h+="<th class='"+dateClass(d)+"'>"+wds[d.getDay()]+"</th>";
+  }
+  h+="</tr></thead><tbody>";
+
+  sortMonthlyGroups(monthCastGroups(),base,days).forEach(function(g){
+    var isNew=g.list.some(function(p){return p.newbie;});
+    h+="<tr><td class='name'>"+esc(g.name)+(isNew?" 🆕":"")+"</td>";
+    for(var i=0;i<days;i++){
+      var d=new Date(base);d.setDate(base.getDate()+i);
+      var ds=ymd(d),hit=monthWorkForGroup(g,ds),cls=dateClass(d);
+      if(!hit){
+        h+="<td class='"+cls+" shiftCell jsShiftCell' data-cast='"+esc(g.name)+"' data-date='"+ds+"'>休</td>";
+      }else{
+        var w=hit.work;
+        var wc=w.hours>=10?"green":(w.hours<=8?"orange":"");
+        h+="<td class='"+cls+" "+wc+" shiftCell jsShiftCell' data-staffid='"+esc(hit.staff.id)+"' data-cast='"+esc(g.name)+"' data-date='"+ds+"'>"+shortRange(w.timeStart,w.timeEnd)+"</td>";
+      }
+    }
+    h+="</tr>";
+  });
+
+  h+="<tr><td class='name'>合計</td>";
+  for(i=0;i<days;i++){
+    d=new Date(base);d.setDate(base.getDate()+i);
+    var t=totals(ymd(d));
+    h+="<td class='"+dateClass(d)+"'><b>"+fmt(t.calc)+"</b><br>("+t.real+")</td>";
+  }
+  h+="</tr></tbody></table>";
+  el("monthlyTable").innerHTML=h;
+}
+
+function cleanDisplayForRoom(room, ds){
+  var related = dorms.filter(function(r){
+    return String(r.dormName||"")===String(room.dormName||"") && String(r.roomNo||"")===String(room.roomNo||"");
+  });
+
+  var latestDoneDate = "";
+  related.forEach(function(r){
+    if(r.cleanStatus==="清掃済み" && r.cleanDoneDate && r.cleanDoneDate<=ds){
+      if(!latestDoneDate || r.cleanDoneDate>latestDoneDate){ latestDoneDate = r.cleanDoneDate; }
+    }
+  });
+
+  if(latestDoneDate){
+    var nextInAfterDone = related.filter(function(r){
+      return r.moveIn && r.moveIn>latestDoneDate && r.status!=="空室";
+    }).sort(function(a,b){
+      return a.moveIn.localeCompare(b.moveIn);
+    })[0];
+
+    if(!nextInAfterDone || ds<nextInAfterDone.moveIn){
+      return {txt:"済", cls:" done"};
+    }
+  }
+
+  var latestOutDate = "";
+  related.forEach(function(r){
+    if(r.moveOut && r.moveOut<=ds){
+      if(!latestOutDate || r.moveOut>latestOutDate){ latestOutDate = r.moveOut; }
+    }
+  });
+
+  if(latestOutDate){
+    var doneAfterOut = related.some(function(r){
+      return r.cleanStatus==="清掃済み" && r.cleanDoneDate && r.cleanDoneDate>=latestOutDate && r.cleanDoneDate<=ds;
+    });
+
+    var nextInAfterOut = related.filter(function(r){
+      return r.moveIn && r.moveIn>latestOutDate && r.status!=="空室";
+    }).sort(function(a,b){
+      return a.moveIn.localeCompare(b.moveIn);
+    })[0];
+
+    if(!doneAfterOut && (!nextInAfterOut || ds<nextInAfterOut.moveIn)){
+      return {txt:"未", cls:" clean"};
+    }
+  }
+
+  return null;
+}
+
+function renderDormMonthly(){
+  try{
+    var base=parseDate(el("monthBase").value||today());
+    var days=Number(el("daysCount").value||31);
+
+    if(typeof syncMasterFromDorms==="function"){
+      try{syncMasterFromDorms(false);}catch(e){}
+    }
+
+    var rows=[];
+    if(Array.isArray(dormMaster) && dormMaster.length){
+      rows=dormMaster.slice();
+    }else if(Array.isArray(dorms) && dorms.length){
+      var seen={};
+      dorms.forEach(function(r){
+        var dn=String(r.dormName||"");
+        var rn=String(r.roomNo||"");
+        if(!dn&&!rn)return;
+        var key=dn+"__"+rn;
+        if(!seen[key]){
+          seen[key]=true;
+          rows.push({dormName:dn,roomNo:rn});
+        }
+      });
+    }
+
+    rows.sort(function(a,b){
+      return (String(a.dormName||"")+String(a.roomNo||"")).localeCompare(String(b.dormName||"")+String(b.roomNo||""),"ja");
+    });
+
+    var h="<table><thead><tr><th class='name' rowspan='2'>寮-部屋</th>";
+    for(var i=0;i<days;i++){
+      var d=new Date(base);d.setDate(base.getDate()+i);
+      h+="<th class='"+dateClass(d)+"'>"+d.getDate()+"日</th>";
+    }
+    h+="</tr><tr>";
+    for(i=0;i<days;i++){
+      d=new Date(base);d.setDate(base.getDate()+i);
+      h+="<th class='"+dateClass(d)+"'>"+wds[d.getDay()]+"</th>";
+    }
+    h+="</tr></thead><tbody>";
+
+    rows.forEach(function(room){
+      var dn=String(room.dormName||"");
+      var rn=String(room.roomNo||"");
+      h+="<tr><td class='name'>"+esc(dn)+"-"+esc(rn)+"</td>";
+
+      for(var i=0;i<days;i++){
+        var d=new Date(base);d.setDate(base.getDate()+i);
+        var ds=ymd(d);
+        var cls=dateClass(d)+" vacant";
+        var txt="";
+
+        var active=null;
+        try{
+          active = (typeof occupiedRecord==="function") ? occupiedRecord({dormName:dn,roomNo:rn},ds) : null;
+        }catch(e){ active=null; }
+
+        if(active){
+          txt=active.residentName||"入居中";
+          cls=dateClass(d)+" occupied";
+        }else{
+          var related=(Array.isArray(dorms)?dorms:[]).filter(function(r){
+            return String(r.dormName||"")===dn && String(r.roomNo||"")===rn;
+          });
+
+          var latestDoneDate="";
+          related.forEach(function(r){
+            if(r.cleanStatus==="清掃済み" && r.cleanDoneDate && r.cleanDoneDate<=ds){
+              if(!latestDoneDate || r.cleanDoneDate>latestDoneDate)latestDoneDate=r.cleanDoneDate;
+            }
+          });
+
+          if(latestDoneDate){
+            var nextIn=related.filter(function(r){
+              return r.moveIn && r.moveIn>latestDoneDate && r.status!=="空室";
+            }).sort(function(a,b){return a.moveIn.localeCompare(b.moveIn);})[0];
+            if(!nextIn || ds<nextIn.moveIn){
+              txt="済";
+              cls+=" done";
+            }
+          }
+
+          if(!txt){
+            var latestOutDate="";
+            related.forEach(function(r){
+              if(r.moveOut && r.moveOut<=ds){
+                if(!latestOutDate || r.moveOut>latestOutDate)latestOutDate=r.moveOut;
+              }
+            });
+
+            if(latestOutDate){
+              var doneAfter=related.some(function(r){
+                return r.cleanStatus==="清掃済み" && r.cleanDoneDate && r.cleanDoneDate>=latestOutDate && r.cleanDoneDate<=ds;
+              });
+              var nextInOut=related.filter(function(r){
+                return r.moveIn && r.moveIn>latestOutDate && r.status!=="空室";
+              }).sort(function(a,b){return a.moveIn.localeCompare(b.moveIn);})[0];
+
+              if(!doneAfter && (!nextInOut || ds<nextInOut.moveIn)){
+                txt="未";
+                cls+=" clean";
+              }
+            }
+          }
+        }
+
+        var marks=[];
+        (Array.isArray(dorms)?dorms:[]).forEach(function(r){
+          if(String(r.dormName||"")!==dn || String(r.roomNo||"")!==rn)return;
+          if(r.moveOut===ds){marks.push("退:"+String(r.residentName||""));}
+          if(r.moveIn===ds){marks.push("入:"+String(r.residentName||""));}
+          if(r.cleanDate===ds && txt!=="未"){marks.push("清");}
+          if(r.cleanStatus==="清掃済み" && r.cleanDoneDate===ds && txt!=="済"){marks.push("済");}
+        });
+        if(marks.length)txt=marks.join("→");
+
+        h+="<td class='"+cls+"'>"+esc(txt)+"</td>";
+      }
+      h+="</tr>";
+    });
+
+    h+="</tbody></table>";
+    var box=el("dormMonthlyTable");
+    if(box)box.innerHTML=h;
+  }catch(err){
+    var box=el("dormMonthlyTable");
+    if(box)box.innerHTML="<div style='padding:14px;color:#b91c1c;font-weight:bold'>寮月間表の表示エラー："+esc(err.message||err)+"</div>";
+  }
+}
+
+function openDormModalByText(dn,rn,ds){openDormModal({dormName:dn,roomNo:rn},ds)}
+function openDormModal(room,ds){
+  let rec=dorms.find(r=>r.dormName===room.dormName&&r.roomNo===room.roomNo&&((r.moveIn&&r.moveOut&&ds>=r.moveIn&&ds<=r.moveOut)||r.moveIn===ds||r.moveOut===ds||r.cleanDate===ds));
+  if(rec)openDormModalById(rec.id,ds);else openDormModalNew(room,ds);
+}
+function openDormModalById(id,focusDate){
+  let r=dorms.find(x=>String(x.id)===String(id)); if(!r)return;
+  fillModalOptions(r.dormName,r.roomNo);
+  el("modalDormId").value=r.id; el("modalTitle").textContent=r.dormName+"-"+r.roomNo+" 編集";
+  el("modalResident").value=r.residentName||""; el("modalStatus").value=r.status||"入寮中";
+  el("modalMoveIn").value=r.moveIn||focusDate||today(); el("modalMoveOut").value=r.moveOut||"";
+  el("modalCleanDate").value=r.cleanDate||focusDate||today(); el("modalCleanStatus").value=r.cleanStatus||"未清掃";
+  el("modalCleanDoneDate").value=r.cleanDoneDate||""; el("modalNote").value=r.note||"";
+  el("modal").classList.remove("hidden");
+}
+function openDormModalNew(room,ds){
+  fillModalOptions(room.dormName,room.roomNo);
+  el("modalDormId").value=""; el("modalTitle").textContent=room.dormName+"-"+room.roomNo+" 新規";
+  el("modalResident").value=""; el("modalStatus").value="入寮中";
+  el("modalMoveIn").value=ds||today(); el("modalMoveOut").value="";
+  el("modalCleanDate").value=ds||today(); el("modalCleanStatus").value="未清掃";
+  el("modalCleanDoneDate").value=""; el("modalNote").value="";
+  el("modal").classList.remove("hidden");
+}
+function fillModalOptions(dn,rn){
+  let s=el("modalDormName"); s.innerHTML="";
+  [...new Set(dormMaster.map(m=>m.dormName))].sort().forEach(n=>{let o=document.createElement("option");o.value=n;o.textContent=n;s.appendChild(o)});
+  s.value=dn; updateModalRoomSelect(); el("modalRoomNo").value=rn;
+}
+function updateModalRoomSelect(){
+  let rs=el("modalRoomNo"),dn=el("modalDormName").value; rs.innerHTML="";
+  dormMaster.filter(m=>m.dormName===dn).map(m=>m.roomNo).sort((a,b)=>a.localeCompare(b,'ja')).forEach(r=>{let o=document.createElement("option");o.value=r;o.textContent=r+"号室";rs.appendChild(o)});
+}
+function saveDormModal(){
+  let id=el("modalDormId").value; let r=id?dorms.find(x=>String(x.id)===String(id)):null;
+  if(!r){r={id:Date.now()};dorms.push(r)}
+  r.dormName=el("modalDormName").value; r.roomNo=el("modalRoomNo").value; r.residentName=el("modalResident").value.trim();
+  r.status=el("modalStatus").value; r.moveIn=el("modalMoveIn").value; r.moveOut=el("modalMoveOut").value;
+  r.cleanDate=el("modalCleanDate").value; r.cleanStatus=el("modalCleanStatus").value; r.cleanDoneDate=el("modalCleanDoneDate").value; r.note=el("modalNote").value;
+  save(); closeModal(); renderDorm(); renderDormMonthly(); renderVacancy(); renderStats(); renderDashboard();
+}
+function deleteDormModal(){
+  let id=el("modalDormId").value;
+  if(id&&confirm("削除しますか？")){dorms=dorms.filter(x=>String(x.id)!==String(id));save();closeModal();renderDorm();renderDormMonthly();renderVacancy();renderStats();}
+}
+function closeModal(){el("modal").classList.add("hidden")}
+
+function dormEvents(ds){let ins=[],outs=[],cleans=[],done=[];for(let r of dorms){let label=`${r.dormName}-${r.roomNo} ${r.residentName||""}`.trim();if(r.moveIn===ds)ins.push(label);if(r.moveOut===ds)outs.push(label);if(r.cleanDate===ds)cleans.push(`${r.dormName}-${r.roomNo}`);if(r.cleanStatus==="清掃済み"&&r.cleanDoneDate===ds)done.push(`${r.dormName}-${r.roomNo}`)}return{ins,outs,cleans,done}}
+function generateText(){let base=parseDate(el("updateDate").value||today()),days=+el("exportDays").value||31,lines=[md(base)+"更新",""],cur=null;for(let i=0;i<days;i++){let d=new Date(base);d.setDate(base.getDate()+i);if(cur!==d.getMonth()){cur=d.getMonth();if(lines[lines.length-1]!="")lines.push("");lines.push((d.getMonth()+1)+"月")}let t=totals(ymd(d));lines.push(`${d.getDate()}日(${wds[d.getDay()]}) ${fmt(t.calc)}(${t.real})`)}lines.push("","※()内は実人数","※()外は0.5人計算人数");let ev=dormEvents(ymd(base));if(ev.ins.length||ev.outs.length||ev.cleans.length||ev.done.length){lines.push("","【本日の寮予定】");if(ev.ins.length){lines.push("","入寮");ev.ins.forEach(x=>lines.push(x))}if(ev.outs.length){lines.push("","退寮");ev.outs.forEach(x=>lines.push(x))}if(ev.cleans.length){lines.push("","清掃予定");ev.cleans.forEach(x=>lines.push(x))}if(ev.done.length){lines.push("","清掃済み");ev.done.forEach(x=>lines.push(x))}}let ds=ymd(base),groups={"清掃済み":[],"清掃予定":[],"未清掃":[]};syncMasterFromDorms(false);for(let room of dormMaster){if(occupiedRecord(room,ds))continue;let related=dorms.filter(r=>r.dormName===room.dormName&&r.roomNo===room.roomNo).sort((a,b)=>(b.cleanDoneDate||b.cleanDate||"").localeCompare(a.cleanDoneDate||a.cleanDate||""))[0]||{};let st=related.cleanStatus||"未清掃";(groups[st]||(groups[st]=[])).push(room.dormName+"-"+room.roomNo)}lines.push("","【空室情報】");if(groups["清掃済み"].length){lines.push("","🟢 清掃済");groups["清掃済み"].forEach(x=>lines.push(x))}if(groups["清掃予定"].length){lines.push("","🟠 清掃予定");groups["清掃予定"].forEach(x=>lines.push(x))}if(groups["未清掃"].length){lines.push("","🔴 未清掃");groups["未清掃"].forEach(x=>lines.push(x))}el("output").value=lines.join("\n")}
+function copyText(){if(!el("output").value)generateText();el("output").select();document.execCommand("copy");alert("コピーしました")}
+function sendLine(){if(!el("output").value)generateText();location.href="https://line.me/R/msg/text/?"+encodeURIComponent(el("output").value)}
+
+function openShiftPopupByName(name,ds){
+  var p=monthFindStaff(name,ds);
+  if(p)openShiftPopup(p.id,ds);
+}
+function openShiftPopup(id,ds){
+  var p=staff.find(function(x){return String(x.id)===String(id);});
+  if(!p)return;
+  if(!p.overrides)p.overrides={};
+  var ov=p.overrides[ds]||{};
+  el("shiftPopupStaffId").value=p.id;
+  el("shiftPopupDate").value=ds;
+  el("shiftPopupDateView").value=ds;
+  var d=parseDate(ds);
+  el("shiftPopupTitle").textContent=md(d)+"（"+wds[d.getDay()]+"）";
+  makeTimeOptions(el("shiftPopupStart"),ov.timeStart||p.timeStart||"10:00");
+  makeTimeOptions(el("shiftPopupEnd"),ov.timeEnd||p.timeEnd||"00:00");
+  el("shiftPopupOff").checked=!!ov.off;
+  el("shiftPopupNote").value=ov.note||"";
+  el("shiftPopup").classList.remove("hidden");
+}
+function changeShiftPopupDate(){
+  openShiftPopup(el("shiftPopupStaffId").value,el("shiftPopupDateView").value);
+}
+function saveShiftPopup(){
+  var p=staff.find(function(x){return String(x.id)===String(el("shiftPopupStaffId").value);});
+  var ds=el("shiftPopupDate").value;
+  if(!p||!ds)return;
+  if(!p.overrides)p.overrides={};
+  p.overrides[ds]={
+    timeStart:el("shiftPopupStart").value,
+    timeEnd:el("shiftPopupEnd").value,
+    off:el("shiftPopupOff").checked,
+    note:el("shiftPopupNote").value||""
+  };
+  save();
+  closeShiftPopup();
+  renderMonthly();
+  if(typeof renderStats==="function")renderStats();
+}
+function clearShiftPopup(){
+  var p=staff.find(function(x){return String(x.id)===String(el("shiftPopupStaffId").value);});
+  var ds=el("shiftPopupDate").value;
+  if(p&&p.overrides&&p.overrides[ds])delete p.overrides[ds];
+  save();
+  closeShiftPopup();
+  renderMonthly();
+  if(typeof renderStats==="function")renderStats();
+}
+function closeShiftPopup(){el("shiftPopup").classList.add("hidden");}
+function bindShiftCellClick(){
+  document.addEventListener("click",function(e){
+    var cell=e.target.closest(".jsShiftCell");
+    if(!cell)return;
+    var ds=cell.getAttribute("data-date");
+    var sid=cell.getAttribute("data-staffid");
+    var cast=cell.getAttribute("data-cast");
+    if(sid){openShiftPopup(sid,ds);}
+    else{openShiftPopupByName(cast,ds);}
+  });
+}
+
+bindShiftCellClick();
+init();
+</script>
+
+
+
+
+
+
+
+<div id="shiftEditPopup" class="shiftEditPopup">
+  <div class="shiftEditPopupBox">
+    <div class="shiftEditPopupHead">
+      <b id="shiftEditPopupTitle">出勤編集</b>
+      <button class="shiftEditPopupClose" onclick="closeShiftEditPopup()">×</button>
+    </div>
+    <div class="shiftEditPopupRow">
+      <div>
+        <label>開始</label>
+        <select id="shiftEditPopupStart"></select>
+      </div>
+      <div>
+        <label>終了</label>
+        <select id="shiftEditPopupEnd"></select>
+      </div>
+    </div>
+    <label style="display:flex;gap:8px;align-items:center;margin:10px 0">
+      <input type="checkbox" id="shiftEditPopupOff" style="width:auto"> 休みで登録する
+    </label>
+    <label>備考</label>
+    <textarea id="shiftEditPopupNote" placeholder="テキスト入力欄"></textarea>
+    <button class="shiftEditPopupBtn" onclick="saveShiftEditPopupFinal()">保存</button>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  function makePopupTimeOptions(select, selected){
+    if(!select)return;
+    var h="";
+    for(var hh=0;hh<24;hh++){
+      ["00","30"].forEach(function(mm){
+        var v=String(hh).padStart(2,"0")+":"+mm;
+        var label=(mm==="00")?String(hh):String(hh)+":"+mm;
+        h += "<option value='"+v+"' "+(v===selected?"selected":"")+">"+label+"</option>";
+      });
+    }
+    select.innerHTML=h;
+  }
+  window.openShiftEditPopupDisplay=function(cellText){
+    var box=document.getElementById("shiftEditPopup");
+    if(!box)return alert("ポップアップHTMLなし：" + cellText);
+    document.getElementById("shiftEditPopupTitle").textContent="出勤編集：" + (cellText||"休");
+    var st="10:00", en="00:00", off=false;
+    var txt=String(cellText||"").trim();
+    if(txt==="休"){off=true;}
+    var m=txt.match(/^(\d{1,2})(?::30)?-(\d{1,2})(?::30)?$/);
+    if(m){
+      var parts=txt.split("-");
+      function normalize(t){
+        if(t.indexOf(":")>=0){
+          var a=t.split(":");
+          return String(Number(a[0])).padStart(2,"0")+":"+a[1];
+        }
+        return String(Number(t)).padStart(2,"0")+":00";
+      }
+      st=normalize(parts[0]);
+      en=normalize(parts[1]);
+    }
+    makePopupTimeOptions(document.getElementById("shiftEditPopupStart"),st);
+    makePopupTimeOptions(document.getElementById("shiftEditPopupEnd"),en);
+    document.getElementById("shiftEditPopupOff").checked=off;
+    document.getElementById("shiftEditPopupNote").value="";
+    box.style.display="flex";
+  };
+  window.closeShiftEditPopup=function(){
+    var box=document.getElementById("shiftEditPopup");
+    if(box)box.style.display="none";
+  };
+  function bindShiftPopupDisplay(){
+    var box=document.getElementById("monthlyTable");
+    if(!box || box.__shiftPopupDisplayBound)return;
+    box.__shiftPopupDisplayBound=true;
+    box.addEventListener("click",function(e){
+      var td=e.target.closest("td");
+      if(!td)return;
+      var text=(td.textContent||"").trim();
+      if(td.className.indexOf("shiftCell")>=0 || text==="休" || /\d{1,2}(:30)?-\d{1,2}/.test(text)){
+        window.openShiftEditPopupDisplay(text);
+      }
+    },true);
+    box.addEventListener("touchend",function(e){
+      var td=e.target.closest("td");
+      if(!td)return;
+      var text=(td.textContent||"").trim();
+      if(td.className.indexOf("shiftCell")>=0 || text==="休" || /\d{1,2}(:30)?-\d{1,2}/.test(text)){
+        window.openShiftEditPopupDisplay(text);
+      }
+    },true);
+  }
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(bindShiftPopupDisplay,300);
+    setTimeout(bindShiftPopupDisplay,1200);
+  });
+  window.addEventListener("load",function(){
+    setTimeout(bindShiftPopupDisplay,300);
+    setTimeout(bindShiftPopupDisplay,1500);
+  });
+  var oldShowPage=window.showPage;
+  if(typeof oldShowPage==="function"){
+    window.showPage=function(id){
+      var r=oldShowPage.apply(this,arguments);
+      if(id==="monthly")setTimeout(bindShiftPopupDisplay,300);
+      return r;
+    };
+  }
+  var oldRenderMonthly=window.renderMonthly;
+  if(typeof oldRenderMonthly==="function"){
+    window.renderMonthly=function(){
+      var r=oldRenderMonthly.apply(this,arguments);
+      setTimeout(bindShiftPopupDisplay,100);
+      return r;
+    };
+  }
+})();
+</script>
+
+
+<script>
+(function(){
+  function findStaffByCellTextAndDate(cellText, ds){
+    var name="";
+    try{
+      var active=document.querySelector("td.shiftCell:hover");
+      if(active){
+        var tr=active.closest("tr");
+        if(tr){
+          var nameCell=tr.querySelector("td.name");
+          if(nameCell)name=(nameCell.textContent||"").replace("🆕","").trim();
+        }
+      }
+    }catch(e){}
+    if(!name && window.__lastShiftEditName)name=window.__lastShiftEditName;
+    var list=(staff||[]).filter(function(p){return String(p.name||"").trim()===String(name||"").trim();});
+    return list.find(function(p){return typeof workFor==="function" && !!workFor(p,ds);}) ||
+           list.find(function(p){return ds>=p.start&&ds<=p.end;}) ||
+           (staff||[]).find(function(p){return typeof workFor==="function" && !!workFor(p,ds);}) ||
+           (staff||[])[0] || null;
+  }
+
+  function getCellInfoFromEventTarget(td){
+    var tr=td&&td.closest?td.closest("tr"):null;
+    var name="";
+    if(tr){
+      var nameCell=tr.querySelector("td.name");
+      if(nameCell)name=(nameCell.textContent||"").replace("🆕","").trim();
+    }
+    return {name:name};
+  }
+
+  window.openShiftEditPopupSave=function(td){
+    var text=(td.textContent||"").trim();
+    var info=getCellInfoFromEventTarget(td);
+    window.__lastShiftEditName=info.name;
+
+    var table=td.closest("table");
+    var cellIndex=td.cellIndex;
+    var headerDate="";
+    var ds="";
+    try{
+      var base=parseDate(el("monthBase").value||today());
+      var dayOffset=cellIndex-1;
+      var d=new Date(base);d.setDate(base.getDate()+dayOffset);
+      ds=ymd(d);
+      headerDate=md(d)+"（"+wds[d.getDay()]+"）";
+    }catch(e){
+      ds=today();
+      headerDate=ds;
+    }
+
+    window.__lastShiftEditDate=ds;
+    var p=findStaffByCellTextAndDate(text,ds);
+    window.__lastShiftEditStaffId=p?p.id:"";
+
+    var st=(p&&p.timeStart)||"10:00", en=(p&&p.timeEnd)||"00:00", off=false, note="";
+    if(p&&p.overrides&&p.overrides[ds]){
+      var ov=p.overrides[ds];
+      st=ov.timeStart||st;
+      en=ov.timeEnd||en;
+      off=!!ov.off;
+      note=ov.note||"";
+    }else if(text==="休"){
+      off=true;
+    }else{
+      var parts=text.split("-");
+      function norm(t){
+        if(!t)return "";
+        if(t.indexOf(":")>=0){
+          var a=t.split(":");
+          return String(Number(a[0])).padStart(2,"0")+":"+a[1];
+        }
+        return String(Number(t)).padStart(2,"0")+":00";
+      }
+      if(parts.length===2){
+        st=norm(parts[0])||st;
+        en=norm(parts[1])||en;
+      }
+    }
+
+    var box=document.getElementById("shiftEditPopup");
+    if(!box)return;
+    document.getElementById("shiftEditPopupTitle").textContent="出勤編集：" + headerDate;
+    makeTimeOptions(document.getElementById("shiftEditPopupStart"),st);
+    makeTimeOptions(document.getElementById("shiftEditPopupEnd"),en);
+    document.getElementById("shiftEditPopupOff").checked=off;
+    document.getElementById("shiftEditPopupNote").value=note;
+
+    var btn=box.querySelector(".shiftEditPopupBtn");
+    if(btn){
+      btn.textContent="保存";
+      btn.onclick=function(){saveShiftEditPopup();};
+    }
+    box.style.display="flex";
+  };
+
+  window.saveShiftEditPopup=function(){
+    var ds=window.__lastShiftEditDate || today();
+    var p=(staff||[]).find(function(x){return String(x.id)===String(window.__lastShiftEditStaffId);});
+    if(!p){
+      var name=window.__lastShiftEditName||"";
+      p=(staff||[]).filter(function(x){return String(x.name||"").trim()===String(name).trim();})[0];
+    }
+    if(!p)return;
+    if(!p.overrides)p.overrides={};
+    p.overrides[ds]={
+      timeStart:document.getElementById("shiftEditPopupStart").value,
+      timeEnd:document.getElementById("shiftEditPopupEnd").value,
+      off:document.getElementById("shiftEditPopupOff").checked,
+      note:document.getElementById("shiftEditPopupNote").value||""
+    };
+    save();
+    if(typeof closeShiftEditPopup==="function")closeShiftEditPopup();
+    if(typeof renderMonthly==="function")renderMonthly();
+    if(typeof renderStats==="function")renderStats();
+    if(typeof generateText==="function" && document.getElementById("output") && document.getElementById("output").value){generateText();}
+  };
+
+  function bindShiftSavePopup(){
+    var box=document.getElementById("monthlyTable");
+    if(!box || box.__shiftSavePopupBound)return;
+    box.__shiftSavePopupBound=true;
+    box.addEventListener("click",function(e){
+      var td=e.target.closest("td");
+      if(!td)return;
+      var text=(td.textContent||"").trim();
+      if(td.className.indexOf("shiftCell")>=0 || text==="休" || /\d{1,2}(:30)?-\d{1,2}/.test(text)){
+        e.preventDefault();
+        e.stopPropagation();
+        window.openShiftEditPopupSave(td);
+      }
+    },true);
+    box.addEventListener("touchend",function(e){
+      var td=e.target.closest("td");
+      if(!td)return;
+      var text=(td.textContent||"").trim();
+      if(td.className.indexOf("shiftCell")>=0 || text==="休" || /\d{1,2}(:30)?-\d{1,2}/.test(text)){
+        e.preventDefault();
+        e.stopPropagation();
+        window.openShiftEditPopupSave(td);
+      }
+    },true);
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(bindShiftSavePopup,300);
+    setTimeout(bindShiftSavePopup,1200);
+  });
+  window.addEventListener("load",function(){
+    setTimeout(bindShiftSavePopup,300);
+    setTimeout(bindShiftSavePopup,1500);
+  });
+
+  var oldShowPage=window.showPage;
+  if(typeof oldShowPage==="function"){
+    window.showPage=function(id){
+      var r=oldShowPage.apply(this,arguments);
+      if(id==="monthly")setTimeout(bindShiftSavePopup,300);
+      return r;
+    };
+  }
+  var oldRenderMonthly=window.renderMonthly;
+  if(typeof oldRenderMonthly==="function"){
+    window.renderMonthly=function(){
+      var r=oldRenderMonthly.apply(this,arguments);
+      setTimeout(bindShiftSavePopup,100);
+      return r;
+    };
+  }
+})();
+</script>
+
+
+<script>
+(function(){
+  function getMonthlyDateByCell(td){
+    try{
+      var base=parseDate(el("monthBase").value||today());
+      var dayOffset=td.cellIndex-1;
+      var d=new Date(base);
+      d.setDate(base.getDate()+dayOffset);
+      return ymd(d);
+    }catch(e){
+      return today();
+    }
+  }
+
+  function getCastNameByCell(td){
+    try{
+      var tr=td.closest("tr");
+      var nameCell=tr ? tr.querySelector("td.name") : null;
+      return nameCell ? (nameCell.textContent||"").replace("🆕","").trim() : "";
+    }catch(e){
+      return "";
+    }
+  }
+
+  function findCastForPopup(name, ds){
+    var list=(staff||[]).filter(function(p){
+      return String(p.name||"").trim()===String(name||"").trim();
+    });
+    return list.find(function(p){return typeof workFor==="function" && !!workFor(p,ds);}) ||
+           list.find(function(p){return ds>=p.start && ds<=p.end;}) ||
+           list[0] ||
+           (staff||[])[0] ||
+           null;
+  }
+
+  function parseTimeFromCell(text, fallbackStart, fallbackEnd){
+    var st=fallbackStart||"10:00", en=fallbackEnd||"00:00", off=false;
+    var t=String(text||"").trim();
+    if(t==="休"){off=false;return {st:st,en:en,off:off};}
+    var parts=t.split("-");
+    function norm(x){
+      if(!x)return "";
+      if(x.indexOf(":")>=0){
+        var a=x.split(":");
+        return String(Number(a[0])).padStart(2,"0")+":"+(a[1]||"00");
+      }
+      return String(Number(x)).padStart(2,"0")+":00";
+    }
+    if(parts.length===2){
+      st=norm(parts[0])||st;
+      en=norm(parts[1])||en;
+    }
+    return {st:st,en:en,off:off};
+  }
+
+  function ensurePopupButton(){
+    var box=document.getElementById("shiftEditPopup");
+    if(!box)return;
+    var btn=box.querySelector(".shiftEditPopupBtn");
+    if(btn){
+      btn.textContent="保存";
+      btn.onclick=function(){ saveShiftEditPopupFinal(); };
+    }
+  }
+
+  window.openShiftEditPopupFinal=function(td){
+    var ds=getMonthlyDateByCell(td);
+    var name=getCastNameByCell(td);
+    var p=findCastForPopup(name,ds);
+    if(!p){ alert("対象CASTが見つかりません"); return; }
+
+    window.__shiftPopupStaffId=p.id;
+    window.__shiftPopupDate=ds;
+
+    if(!p.overrides)p.overrides={};
+    var ov=p.overrides[ds]||{};
+    var parsed=parseTimeFromCell((td.textContent||"").trim(), p.timeStart||"10:00", p.timeEnd||"00:00");
+
+    var st=ov.timeStart || parsed.st || p.timeStart || "10:00";
+    var en=ov.timeEnd || parsed.en || p.timeEnd || "00:00";
+    var off=(ov.off!==undefined) ? !!ov.off : !!parsed.off;
+
+    var d=parseDate(ds);
+    var title=document.getElementById("shiftEditPopupTitle");
+    if(title)title.textContent=(name||p.name)+" / "+md(d)+"（"+wds[d.getDay()]+"）";
+
+    makeTimeOptions(document.getElementById("shiftEditPopupStart"), st);
+    makeTimeOptions(document.getElementById("shiftEditPopupEnd"), en);
+
+    var offEl=document.getElementById("shiftEditPopupOff");
+    if(offEl)offEl.checked=off;
+
+    var noteEl=document.getElementById("shiftEditPopupNote");
+    if(noteEl)noteEl.value=ov.note||"";
+
+    ensurePopupButton();
+
+    var popup=document.getElementById("shiftEditPopup");
+    if(popup)popup.style.display="flex";
+  };
+
+  window.saveShiftEditPopupFinal=function(){
+    var p=(staff||[]).find(function(x){
+      return String(x.id)===String(window.__shiftPopupStaffId);
+    });
+    var ds=window.__shiftPopupDate;
+    if(!p||!ds){ alert("保存対象が見つかりません"); return; }
+
+    if(!p.overrides)p.overrides={};
+
+    p.overrides[ds]={
+      timeStart:document.getElementById("shiftEditPopupStart").value,
+      timeEnd:document.getElementById("shiftEditPopupEnd").value,
+      off:!!document.getElementById("shiftEditPopupOff").checked,
+      note:(document.getElementById("shiftEditPopupNote").value||"")
+    };
+
+    // 範囲外の日を編集した場合は、表示・AI書き出しに反映されるよう範囲を拡張
+    if(!p.start || ds<p.start)p.start=ds;
+    if(!p.end || ds>p.end)p.end=ds;
+
+    save();
+
+    if(typeof closeShiftEditPopup==="function")closeShiftEditPopup();
+    else{
+      var popup=document.getElementById("shiftEditPopup");
+      if(popup)popup.style.display="none";
+    }
+
+    if(typeof renderMonthly==="function")renderMonthly();
+    if(typeof renderStats==="function")renderStats();
+    if(typeof generateText==="function" && document.getElementById("output") && document.getElementById("output").value){
+      generateText();
+    }
+  };
+
+  function bindFinalPopupSave(){
+    var box=document.getElementById("monthlyTable");
+    if(!box || box.__finalPopupSaveBound)return;
+    box.__finalPopupSaveBound=true;
+
+    box.addEventListener("click",function(e){
+      var td=e.target.closest("td");
+      if(!td)return;
+      var text=(td.textContent||"").trim();
+      if(td.className.indexOf("shiftCell")>=0 || text==="休" || /\d{1,2}(:30)?-\d{1,2}/.test(text)){
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.openShiftEditPopupFinal(td);
+      }
+    },true);
+
+    box.addEventListener("touchend",function(e){
+      var td=e.target.closest("td");
+      if(!td)return;
+      var text=(td.textContent||"").trim();
+      if(td.className.indexOf("shiftCell")>=0 || text==="休" || /\d{1,2}(:30)?-\d{1,2}/.test(text)){
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.openShiftEditPopupFinal(td);
+      }
+    },true);
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(bindFinalPopupSave,300);
+    setTimeout(bindFinalPopupSave,1200);
+    setTimeout(ensurePopupButton,500);
+  });
+
+  window.addEventListener("load",function(){
+    setTimeout(bindFinalPopupSave,300);
+    setTimeout(bindFinalPopupSave,1500);
+    setTimeout(ensurePopupButton,500);
+  });
+
+  var oldShowPage=window.showPage;
+  if(typeof oldShowPage==="function"){
+    window.showPage=function(id){
+      var r=oldShowPage.apply(this,arguments);
+      if(id==="monthly")setTimeout(bindFinalPopupSave,300);
+      return r;
+    };
+  }
+
+  var oldRenderMonthly=window.renderMonthly;
+  if(typeof oldRenderMonthly==="function"){
+    window.renderMonthly=function(){
+      var r=oldRenderMonthly.apply(this,arguments);
+      setTimeout(bindFinalPopupSave,100);
+      return r;
+    };
+  }
+})();
+</script>
+
+
+<div id="dormEditPopup" class="dormEditPopup">
+  <div class="dormEditPopupBox">
+    <div class="dormEditPopupHead">
+      <b id="dormEditPopupTitle">寮編集</b>
+      <button class="dormEditPopupClose" onclick="closeDormEditPopup()">×</button>
+    </div>
+    <input type="hidden" id="dormEditDormName">
+    <input type="hidden" id="dormEditRoomNo">
+    <input type="hidden" id="dormEditDate">
+    <label>名前</label>
+    <input id="dormEditResident" placeholder="入寮者名">
+    <div class="dormEditPopupRow">
+      <div><label>入寮日</label><input id="dormEditMoveIn" type="date"></div>
+      <div><label>退寮日</label><input id="dormEditMoveOut" type="date"></div>
+    </div>
+    <div class="dormEditPopupRow">
+      <div><label>清掃日</label><input id="dormEditCleanDate" type="date"></div>
+      <div><label>清掃状態</label><select id="dormEditCleanStatus"><option>未清掃</option><option>清掃予定</option><option>清掃済み</option></select></div>
+    </div>
+    <label>備考</label>
+    <textarea id="dormEditNote" placeholder="備考"></textarea>
+    <button class="dormEditPopupBtn" onclick="saveDormEditPopup()">保存</button>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  function getDormCellDate(td){
+    try{
+      var base=parseDate(el("monthBase").value||today());
+      var dayOffset=td.cellIndex-1;
+      var d=new Date(base);
+      d.setDate(base.getDate()+dayOffset);
+      return ymd(d);
+    }catch(e){return today();}
+  }
+  function getDormRoomFromCell(td){
+    var tr=td.closest("tr");
+    var nameCell=tr?tr.querySelector("td.name"):null;
+    var raw=nameCell?(nameCell.textContent||"").trim():"";
+    var idx=raw.lastIndexOf("-");
+    if(idx<0)return {dormName:"",roomNo:""};
+    return {dormName:raw.slice(0,idx),roomNo:raw.slice(idx+1)};
+  }
+  function findDormRecord(dn,rn,ds){
+    var related=(dorms||[]).filter(function(r){
+      return String(r.dormName||"")===String(dn||"") && String(r.roomNo||"")===String(rn||"");
+    });
+    return related.find(function(r){return r.moveIn&&r.moveOut&&ds>=r.moveIn&&ds<=r.moveOut;}) ||
+           related.find(function(r){return r.moveIn===ds || r.moveOut===ds || r.cleanDate===ds || r.cleanDoneDate===ds;}) ||
+           related.sort(function(a,b){return String(b.moveIn||b.moveOut||b.cleanDate||"").localeCompare(String(a.moveIn||a.moveOut||a.cleanDate||""));})[0] ||
+           null;
+  }
+  window.openDormEditPopup=function(td){
+    var room=getDormRoomFromCell(td);
+    var ds=getDormCellDate(td);
+    var rec=findDormRecord(room.dormName,room.roomNo,ds);
+
+    window.__dormEditRecordId=rec?rec.id:"";
+    el("dormEditDormName").value=room.dormName;
+    el("dormEditRoomNo").value=room.roomNo;
+    el("dormEditDate").value=ds;
+    el("dormEditPopupTitle").textContent=room.dormName+"-"+room.roomNo+" / "+ds;
+
+    el("dormEditResident").value=rec?(rec.residentName||""):"";
+    el("dormEditMoveIn").value=rec?(rec.moveIn||ds):ds;
+    el("dormEditMoveOut").value=rec?(rec.moveOut||""):"";
+    el("dormEditCleanDate").value=rec?(rec.cleanDate||ds):ds;
+    el("dormEditCleanStatus").value=rec?(rec.cleanStatus||"未清掃"):"未清掃";
+    el("dormEditNote").value=rec?(rec.note||""):"";
+
+    var box=el("dormEditPopup");
+    if(box)box.style.display="flex";
+  };
+  window.closeDormEditPopup=function(){
+    var box=el("dormEditPopup");
+    if(box)box.style.display="none";
+  };
+  window.saveDormEditPopup=function(){
+    var id=window.__dormEditRecordId;
+    var rec=(dorms||[]).find(function(r){return String(r.id)===String(id);});
+    if(!rec){
+      rec={id:Date.now()};
+      dorms.push(rec);
+    }
+    rec.dormName=el("dormEditDormName").value;
+    rec.roomNo=el("dormEditRoomNo").value;
+    rec.residentName=el("dormEditResident").value.trim();
+    rec.status=rec.residentName?"入寮中":"空室";
+    rec.moveIn=el("dormEditMoveIn").value;
+    rec.moveOut=el("dormEditMoveOut").value;
+    rec.cleanDate=el("dormEditCleanDate").value;
+    rec.cleanStatus=el("dormEditCleanStatus").value;
+    rec.cleanDoneDate=(rec.cleanStatus==="清掃済み")?(rec.cleanDoneDate||today()):"";
+    rec.note=el("dormEditNote").value||"";
+    save();
+    closeDormEditPopup();
+    if(typeof renderDorm==="function")renderDorm();
+    if(typeof renderDormMonthly==="function")renderDormMonthly();
+    if(typeof renderVacancy==="function")renderVacancy();
+    if(typeof renderStats==="function")renderStats();
+  };
+  function bindDormMonthlyEdit(){
+    var box=el("dormMonthlyTable");
+    if(!box||box.__dormMonthlyEditBound)return;
+    box.__dormMonthlyEditBound=true;
+    box.addEventListener("click",function(e){
+      var td=e.target.closest("td");
+      if(!td||td.classList.contains("name"))return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      openDormEditPopup(td);
+    },true);
+    box.addEventListener("touchend",function(e){
+      var td=e.target.closest("td");
+      if(!td||td.classList.contains("name"))return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      openDormEditPopup(td);
+    },true);
+  }
+  document.addEventListener("DOMContentLoaded",function(){setTimeout(bindDormMonthlyEdit,500);setTimeout(bindDormMonthlyEdit,1500);});
+  window.addEventListener("load",function(){setTimeout(bindDormMonthlyEdit,500);setTimeout(bindDormMonthlyEdit,1500);});
+  var oldShowPage=window.showPage;
+  if(typeof oldShowPage==="function"){
+    window.showPage=function(id){
+      var r=oldShowPage.apply(this,arguments);
+      if(id==="monthly")setTimeout(bindDormMonthlyEdit,300);
+      return r;
+    };
+  }
+  var oldRenderDormMonthly=window.renderDormMonthly;
+  if(typeof oldRenderDormMonthly==="function"){
+    window.renderDormMonthly=function(){
+      var r=oldRenderDormMonthly.apply(this,arguments);
+      setTimeout(bindDormMonthlyEdit,100);
+      return r;
+    };
+  }
+})();
+</script>
+
+</body>
+</html>
