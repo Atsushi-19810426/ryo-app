@@ -1042,6 +1042,11 @@ init();
         <select id="shiftEditPopupEnd"></select>
       </div>
     </div>
+    <label>出勤場所</label>
+    <select id="shiftEditPopupWorkPlace">
+      <option>G-SPOT</option>
+      <option>別邸</option>
+    </select>
     <label style="display:flex;gap:8px;align-items:center;margin:10px 0">
       <input type="checkbox" id="shiftEditPopupOff" style="width:auto"> 休みで登録する
     </label>
@@ -1088,6 +1093,8 @@ init();
     }
     makePopupTimeOptions(document.getElementById("shiftEditPopupStart"),st);
     makePopupTimeOptions(document.getElementById("shiftEditPopupEnd"),en);
+    var wpEl=document.getElementById("shiftEditPopupWorkPlace");
+    if(wpEl)wpEl.value="G-SPOT";
     document.getElementById("shiftEditPopupOff").checked=off;
     document.getElementById("shiftEditPopupNote").value="";
     box.style.display="flex";
@@ -1251,6 +1258,7 @@ init();
     }
     if(!p)return;
     if(!p.overrides)p.overrides={};
+    p.workPlace=(document.getElementById("shiftEditPopupWorkPlace")?document.getElementById("shiftEditPopupWorkPlace").value:(p.workPlace||"G-SPOT"));
     p.overrides[ds]={
       timeStart:document.getElementById("shiftEditPopupStart").value,
       timeEnd:document.getElementById("shiftEditPopupEnd").value,
@@ -1408,6 +1416,9 @@ init();
     makeTimeOptions(document.getElementById("shiftEditPopupStart"), st);
     makeTimeOptions(document.getElementById("shiftEditPopupEnd"), en);
 
+    var wpEl=document.getElementById("shiftEditPopupWorkPlace");
+    if(wpEl)wpEl.value=p.workPlace||"G-SPOT";
+
     var offEl=document.getElementById("shiftEditPopupOff");
     if(offEl)offEl.checked=off;
 
@@ -1429,6 +1440,7 @@ init();
 
     if(!p.overrides)p.overrides={};
 
+    p.workPlace=(document.getElementById("shiftEditPopupWorkPlace")?document.getElementById("shiftEditPopupWorkPlace").value:(p.workPlace||"G-SPOT"));
     p.overrides[ds]={
       timeStart:document.getElementById("shiftEditPopupStart").value,
       timeEnd:document.getElementById("shiftEditPopupEnd").value,
