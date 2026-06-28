@@ -1,4 +1,4 @@
-const CACHE='gspot-ver40-cell-edit-working';
+const CACHE='gspot-ver41-inline-select';
 const FILES=['./','./index.html','./manifest.json'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim()});

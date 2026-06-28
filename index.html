@@ -67,9 +67,13 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 .shiftModal{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:120;display:flex;align-items:flex-end;justify-content:center}
 .shiftModalBox{background:#fff;width:min(620px,100%);max-height:84vh;overflow:auto;border-radius:26px 26px 0 0;padding:18px;box-shadow:0 -12px 40px rgba(0,0,0,.18)}
 
-.shiftEditCell{cursor:pointer}
-.shiftModal{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:120;display:flex;align-items:flex-end;justify-content:center}
-.shiftModalBox{background:#fff;width:min(620px,100%);max-height:84vh;overflow:auto;border-radius:26px 26px 0 0;padding:18px;box-shadow:0 -12px 40px rgba(0,0,0,.18)}
+.inlineShiftBox{display:flex;gap:4px;align-items:center;justify-content:center;min-width:122px}
+.inlineShiftBox select{width:auto;min-width:52px;padding:4px 6px;border-radius:8px;font-size:12px}
+.inlineShiftBox label{display:flex;align-items:center;gap:3px;margin:0;font-size:11px;color:#111827}
+.inlineShiftBox input{width:auto}
+.shiftCell{min-width:122px}
+@media(max-width:760px){.inlineShiftBox{min-width:112px}.inlineShiftBox select{font-size:11px;min-width:48px;padding:4px}.shiftCell{min-width:112px}}
+
 </style>
 </head>
 <body>
@@ -174,7 +178,7 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 <section id="monthly" class="page hidden">
  <div class="card"><h2 id="monthTitle">月間出勤</h2>
   <div class="row"><div><label>表示開始日</label><input id="monthBase" type="date" onchange="renderMonthly();renderDormMonthly();"></div><div><label>表示日数</label><select id="daysCount" onchange="renderMonthly();renderDormMonthly();"><option>31</option><option>30</option><option>14</option><option>7</option></select></div></div>
-  <p class="note">出勤セルをタップすると開始・終了・休みを変更できます。</p><p class="note">セルをクリック/タップすると開始・終了・休みを変更できます。</p><div class="tableWrap" id="monthlyTable"></div>
+  <p class="note">出勤セルをタップすると開始・終了・休みを変更できます。</p><p class="note">月間表のセル内で開始・終了・休みを直接変更できます。</p><div class="tableWrap" id="monthlyTable"></div>
  </div>
  <div class="card"><h2>寮 月間表</h2><div class="tableWrap" id="dormMonthlyTable"></div></div>
 </section>
@@ -348,7 +352,7 @@ function clearShiftModal(){
 function closeShiftModal(){el("shiftModal").classList.add("hidden");}
 
 
-function castGroupsForMonthly(){
+function monthlyCastGroups(){
   var map={};
   staff.forEach(function(p){
     var key=String(p.name||"").trim()||"未設定";
@@ -359,7 +363,7 @@ function castGroupsForMonthly(){
     return {name:name,list:map[name].sort(function(a,b){return String(a.start||"").localeCompare(String(b.start||""));})};
   });
 }
-function workForCastGroup(group,ds){
+function monthlyGroupWork(group,ds){
   var hit=null;
   group.list.forEach(function(p){
     var w=workFor(p,ds);
@@ -367,59 +371,45 @@ function workForCastGroup(group,ds){
   });
   return hit;
 }
-function findCastForDate(name,ds){
+function monthlyFindStaff(name,ds){
   var list=staff.filter(function(p){return String(p.name||"").trim()===String(name||"").trim();});
   return list.find(function(p){return !!workFor(p,ds);}) ||
          list.find(function(p){return ds>=p.start&&ds<=p.end;}) ||
          list[0] || null;
 }
-function openShiftCellByName(name,ds){
-  var p=findCastForDate(name,ds);
-  if(p)openShiftCell(p.id,ds);
+function timeOptionsHtml(selected){
+  var h="";
+  for(var hh=0;hh<24;hh++){
+    ["00","30"].forEach(function(mm){
+      var v=String(hh).padStart(2,"0")+":"+mm;
+      var label=(mm==="00"?String(hh):String(hh)+":"+mm);
+      h+="<option value='"+v+"' "+(v===selected?"selected":"")+">"+label+"</option>";
+    });
+  }
+  return h;
 }
-function openShiftCell(id,ds){
-  var p=staff.find(function(x){return String(x.id)===String(id);});
+function inlineShiftEditor(staffId,castName,ds,st,en,off){
+  var idSafe=String(staffId||"new")+"_"+ds.replaceAll("-","");
+  return "<div class='inlineShiftBox'>"+
+    "<select id='st_"+idSafe+"' onchange='saveInlineShift("+JSON.stringify(staffId)+","+JSON.stringify(castName)+","+JSON.stringify(ds)+")'>"+timeOptionsHtml(st||"10:00")+"</select>"+
+    "<select id='en_"+idSafe+"' onchange='saveInlineShift("+JSON.stringify(staffId)+","+JSON.stringify(castName)+","+JSON.stringify(ds)+")'>"+timeOptionsHtml(en||"00:00")+"</select>"+
+    "<label><input type='checkbox' id='off_"+idSafe+"' "+(off?"checked":"")+" onchange='saveInlineShift("+JSON.stringify(staffId)+","+JSON.stringify(castName)+","+JSON.stringify(ds)+")'>休</label>"+
+    "</div>";
+}
+function saveInlineShift(staffId,castName,ds){
+  var p=staff.find(function(x){return String(x.id)===String(staffId);});
+  if(!p)p=monthlyFindStaff(castName,ds);
   if(!p)return;
-  if(!p.overrides)p.overrides={};
-  var ov=p.overrides[ds]||{};
-  el("shiftCellStaffId").value=p.id;
-  el("shiftCellDate").value=ds;
-  el("shiftCellDateView").value=ds;
-  el("shiftCellTitle").textContent=p.name+" / "+ds;
-  makeTimeOptions(el("shiftCellStart"),ov.timeStart||p.timeStart||"10:00");
-  makeTimeOptions(el("shiftCellEnd"),ov.timeEnd||p.timeEnd||"00:00");
-  el("shiftCellOff").checked=!!ov.off;
-  el("shiftCellModal").classList.remove("hidden");
-}
-function changeShiftCellDate(){
-  openShiftCell(el("shiftCellStaffId").value,el("shiftCellDateView").value);
-}
-function saveShiftCell(){
-  var p=staff.find(function(x){return String(x.id)===String(el("shiftCellStaffId").value);});
-  var ds=el("shiftCellDate").value;
-  if(!p||!ds)return;
+  var idSafe=String(p.id||"new")+"_"+ds.replaceAll("-","");
   if(!p.overrides)p.overrides={};
   p.overrides[ds]={
-    timeStart:el("shiftCellStart").value,
-    timeEnd:el("shiftCellEnd").value,
-    off:el("shiftCellOff").checked
+    timeStart:el("st_"+idSafe).value,
+    timeEnd:el("en_"+idSafe).value,
+    off:el("off_"+idSafe).checked
   };
   save();
-  closeShiftCellModal();
-  renderMonthly();
-  if(typeof renderStats==="function")renderStats();
-}
-function clearShiftCell(){
-  var p=staff.find(function(x){return String(x.id)===String(el("shiftCellStaffId").value);});
-  var ds=el("shiftCellDate").value;
-  if(p&&p.overrides&&p.overrides[ds])delete p.overrides[ds];
-  save();
-  closeShiftCellModal();
-  renderMonthly();
-  if(typeof renderStats==="function")renderStats();
-}
-function closeShiftCellModal(){
-  el("shiftCellModal").classList.add("hidden");
+  renderStats();
+  // 表示崩れ防止のため全体再描画はしない。合計更新が必要な場合は表示開始日変更や更新で反映。
 }
 
 function renderMonthly(){
@@ -437,20 +427,21 @@ function renderMonthly(){
   }
   h+="</tr></thead><tbody>";
 
-  var groups=castGroupsForMonthly();
-  groups.forEach(function(g){
+  monthlyCastGroups().forEach(function(g){
     var isNew=g.list.some(function(p){return p.newbie;});
     h+="<tr><td class='name'>"+esc(g.name)+(isNew?" 🆕":"")+"</td>";
     for(var i=0;i<days;i++){
       var d=new Date(base);d.setDate(base.getDate()+i);
-      var ds=ymd(d),hit=workForCastGroup(g,ds),cls=dateClass(d);
-      if(!hit){
-        h+="<td class='"+cls+" shiftCell shiftEditCell' onclick='openShiftCellByName("+JSON.stringify(g.name)+","+JSON.stringify(ds)+")'>休</td>";
+      var ds=ymd(d),hit=monthlyGroupWork(g,ds),cls=dateClass(d),p=null,w=null,st="10:00",en="00:00",off=true,wc="";
+      if(hit){
+        p=hit.staff; w=hit.work; st=w.timeStart; en=w.timeEnd; off=false;
+        wc=w.hours>=10?"green":(w.hours<=8?"orange":"");
       }else{
-        var w=hit.work;
-        var wc=w.hours>=10?"green":(w.hours<=8?"orange":"");
-        h+="<td class='"+cls+" "+wc+" shiftCell shiftEditCell' onclick='openShiftCell("+JSON.stringify(hit.staff.id)+","+JSON.stringify(ds)+")'>"+shortRange(w.timeStart,w.timeEnd)+"</td>";
+        p=monthlyFindStaff(g.name,ds);
+        var ov=p&&p.overrides?p.overrides[ds]:null;
+        if(ov){st=ov.timeStart||st;en=ov.timeEnd||en;off=!!ov.off;}
       }
+      h+="<td class='"+cls+" "+wc+" shiftCell'>"+inlineShiftEditor(p?p.id:"",g.name,ds,st,en,off)+"</td>";
     }
     h+="</tr>";
   });
