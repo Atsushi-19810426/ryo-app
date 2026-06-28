@@ -90,6 +90,18 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 </style>
 </head>
 <body>
+
+<div id="gspotFixedTestBtn" onclick="document.getElementById('gspotFixedTestPopup').style.display='flex'" style="position:fixed;right:12px;bottom:18px;z-index:2147483647;background:#007aff;color:#fff;border-radius:999px;padding:14px 18px;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,.25);cursor:pointer;user-select:none;-webkit-user-select:none;">
+  POP確認
+</div>
+<div id="gspotFixedTestPopup" style="position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:2147483646;display:none;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:18px;padding:18px;width:min(340px,90%);box-shadow:0 18px 50px rgba(0,0,0,.25);font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;">
+    <h2 style="margin:0 0 10px;font-size:18px;color:#111;">ポップアップ表示OK</h2>
+    <p style="font-size:14px;line-height:1.6;margin:0 0 14px;color:#333;">この表示が出れば、ポップアップ自体は動いています。</p>
+    <div onclick="document.getElementById('gspotFixedTestPopup').style.display='none'" style="width:100%;background:#007aff;color:#fff;border:0;border-radius:12px;padding:12px;font-weight:bold;text-align:center;cursor:pointer;">閉じる</div>
+  </div>
+</div>
+
 <header>
   <h1>G-SPOT管理システム</h1>
   <p>出勤・寮・清掃・月間表・AI書き出し</p>
@@ -191,7 +203,7 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 <section id="monthly" class="page hidden">
  <div class="card"><h2 id="monthTitle">月間出勤</h2>
   <div class="row"><div><label>表示開始日</label><input id="monthBase" type="date" onchange="renderMonthly();renderDormMonthly();"></div><div><label>表示日数</label><select id="daysCount" onchange="renderMonthly();renderDormMonthly();"><option>31</option><option>30</option><option>14</option><option>7</option></select></div></div>
-  <p class="note">月間表のセルをタップすると編集できます。</p><p class="note">月間表のセルをタップすると編集できます。</p><button id="popupDebugButton" class="sub" type="button" style="margin:6px 0 10px" onclick="gspotPopupDebugOpen('ボタン反応あり')">ポップアップ確認</button><div class="tableWrap" id="monthlyTable"></div>
+  <p class="note">月間表のセルをタップすると編集できます。</p><p class="note">月間表のセルをタップすると編集できます。</p><button id="popupDebugButton" style="cursor:pointer;pointer-events:auto;position:relative;z-index:999999;background:#007aff;color:#fff" class="sub" type="button" style="margin:6px 0 10px" onclick="gspotPopupDebugOpen('ボタン反応あり')">ポップアップ確認</button><div class="tableWrap" id="monthlyTable"></div>
  </div>
  <div class="card"><h2>寮 月間表</h2><div class="tableWrap" id="dormMonthlyTable"></div></div>
 </section>
@@ -642,6 +654,57 @@ function renderMonthly(){
   h+="</tr></tbody></table>";
   el("monthlyTable").innerHTML=h;
 }
+
+function cleanDisplayForRoom(room, ds){
+  var related = dorms.filter(function(r){
+    return String(r.dormName||"")===String(room.dormName||"") && String(r.roomNo||"")===String(room.roomNo||"");
+  });
+
+  var latestDoneDate = "";
+  related.forEach(function(r){
+    if(r.cleanStatus==="清掃済み" && r.cleanDoneDate && r.cleanDoneDate<=ds){
+      if(!latestDoneDate || r.cleanDoneDate>latestDoneDate){ latestDoneDate = r.cleanDoneDate; }
+    }
+  });
+
+  if(latestDoneDate){
+    var nextInAfterDone = related.filter(function(r){
+      return r.moveIn && r.moveIn>latestDoneDate && r.status!=="空室";
+    }).sort(function(a,b){
+      return a.moveIn.localeCompare(b.moveIn);
+    })[0];
+
+    if(!nextInAfterDone || ds<nextInAfterDone.moveIn){
+      return {txt:"済", cls:" done"};
+    }
+  }
+
+  var latestOutDate = "";
+  related.forEach(function(r){
+    if(r.moveOut && r.moveOut<=ds){
+      if(!latestOutDate || r.moveOut>latestOutDate){ latestOutDate = r.moveOut; }
+    }
+  });
+
+  if(latestOutDate){
+    var doneAfterOut = related.some(function(r){
+      return r.cleanStatus==="清掃済み" && r.cleanDoneDate && r.cleanDoneDate>=latestOutDate && r.cleanDoneDate<=ds;
+    });
+
+    var nextInAfterOut = related.filter(function(r){
+      return r.moveIn && r.moveIn>latestOutDate && r.status!=="空室";
+    }).sort(function(a,b){
+      return a.moveIn.localeCompare(b.moveIn);
+    })[0];
+
+    if(!doneAfterOut && (!nextInAfterOut || ds<nextInAfterOut.moveIn)){
+      return {txt:"未", cls:" clean"};
+    }
+  }
+
+  return null;
+}
+
 function renderDormMonthly(){
   let base=parseDate(el("monthBase").value||today()),days=+el("daysCount").value||31;
   syncMasterFromDorms(false);
