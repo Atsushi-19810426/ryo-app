@@ -983,7 +983,7 @@ init();
     </label>
     <label>備考</label>
     <textarea id="shiftEditPopupNote" placeholder="テキスト入力欄"></textarea>
-    <button class="shiftEditPopupBtn" onclick="closeShiftEditPopup()">表示確認OK</button>
+    <button class="shiftEditPopupBtn" onclick="closeShiftEditPopup()">保存</button>
   </div>
 </div>
 
@@ -1074,6 +1074,179 @@ init();
     window.renderMonthly=function(){
       var r=oldRenderMonthly.apply(this,arguments);
       setTimeout(bindShiftPopupDisplay,100);
+      return r;
+    };
+  }
+})();
+</script>
+
+
+<script>
+(function(){
+  function findStaffByCellTextAndDate(cellText, ds){
+    var name="";
+    try{
+      var active=document.querySelector("td.shiftCell:hover");
+      if(active){
+        var tr=active.closest("tr");
+        if(tr){
+          var nameCell=tr.querySelector("td.name");
+          if(nameCell)name=(nameCell.textContent||"").replace("🆕","").trim();
+        }
+      }
+    }catch(e){}
+    if(!name && window.__lastShiftEditName)name=window.__lastShiftEditName;
+    var list=(window.staff||[]).filter(function(p){return String(p.name||"").trim()===String(name||"").trim();});
+    return list.find(function(p){return typeof workFor==="function" && !!workFor(p,ds);}) ||
+           list.find(function(p){return ds>=p.start&&ds<=p.end;}) ||
+           (window.staff||[]).find(function(p){return typeof workFor==="function" && !!workFor(p,ds);}) ||
+           (window.staff||[])[0] || null;
+  }
+
+  function getCellInfoFromEventTarget(td){
+    var tr=td&&td.closest?td.closest("tr"):null;
+    var name="";
+    if(tr){
+      var nameCell=tr.querySelector("td.name");
+      if(nameCell)name=(nameCell.textContent||"").replace("🆕","").trim();
+    }
+    return {name:name};
+  }
+
+  window.openShiftEditPopupSave=function(td){
+    var text=(td.textContent||"").trim();
+    var info=getCellInfoFromEventTarget(td);
+    window.__lastShiftEditName=info.name;
+
+    var table=td.closest("table");
+    var cellIndex=td.cellIndex;
+    var headerDate="";
+    var ds="";
+    try{
+      var base=parseDate(el("monthBase").value||today());
+      var dayOffset=cellIndex-1;
+      var d=new Date(base);d.setDate(base.getDate()+dayOffset);
+      ds=ymd(d);
+      headerDate=md(d)+"（"+wds[d.getDay()]+"）";
+    }catch(e){
+      ds=today();
+      headerDate=ds;
+    }
+
+    window.__lastShiftEditDate=ds;
+    var p=findStaffByCellTextAndDate(text,ds);
+    window.__lastShiftEditStaffId=p?p.id:"";
+
+    var st=(p&&p.timeStart)||"10:00", en=(p&&p.timeEnd)||"00:00", off=false, note="";
+    if(p&&p.overrides&&p.overrides[ds]){
+      var ov=p.overrides[ds];
+      st=ov.timeStart||st;
+      en=ov.timeEnd||en;
+      off=!!ov.off;
+      note=ov.note||"";
+    }else if(text==="休"){
+      off=true;
+    }else{
+      var parts=text.split("-");
+      function norm(t){
+        if(!t)return "";
+        if(t.indexOf(":")>=0){
+          var a=t.split(":");
+          return String(Number(a[0])).padStart(2,"0")+":"+a[1];
+        }
+        return String(Number(t)).padStart(2,"0")+":00";
+      }
+      if(parts.length===2){
+        st=norm(parts[0])||st;
+        en=norm(parts[1])||en;
+      }
+    }
+
+    var box=document.getElementById("shiftEditPopup");
+    if(!box)return;
+    document.getElementById("shiftEditPopupTitle").textContent="出勤編集：" + headerDate;
+    makeTimeOptions(document.getElementById("shiftEditPopupStart"),st);
+    makeTimeOptions(document.getElementById("shiftEditPopupEnd"),en);
+    document.getElementById("shiftEditPopupOff").checked=off;
+    document.getElementById("shiftEditPopupNote").value=note;
+
+    var btn=box.querySelector(".shiftEditPopupBtn");
+    if(btn){
+      btn.textContent="保存";
+      btn.onclick=function(){saveShiftEditPopup();};
+    }
+    box.style.display="flex";
+  };
+
+  window.saveShiftEditPopup=function(){
+    var ds=window.__lastShiftEditDate || today();
+    var p=(window.staff||[]).find(function(x){return String(x.id)===String(window.__lastShiftEditStaffId);});
+    if(!p){
+      var name=window.__lastShiftEditName||"";
+      p=(window.staff||[]).filter(function(x){return String(x.name||"").trim()===String(name).trim();})[0];
+    }
+    if(!p)return;
+    if(!p.overrides)p.overrides={};
+    p.overrides[ds]={
+      timeStart:document.getElementById("shiftEditPopupStart").value,
+      timeEnd:document.getElementById("shiftEditPopupEnd").value,
+      off:document.getElementById("shiftEditPopupOff").checked,
+      note:document.getElementById("shiftEditPopupNote").value||""
+    };
+    save();
+    if(typeof closeShiftEditPopup==="function")closeShiftEditPopup();
+    if(typeof renderMonthly==="function")renderMonthly();
+    if(typeof renderStats==="function")renderStats();
+  };
+
+  function bindShiftSavePopup(){
+    var box=document.getElementById("monthlyTable");
+    if(!box || box.__shiftSavePopupBound)return;
+    box.__shiftSavePopupBound=true;
+    box.addEventListener("click",function(e){
+      var td=e.target.closest("td");
+      if(!td)return;
+      var text=(td.textContent||"").trim();
+      if(td.className.indexOf("shiftCell")>=0 || text==="休" || /\d{1,2}(:30)?-\d{1,2}/.test(text)){
+        e.preventDefault();
+        e.stopPropagation();
+        window.openShiftEditPopupSave(td);
+      }
+    },true);
+    box.addEventListener("touchend",function(e){
+      var td=e.target.closest("td");
+      if(!td)return;
+      var text=(td.textContent||"").trim();
+      if(td.className.indexOf("shiftCell")>=0 || text==="休" || /\d{1,2}(:30)?-\d{1,2}/.test(text)){
+        e.preventDefault();
+        e.stopPropagation();
+        window.openShiftEditPopupSave(td);
+      }
+    },true);
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(bindShiftSavePopup,300);
+    setTimeout(bindShiftSavePopup,1200);
+  });
+  window.addEventListener("load",function(){
+    setTimeout(bindShiftSavePopup,300);
+    setTimeout(bindShiftSavePopup,1500);
+  });
+
+  var oldShowPage=window.showPage;
+  if(typeof oldShowPage==="function"){
+    window.showPage=function(id){
+      var r=oldShowPage.apply(this,arguments);
+      if(id==="monthly")setTimeout(bindShiftSavePopup,300);
+      return r;
+    };
+  }
+  var oldRenderMonthly=window.renderMonthly;
+  if(typeof oldRenderMonthly==="function"){
+    window.renderMonthly=function(){
+      var r=oldRenderMonthly.apply(this,arguments);
+      setTimeout(bindShiftSavePopup,100);
       return r;
     };
   }
