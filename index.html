@@ -1056,7 +1056,7 @@ init();
         window.openShiftEditPopupDisplay(text);
       }
     },true);
-    box.addEventListener("touchend",function(e){
+    box.addEventListener("gspotDisabledTouchend",function(e){
       var td=e.target.closest("td");
       if(!td)return;
       var text=(td.textContent||"").trim();
@@ -1226,7 +1226,7 @@ init();
         window.openShiftEditPopupSave(td);
       }
     },true);
-    box.addEventListener("touchend",function(e){
+    box.addEventListener("gspotDisabledTouchend",function(e){
       var td=e.target.closest("td");
       if(!td)return;
       var text=(td.textContent||"").trim();
@@ -1419,7 +1419,7 @@ init();
       }
     },true);
 
-    box.addEventListener("touchend",function(e){
+    box.addEventListener("gspotDisabledTouchend",function(e){
       var td=e.target.closest("td");
       if(!td)return;
       var text=(td.textContent||"").trim();
@@ -1578,7 +1578,7 @@ init();
       e.stopImmediatePropagation();
       openDormEditPopup(td);
     },true);
-    box.addEventListener("touchend",function(e){
+    box.addEventListener("gspotDisabledTouchend",function(e){
       var td=e.target.closest("td");
       if(!td||td.classList.contains("name"))return;
       e.preventDefault();
@@ -1604,6 +1604,104 @@ init();
       return r;
     };
   }
+})();
+</script>
+
+
+
+<!-- Ver60: iPhone誤タップ対策・月間表タップ編集ガード -->
+<script>
+(function(){
+  if(window.__GSPOT_VER60_TOUCH_GUARD__)return;
+  window.__GSPOT_VER60_TOUCH_GUARD__=true;
+
+  var touch={active:false,x:0,y:0,moved:false,start:0};
+  var MOVE_LIMIT=14;
+
+  document.addEventListener('touchstart',function(e){
+    var t=e.touches&&e.touches[0];
+    if(!t)return;
+    touch.active=true;
+    touch.x=t.clientX;
+    touch.y=t.clientY;
+    touch.moved=false;
+    touch.start=Date.now();
+  },true);
+
+  document.addEventListener('touchmove',function(e){
+    if(!touch.active)return;
+    var t=e.touches&&e.touches[0];
+    if(!t)return;
+    if(Math.abs(t.clientX-touch.x)>MOVE_LIMIT || Math.abs(t.clientY-touch.y)>MOVE_LIMIT){
+      touch.moved=true;
+    }
+  },true);
+
+  document.addEventListener('touchend',function(e){
+    if(touch.moved){
+      // スクロール時は既存のポップアップ処理までイベントを届かせない
+      e.stopImmediatePropagation();
+      window.__GSPOT_IGNORE_NEXT_CLICK__=Date.now();
+    }
+    touch.active=false;
+  },true);
+
+  function ignoreClickBecauseScroll(){
+    return window.__GSPOT_IGNORE_NEXT_CLICK__ && (Date.now()-window.__GSPOT_IGNORE_NEXT_CLICK__<450);
+  }
+
+  function isShiftEditCell(td){
+    if(!td || td.classList.contains('name'))return false;
+    return td.className.indexOf('shiftCell')>=0 || td.classList.contains('jsShiftCell');
+  }
+
+  function isDormMonthlyCell(td){
+    if(!td || td.classList.contains('name'))return false;
+    var box=document.getElementById('dormMonthlyTable');
+    return !!(box && box.contains(td));
+  }
+
+  // 月間出勤：未登録日も含めて、タップ時だけ編集ポップアップを開く
+  document.addEventListener('click',function(e){
+    if(ignoreClickBecauseScroll()){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      return;
+    }
+    var td=e.target&&e.target.closest?e.target.closest('td'):null;
+    if(!td)return;
+    var monthly=document.getElementById('monthlyTable');
+    if(monthly && monthly.contains(td) && isShiftEditCell(td)){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if(typeof window.openShiftEditPopupFinal==='function'){
+        window.openShiftEditPopupFinal(td);
+      }else if(typeof window.openShiftPopup==='function'){
+        var ds=td.getAttribute('data-date');
+        var sid=td.getAttribute('data-staffid');
+        if(sid&&ds)window.openShiftPopup(sid,ds);
+      }
+    }
+  },true);
+
+  // 寮月間：スクロールでは開かず、タップ時だけ直接編集
+  document.addEventListener('click',function(e){
+    if(ignoreClickBecauseScroll())return;
+    var td=e.target&&e.target.closest?e.target.closest('td'):null;
+    if(isDormMonthlyCell(td)){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if(typeof window.openDormEditPopup==='function')window.openDormEditPopup(td);
+      else if(typeof window.openDormModal==='function'){
+        var tr=td.closest('tr'), nameCell=tr?tr.querySelector('td.name'):null;
+        var raw=nameCell?(nameCell.textContent||'').trim():'';
+        var idx=raw.lastIndexOf('-');
+        var base=parseDate(el('monthBase').value||today());
+        var d=new Date(base);d.setDate(base.getDate()+td.cellIndex-1);
+        if(idx>=0)window.openDormModal({dormName:raw.slice(0,idx),roomNo:raw.slice(idx+1)},ymd(d));
+      }
+    }
+  },true);
 })();
 </script>
 
