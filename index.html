@@ -85,6 +85,8 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 .shiftPopupBox textarea{height:52px}
 .shiftCell{cursor:pointer}
 
+
+#popupTestBox.hidden{display:none!important}
 </style>
 </head>
 <body>
@@ -350,6 +352,29 @@ function bindShiftCellClick(){
 }
 
 bindShiftCellClick();
+
+function openPopupTest(info){
+  var box=document.getElementById("popupTestBox");
+  var txt=document.getElementById("popupTestText");
+  if(txt)txt.textContent=info || "クリック反応あり";
+  if(box)box.classList.remove("hidden");
+}
+function closePopupTest(){
+  var box=document.getElementById("popupTestBox");
+  if(box)box.classList.add("hidden");
+}
+function bindPopupTestOnce(){
+  if(window.__popupTestBound)return;
+  window.__popupTestBound=true;
+  document.addEventListener("click",function(e){
+    var cell=e.target.closest("td.shiftCell");
+    if(!cell)return;
+    var text=(cell.textContent||"").trim();
+    openPopupTest("セルクリック反応あり： " + text);
+  },true);
+}
+
+bindPopupTestOnce();
 init();alert("復元しました")}catch(e){alert("復元できませんでした")}};r.readAsText(file)}
 function showStorageInfo(){el("storageInfo").value=JSON.stringify({staff:staff.length,dorms:dorms.length,dormMaster:dormMaster.length,keys:Object.keys(localStorage)},null,2)}
 function addStaff(){let name=el("name").value.trim();if(!name)return alert("源氏名を入力してください");staff.push({id:Date.now(),name,newbie:el("newbie").value==="1",start:el("start").value,end:el("end").value,timeStart:el("timeStart").value,timeEnd:el("timeEnd").value,note:el("staffNote").value,overrides:{}});el("name").value="";if(el("staffNote"))el("staffNote").value="";save();renderStaff();renderMonthly();renderEditStaffSelect()}
@@ -767,5 +792,14 @@ function bindShiftCellClick(){
 bindShiftCellClick();
 init();
 </script>
+
+<div id="popupTestBox" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:9999;display:flex;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:18px;padding:18px;width:min(340px,90%);box-shadow:0 18px 50px rgba(0,0,0,.25);">
+    <h2 style="margin:0 0 10px;font-size:18px;">セル反応テスト</h2>
+    <p id="popupTestText" style="font-size:14px;line-height:1.6;margin:0 0 14px;">ここに情報が表示されます</p>
+    <button onclick="closePopupTest()" style="width:100%;background:#007aff;color:#fff;border:0;border-radius:12px;padding:12px;font-weight:bold;">閉じる</button>
+  </div>
+</div>
+
 </body>
 </html>
