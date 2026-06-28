@@ -74,6 +74,17 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 .shiftCell{min-width:122px}
 @media(max-width:760px){.inlineShiftBox{min-width:112px}.inlineShiftBox select{font-size:11px;min-width:48px;padding:4px}.shiftCell{min-width:112px}}
 
+
+.shiftPopup{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding-top:42px}
+.shiftPopupBox{background:#fff;width:min(360px,calc(100% - 24px));border-radius:18px;padding:14px;box-shadow:0 16px 50px rgba(0,0,0,.25);border:1px solid #e5e7eb}
+.shiftPopupHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.shiftPopupHead b{font-size:16px}
+.shiftPopupClose{box-shadow:none;background:#f3f4f6;border-radius:999px;padding:4px 10px}
+.shiftPopupRow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.shiftPopupBox select,.shiftPopupBox input,.shiftPopupBox textarea{font-size:14px;padding:8px;border-radius:10px}
+.shiftPopupBox textarea{height:52px}
+.shiftCell{cursor:pointer}
+
 </style>
 </head>
 <body>
@@ -101,7 +112,7 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   </div>
   <div class="grid2">
     <button class="primary" onclick="showPage('staff')">出勤登録</button>
-    <button class="sub" onclick="showPage('shiftEdit')">月間表で編集</button>
+    
     <button class="sub" onclick="showPage('dorm')">入寮登録</button>
     <button class="sub" onclick="showPage('vacancy')">空室確認</button>
     <button class="good" onclick="showPage('ai')">AI書き出し</button>
@@ -128,7 +139,7 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
     <h2>月間表</h2>
     <div class="grid2">
       <button class="primary" onclick="showPage('monthly')">月間表を見る</button>
-      <button class="sub" onclick="showPage('shiftEdit')">月間表で編集</button>
+      
       <button onclick="showPage('home')">ホームへ戻る</button>
     </div>
   </div>
@@ -178,7 +189,7 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 <section id="monthly" class="page hidden">
  <div class="card"><h2 id="monthTitle">月間出勤</h2>
   <div class="row"><div><label>表示開始日</label><input id="monthBase" type="date" onchange="renderMonthly();renderDormMonthly();"></div><div><label>表示日数</label><select id="daysCount" onchange="renderMonthly();renderDormMonthly();"><option>31</option><option>30</option><option>14</option><option>7</option></select></div></div>
-  <p class="note">出勤セルをタップすると開始・終了・休みを変更できます。</p><p class="note">月間表は確認用です。編集は「月間表で編集」から行います。</p><div class="tableWrap" id="monthlyTable"></div>
+  <p class="note">月間表のセルをタップすると編集できます。</p><p class="note">月間表のセルをタップすると編集できます。</p><div class="tableWrap" id="monthlyTable"></div>
  </div>
  <div class="card"><h2>寮 月間表</h2><div class="tableWrap" id="dormMonthlyTable"></div></div>
 </section>
@@ -412,6 +423,83 @@ function saveInlineShift(staffId,castName,ds){
   // 表示崩れ防止のため全体再描画はしない。合計更新が必要な場合は表示開始日変更や更新で反映。
 }
 
+
+function monthCastGroups(){
+  var map={};
+  staff.forEach(function(p){
+    var key=String(p.name||"").trim()||"未設定";
+    if(!map[key])map[key]=[];
+    map[key].push(p);
+  });
+  return Object.keys(map).sort(function(a,b){return a.localeCompare(b,"ja")}).map(function(name){
+    return {name:name,list:map[name].sort(function(a,b){return String(a.start||"").localeCompare(String(b.start||""));})};
+  });
+}
+function monthWorkForGroup(group,ds){
+  var hit=null;
+  group.list.forEach(function(p){
+    var w=workFor(p,ds);
+    if(w&&!hit)hit={staff:p,work:w};
+  });
+  return hit;
+}
+function monthFindStaff(name,ds){
+  var list=staff.filter(function(p){return String(p.name||"").trim()===String(name||"").trim();});
+  return list.find(function(p){return !!workFor(p,ds);}) ||
+         list.find(function(p){return ds>=p.start&&ds<=p.end;}) ||
+         list[0] || null;
+}
+function openShiftPopupByName(name,ds){
+  var p=monthFindStaff(name,ds);
+  if(p)openShiftPopup(p.id,ds);
+}
+function openShiftPopup(id,ds){
+  var p=staff.find(function(x){return String(x.id)===String(id);});
+  if(!p)return;
+  if(!p.overrides)p.overrides={};
+  var ov=p.overrides[ds]||{};
+  el("shiftPopupStaffId").value=p.id;
+  el("shiftPopupDate").value=ds;
+  el("shiftPopupDateView").value=ds;
+  el("shiftPopupTitle").textContent=md(parseDate(ds))+"（"+wds[parseDate(ds).getDay()]+"）";
+  makeTimeOptions(el("shiftPopupStart"),ov.timeStart||p.timeStart||"10:00");
+  makeTimeOptions(el("shiftPopupEnd"),ov.timeEnd||p.timeEnd||"00:00");
+  el("shiftPopupOff").checked=!!ov.off;
+  el("shiftPopupNote").value=ov.note||"";
+  el("shiftPopup").classList.remove("hidden");
+}
+function changeShiftPopupDate(){
+  openShiftPopup(el("shiftPopupStaffId").value,el("shiftPopupDateView").value);
+}
+function saveShiftPopup(){
+  var p=staff.find(function(x){return String(x.id)===String(el("shiftPopupStaffId").value);});
+  var ds=el("shiftPopupDate").value;
+  if(!p||!ds)return;
+  if(!p.overrides)p.overrides={};
+  p.overrides[ds]={
+    timeStart:el("shiftPopupStart").value,
+    timeEnd:el("shiftPopupEnd").value,
+    off:el("shiftPopupOff").checked,
+    note:el("shiftPopupNote").value||""
+  };
+  save();
+  closeShiftPopup();
+  renderMonthly();
+  if(typeof renderStats==="function")renderStats();
+}
+function clearShiftPopup(){
+  var p=staff.find(function(x){return String(x.id)===String(el("shiftPopupStaffId").value);});
+  var ds=el("shiftPopupDate").value;
+  if(p&&p.overrides&&p.overrides[ds])delete p.overrides[ds];
+  save();
+  closeShiftPopup();
+  renderMonthly();
+  if(typeof renderStats==="function")renderStats();
+}
+function closeShiftPopup(){
+  el("shiftPopup").classList.add("hidden");
+}
+
 function renderMonthly(){
   var base=parseDate(el("monthBase").value||today()),days=Number(el("daysCount").value||31);
   el("monthTitle").textContent=(base.getMonth()+1)+"月出勤";
@@ -427,26 +515,18 @@ function renderMonthly(){
   }
   h+="</tr></thead><tbody>";
 
-  var groups = (typeof castGroupsForMonthly==="function") ? castGroupsForMonthly() :
-    (typeof groupedCastList==="function") ? groupedCastList() :
-    staff.map(function(p){return {name:p.name,list:[p]};});
-
-  groups.forEach(function(g){
+  monthCastGroups().forEach(function(g){
     var isNew=g.list.some(function(p){return p.newbie;});
     h+="<tr><td class='name'>"+esc(g.name)+(isNew?" 🆕":"")+"</td>";
     for(var i=0;i<days;i++){
       var d=new Date(base);d.setDate(base.getDate()+i);
-      var ds=ymd(d),cls=dateClass(d),hit=null;
-      g.list.forEach(function(p){
-        var w=workFor(p,ds);
-        if(w&&!hit)hit={staff:p,work:w};
-      });
+      var ds=ymd(d),hit=monthWorkForGroup(g,ds),cls=dateClass(d);
       if(!hit){
-        h+="<td class='"+cls+" shiftCell'>休</td>";
+        h+="<td class='"+cls+" shiftCell' onclick='openShiftPopupByName("+JSON.stringify(g.name)+","+JSON.stringify(ds)+")'>休</td>";
       }else{
         var w=hit.work;
         var wc=w.hours>=10?"green":(w.hours<=8?"orange":"");
-        h+="<td class='"+cls+" "+wc+" shiftCell'>"+shortRange(w.timeStart,w.timeEnd)+"</td>";
+        h+="<td class='"+cls+" "+wc+" shiftCell' onclick='openShiftPopup("+JSON.stringify(hit.staff.id)+","+JSON.stringify(ds)+")'>"+shortRange(w.timeStart,w.timeEnd)+"</td>";
       }
     }
     h+="</tr>";
