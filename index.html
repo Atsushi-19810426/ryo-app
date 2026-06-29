@@ -110,6 +110,12 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 .dormEditPopupBtn{width:100%;background:#007aff;color:#fff;border:0;border-radius:12px;padding:12px;font-weight:bold;margin-top:10px}
 #dormMonthlyTable td:not(.name){cursor:pointer}
 
+
+.wpBadge{display:inline-block;border-radius:999px;padding:2px 7px;font-size:10px;font-weight:900;margin-left:4px;vertical-align:middle}
+.wp-gspot{background:#e0f2fe;color:#075985}
+.wp-bettei{background:#fef3c7;color:#92400e}
+.wp-both{background:#ede9fe;color:#5b21b6}
+
 </style>
 </head>
 <body>
@@ -176,7 +182,7 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 
 <section id="staff" class="page hidden">
  <div class="card"><h2>出勤登録</h2>
-  <div class="row"><div><label>源氏名</label><input id="name" placeholder="例：いずな"></div><div><label>新人</label><select id="newbie"><option value="0">通常</option><option value="1">新人</option></select></div></div><div class="row"><div><label>出勤場所</label><select id="workPlace"><option>G-SPOT</option><option>別邸</option></select></div><div></div></div>
+  <div class="row"><div><label>源氏名</label><input id="name" placeholder="例：いずな"></div><div><label>新人</label><select id="newbie"><option value="0">通常</option><option value="1">新人</option></select></div></div><div class="row"><div><label>出勤場所</label><select id="workPlace"><option>G-SPOT</option><option>別邸</option><option>G-SPOT/別邸</option></select></div><div></div></div>
   <div class="row"><div><label>開始日</label><input id="start" type="date"></div><div><label>終了日</label><input id="end" type="date"></div></div>
   <div class="row"><div><label>出勤開始</label><select id="timeStart"></select></div><div><label>出勤終了</label><select id="timeEnd"></select></div></div>
   <label>備考</label><textarea id="staffNote" placeholder="出勤に関する備考"></textarea><button class="primary" onclick="addStaff()">登録</button>
@@ -311,6 +317,13 @@ function fmt(n){return Number.isInteger(n)?String(n):n.toFixed(1)}
 function shortTime(t){if(!t)return"";let [h,m]=t.split(":");h=String(+h);return (m||"00")==="00"?h:h+":"+m}
 function shortRange(a,b){return shortTime(a)+"-"+shortTime(b)}
 function makeTimeOptions(sel,val){if(!sel)return;sel.innerHTML="";for(let h=0;h<24;h++){for(let m of ["00","30"]){let v=pad(h)+":"+m;let o=document.createElement("option");o.value=v;o.textContent=shortTime(v);sel.appendChild(o)}}if(val)sel.value=val}
+
+function workPlaceBadge(wp){
+  wp=wp||"G-SPOT";
+  let cls=wp==="別邸"?"wp-bettei":(wp==="G-SPOT/別邸"?"wp-both":"wp-gspot");
+  return `<span class="wpBadge ${cls}">${esc(wp)}</span>`;
+}
+
 function showPage(id){document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));document.querySelectorAll(".menu button").forEach(b=>b.classList.remove("active"));el(id).classList.remove("hidden");el("tab_"+id).classList.add("active");if(id==="staff")renderStaff();if(id==="shiftEdit")renderShiftEditor();if(id==="master")renderMaster();if(id==="dorm"){syncMasterFromDorms();renderDorm();updateRoomSelect();updateDormSelect()}if(id==="vacancy")renderVacancy();if(id==="monthly"){renderMonthly();renderDormMonthly()}if(id==="ai"&&!el("updateDate").value)el("updateDate").value=today();renderStats();renderDashboard()}
 function init(){backupBeforeUpdateOnce();staff.forEach(function(p){if(!p.workPlace)p.workPlace="G-SPOT";});let d=new Date();["start","monthBase","editBase","updateDate","moveIn","cleanDate","cleanDoneDate"].forEach(id=>{if(el(id))el(id).value=today()});el("end").value=ymd(new Date(d.getFullYear(),d.getMonth(),d.getDate()+30));makeTimeOptions(el("timeStart"),"10:00");makeTimeOptions(el("timeEnd"),"00:00");syncMasterFromDorms();renderEditStaffSelect();renderStaff();renderMaster();renderDorm();renderMonthly();renderDormMonthly();updateDormSelect();renderStats();renderDashboard()}
 function occupiedRecord(room,ds){return dorms.find(r=>r.dormName===room.dormName&&r.roomNo===room.roomNo&&r.status!=="空室"&&((r.moveIn&&r.moveOut&&ds>=r.moveIn&&ds<=r.moveOut)||(r.moveIn&&!r.moveOut&&ds>=r.moveIn)||(!r.moveIn&&r.status==="入寮中")))}
@@ -418,7 +431,7 @@ function closePopupTest(){
 init();alert("復元しました")}catch(e){alert("復元できませんでした")}};r.readAsText(file)}
 function showStorageInfo(){el("storageInfo").value=JSON.stringify({staff:staff.length,dorms:dorms.length,dormMaster:dormMaster.length,keys:Object.keys(localStorage)},null,2)}
 function addStaff(){let name=el("name").value.trim();if(!name)return alert("源氏名を入力してください");staff.push({id:Date.now(),name,newbie:el("newbie").value==="1",workPlace:(el("workPlace")?el("workPlace").value:"G-SPOT"),start:el("start").value,end:el("end").value,timeStart:el("timeStart").value,timeEnd:el("timeEnd").value,note:el("staffNote").value,overrides:{}});el("name").value="";if(el("staffNote"))el("staffNote").value="";save();renderStaff();renderMonthly();renderEditStaffSelect()}
-function renderStaff(){let box=el("staffList");box.innerHTML=staff.length?"":"<p class='note'>登録なし</p>";staff.forEach(p=>{let div=document.createElement("div");div.className="item";div.innerHTML=`<b>${esc(p.name)}</b>${p.newbie?"<span class='badge new'>新人</span>":""}<span class="badge info">${esc(p.workPlace||"G-SPOT")}</span><div class='note'>${p.start}〜${p.end} / ${shortRange(p.timeStart,p.timeEnd)}</div>${p.note?`<div class="note">備考：${esc(p.note)}</div>`:""}<div class='row3'><button class='sub' onclick='openStaffMonth(${p.id})'>月間表で編集</button><button onclick='toggleNewbie(${p.id})'>新人切替</button><button class='danger' onclick='removeStaff(${p.id})'>削除</button></div>`;box.appendChild(div)})}
+function renderStaff(){let box=el("staffList");box.innerHTML=staff.length?"":"<p class='note'>登録なし</p>";staff.forEach(p=>{let div=document.createElement("div");div.className="item";div.innerHTML=`<b>${esc(p.name)}</b>${p.newbie?"<span class='badge new'>新人</span>":""}${workPlaceBadge(p.workPlace||"G-SPOT")}<div class='note'>${p.start}〜${p.end} / ${shortRange(p.timeStart,p.timeEnd)}</div>${p.note?`<div class="note">備考：${esc(p.note)}</div>`:""}<div class='row3'><button class='sub' onclick='openStaffMonth(${p.id})'>月間表で編集</button><button onclick='toggleNewbie(${p.id})'>新人切替</button><button class='danger' onclick='removeStaff(${p.id})'>削除</button></div>`;box.appendChild(div)})}
 function openStaffMonth(id){showPage("shiftEdit");el("editStaffSelect").value=String(id);renderShiftEditor()}
 function toggleNewbie(id){let p=staff.find(x=>x.id===id);if(p){p.newbie=!p.newbie;save();renderStaff();renderMonthly()}}
 function removeStaff(id){if(confirm("削除しますか？")){staff=staff.filter(x=>x.id!==id);save();renderStaff();renderMonthly();renderEditStaffSelect()}}
@@ -697,7 +710,7 @@ function renderMonthly(){
 
   sortMonthlyGroups(monthCastGroups(),base,days).forEach(function(g){
     var isNew=g.list.some(function(p){return p.newbie;});
-    h+="<tr><td class='name'>"+esc(g.name)+(isNew?" 🆕":"")+"</td>";
+    var wp=(g.list&&g.list[0]?(g.list[0].workPlace||"G-SPOT"):"G-SPOT");h+="<tr><td class='name'>"+esc(g.name)+(isNew?" 🆕":"")+workPlaceBadge(wp)+"</td>";
     for(var i=0;i<days;i++){
       var d=new Date(base);d.setDate(base.getDate()+i);
       var ds=ymd(d),hit=monthWorkForGroup(g,ds),cls=dateClass(d);
