@@ -172,6 +172,20 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   .wpBadge{font-size:8.3px;padding:1px 4px}
 }
 
+
+/* Ver67: 月間表の源氏名横ラベルを直接表示 */
+#monthlyTable th,#monthlyTable td{font-size:11px}
+#monthlyTable .name{font-size:11px;min-width:118px;white-space:nowrap}
+.wpBadge{display:inline-block;border-radius:999px;padding:1px 5px;font-size:8.8px;font-weight:900;margin-left:4px;vertical-align:middle;line-height:1.45}
+.wp-gspot{background:#e0f2fe;color:#075985}
+.wp-bettei{background:#fef3c7;color:#92400e}
+.wp-both{background:#ede9fe;color:#5b21b6}
+@media(max-width:760px){
+  #monthlyTable th,#monthlyTable td{font-size:10.5px}
+  #monthlyTable .name{font-size:10.5px;min-width:112px}
+  .wpBadge{font-size:8.3px;padding:1px 4px}
+}
+
 </style>
 </head>
 <body>
@@ -374,17 +388,17 @@ function shortTime(t){if(!t)return"";let [h,m]=t.split(":");h=String(+h);return 
 function shortRange(a,b){return shortTime(a)+"-"+shortTime(b)}
 function makeTimeOptions(sel,val){if(!sel)return;sel.innerHTML="";for(let h=0;h<24;h++){for(let m of ["00","30"]){let v=pad(h)+":"+m;let o=document.createElement("option");o.value=v;o.textContent=shortTime(v);sel.appendChild(o)}}if(val)sel.value=val}
 
+
 function workPlaceBadge(wp){
   wp=wp||"G-SPOT";
-  let label=wp==="G-SPOT/別邸"?"G/別":wp;
-  let cls=wp==="別邸"?"wp-bettei":(wp==="G-SPOT/別邸"?"wp-both":"wp-gspot");
-  return `<span class="wpBadge ${cls}" title="${esc(wp)}">${esc(label)}</span>`;
+  var label=wp==="G-SPOT/別邸"?"G/別":wp;
+  var cls=wp==="別邸"?"wp-bettei":(wp==="G-SPOT/別邸"?"wp-both":"wp-gspot");
+  return '<span class="wpBadge '+cls+'" title="'+esc(wp)+'">'+esc(label)+'</span>';
 }
 function groupDisplayWorkPlace(group,base,days){
-  // 同名CAST内で「別邸」や「G-SPOT/別邸」へ変更された値を優先して表示する
-  let places=(group.list||[]).map(p=>p.workPlace||"G-SPOT");
-  if(places.includes("G-SPOT/別邸"))return "G-SPOT/別邸";
-  if(places.includes("別邸"))return "別邸";
+  var places=(group.list||[]).map(function(p){return p.workPlace||"G-SPOT";});
+  if(places.indexOf("G-SPOT/別邸")>=0)return "G-SPOT/別邸";
+  if(places.indexOf("別邸")>=0)return "別邸";
   return "G-SPOT";
 }
 function syncWorkPlaceByName(name,wp){
@@ -787,7 +801,9 @@ function renderMonthly(){
 
   sortMonthlyGroups(monthCastGroups(),base,days).forEach(function(g){
     var isNew=g.list.some(function(p){return p.newbie;});
-    var wp=groupDisplayWorkPlace(g,base,days);h+="<tr><td class='name'>"+esc(g.name)+(isNew?" 🆕":"")+workPlaceBadge(wp)+"</td>";
+    var wp=groupDisplayWorkPlace(g,base,days);
+    h+="<tr><td class='name'>"+esc(g.name)+(isNew?" 🆕":"")+" "+workPlaceBadge(wp)+"</td>";
+
     for(var i=0;i<days;i++){
       var d=new Date(base);d.setDate(base.getDate()+i);
       var ds=ymd(d),hit=monthWorkForGroup(g,ds),cls=dateClass(d);
@@ -795,8 +811,10 @@ function renderMonthly(){
         h+="<td class='"+cls+" shiftCell jsShiftCell' data-cast='"+esc(g.name)+"' data-date='"+ds+"'>休</td>";
       }else{
         var w=hit.work;
+        var place=hit.staff.workPlace||"G-SPOT";
         var wc=w.hours>=10?"green":(w.hours<=8?"orange":"");
-        h+="<td class='"+cls+" "+wc+" shiftCell jsShiftCell' data-staffid='"+esc(hit.staff.id)+"' data-cast='"+esc(g.name)+"' data-date='"+ds+"'>"+shortRange(w.timeStart,w.timeEnd)+(((hit.staff.workPlace||"G-SPOT")==="別邸")?"<br><span class='badge info'>別邸</span>":"")+"</td>";
+        var placeMini=place==="別邸"?"<br><span class='wpBadge wp-bettei'>別邸</span>":(place==="G-SPOT/別邸"?"<br><span class='wpBadge wp-both'>G/別</span>":"");
+        h+="<td class='"+cls+" "+wc+" shiftCell jsShiftCell' data-staffid='"+esc(hit.staff.id)+"' data-cast='"+esc(g.name)+"' data-date='"+ds+"'>"+shortRange(w.timeStart,w.timeEnd)+placeMini+"</td>";
       }
     }
     h+="</tr>";
@@ -810,56 +828,6 @@ function renderMonthly(){
   }
   h+="</tr></tbody></table>";
   el("monthlyTable").innerHTML=h;
-}
-
-function cleanDisplayForRoom(room, ds){
-  var related = dorms.filter(function(r){
-    return String(r.dormName||"")===String(room.dormName||"") && String(r.roomNo||"")===String(room.roomNo||"");
-  });
-
-  var latestDoneDate = "";
-  related.forEach(function(r){
-    if(r.cleanStatus==="清掃済み" && r.cleanDoneDate && r.cleanDoneDate<=ds){
-      if(!latestDoneDate || r.cleanDoneDate>latestDoneDate){ latestDoneDate = r.cleanDoneDate; }
-    }
-  });
-
-  if(latestDoneDate){
-    var nextInAfterDone = related.filter(function(r){
-      return r.moveIn && r.moveIn>latestDoneDate && r.status!=="空室";
-    }).sort(function(a,b){
-      return a.moveIn.localeCompare(b.moveIn);
-    })[0];
-
-    if(!nextInAfterDone || ds<nextInAfterDone.moveIn){
-      return {txt:"済", cls:" done"};
-    }
-  }
-
-  var latestOutDate = "";
-  related.forEach(function(r){
-    if(r.moveOut && r.moveOut<=ds){
-      if(!latestOutDate || r.moveOut>latestOutDate){ latestOutDate = r.moveOut; }
-    }
-  });
-
-  if(latestOutDate){
-    var doneAfterOut = related.some(function(r){
-      return r.cleanStatus==="清掃済み" && r.cleanDoneDate && r.cleanDoneDate>=latestOutDate && r.cleanDoneDate<=ds;
-    });
-
-    var nextInAfterOut = related.filter(function(r){
-      return r.moveIn && r.moveIn>latestOutDate && r.status!=="空室";
-    }).sort(function(a,b){
-      return a.moveIn.localeCompare(b.moveIn);
-    })[0];
-
-    if(!doneAfterOut && (!nextInAfterOut || ds<nextInAfterOut.moveIn)){
-      return {txt:"未", cls:" clean"};
-    }
-  }
-
-  return null;
 }
 
 function renderDormMonthly(){
@@ -2007,6 +1975,78 @@ init();
   });
   window.addEventListener("load",function(){
     setTimeout(function(){ensureWorkPlaceSelect("G-SPOT");applyWorkPlaceLabels();},500);
+  });
+})();
+</script>
+
+
+<script>
+(function(){
+  function getSelectedWorkPlace(){
+    var s=document.getElementById("shiftEditPopupWorkPlace");
+    return s?(s.value||"G-SPOT"):"G-SPOT";
+  }
+  function getPopupTargetStaff(){
+    var id=window.__shiftWpStaffId||window.__shiftPopupStaffId;
+    if(id){
+      var p=(staff||[]).find(function(x){return String(x.id)===String(id);});
+      if(p)return p;
+    }
+    var sid=document.getElementById("shiftPopupStaffId");
+    if(sid){
+      var p2=(staff||[]).find(function(x){return String(x.id)===String(sid.value);});
+      if(p2)return p2;
+    }
+    return null;
+  }
+
+  window.forceRefreshMonthlyWorkPlaceLabels=function(){
+    if(typeof renderMonthly==="function")renderMonthly();
+    if(typeof renderStats==="function")renderStats();
+    if(typeof renderStaff==="function")renderStaff();
+  };
+
+  var oldFixed=window.saveShiftEditPopupWorkPlaceFixed;
+  window.saveShiftEditPopupWorkPlaceFixed=function(){
+    var wp=getSelectedWorkPlace();
+    var p=getPopupTargetStaff();
+    if(p && typeof syncWorkPlaceByName==="function")syncWorkPlaceByName(p.name,wp);
+    if(typeof oldFixed==="function"){
+      var r=oldFixed.apply(this,arguments);
+      setTimeout(forceRefreshMonthlyWorkPlaceLabels,0);
+      return r;
+    }
+  };
+
+  var oldFinal=window.saveShiftEditPopupFinal;
+  window.saveShiftEditPopupFinal=function(){
+    var wp=getSelectedWorkPlace();
+    var p=getPopupTargetStaff();
+    if(p && typeof syncWorkPlaceByName==="function")syncWorkPlaceByName(p.name,wp);
+    if(typeof oldFinal==="function"){
+      var r=oldFinal.apply(this,arguments);
+      setTimeout(forceRefreshMonthlyWorkPlaceLabels,0);
+      return r;
+    }
+    save();
+    var box=document.getElementById("shiftEditPopup");
+    if(box)box.style.display="none";
+    forceRefreshMonthlyWorkPlaceLabels();
+  };
+
+  document.addEventListener("change",function(e){
+    if(e.target && e.target.id==="shiftEditPopupWorkPlace"){
+      var p=getPopupTargetStaff();
+      if(p && typeof syncWorkPlaceByName==="function"){
+        syncWorkPlaceByName(p.name,e.target.value||"G-SPOT");
+        save();
+        forceRefreshMonthlyWorkPlaceLabels();
+      }
+    }
+  },true);
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(function(){if(typeof renderMonthly==="function" && document.getElementById("monthlyTable"))renderMonthly();},300);
   });
 })();
 </script>
