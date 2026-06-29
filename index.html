@@ -607,7 +607,39 @@ function openStaffMonth(id){showPage("shiftEdit");el("editStaffSelect").value=St
 function toggleNewbie(id){let p=staff.find(x=>x.id===id);if(p){p.newbie=!p.newbie;save();renderStaff();renderMonthly()}}
 function removeStaff(id){if(confirm("削除しますか？")){staff=staff.filter(x=>x.id!==id);save();renderStaff();renderMonthly();renderEditStaffSelect()}}
 function workFor(p,ds){if(ds<p.start||ds>p.end)return null;let ov=(p.overrides||{})[ds];if(ov&&ov.off)return null;let st=ov&&ov.timeStart?ov.timeStart:p.timeStart;let en=ov&&ov.timeEnd?ov.timeEnd:p.timeEnd;let h=diffHours(st,en);if(h<=0)return null;return{hours:h,point:point(h),timeStart:st,timeEnd:en}}
-function totals(ds){let real=0,calc=0,newbies=[];for(let p of staff){let w=workFor(p,ds);if(w){if((p.workPlace||"G-SPOT")!=="別邸"){real++;calc+=w.point}if(p.newbie)newbies.push(p.name)}}return{real,calc,newbies}}
+function totals(ds){
+  let byName={};
+
+  for(let p of staff){
+    let name=String(p.name||"").trim();
+    if(!name)continue;
+
+    let w=workFor(p,ds);
+    if(!w)continue;
+
+    let place=p.workPlace||"G-SPOT";
+
+    // 別邸のみは人数に含めない
+    if(place==="別邸")continue;
+
+    // 同じ源氏名が同日に複数登録されていても1人分だけにする
+    let point=w.point||0;
+    if(!byName[name] || point>byName[name].point){
+      byName[name]={real:1,point:point,newbie:!!p.newbie};
+    }else if(p.newbie){
+      byName[name].newbie=true;
+    }
+  }
+
+  let real=0,calc=0,newbies=[];
+  Object.keys(byName).forEach(function(name){
+    real+=1;
+    calc+=byName[name].point;
+    if(byName[name].newbie)newbies.push(name);
+  });
+
+  return{real,calc,newbies};
+}
 function renderEditStaffSelect(){let s=el("editStaffSelect");if(!s)return;s.innerHTML="";staff.forEach(p=>{let o=document.createElement("option");o.value=p.id;o.textContent=p.name;s.appendChild(o)})}
 function renderShiftEditor(){renderEditStaffSelect();let box=el("shiftEditor");let p=staff.find(x=>String(x.id)===String(el("editStaffSelect").value));if(!p){box.innerHTML="<p class='note'>スタッフ登録がありません。</p>";return}let base=parseDate(el("editBase").value||today());let h="";for(let i=0;i<31;i++){let d=new Date(base);d.setDate(base.getDate()+i);let ds=ymd(d);let ov=(p.overrides||{})[ds]||{};h+=`<div class='editorRow'><div><b>${d.getMonth()+1}/${d.getDate()}</b><br><span class='note'>${wds[d.getDay()]}</span></div><div><label>開始</label><select id='st_${ds}'></select></div><div><label>終了</label><select id='en_${ds}'></select></div><div><label>休</label><input type='checkbox' id='off_${ds}' ${ov.off?"checked":""} onchange="saveDayShift('${p.id}','${ds}')"></div></div>`}box.innerHTML=h;for(let i=0;i<31;i++){let d=new Date(base);d.setDate(base.getDate()+i);let ds=ymd(d),ov=(p.overrides||{})[ds]||{};makeTimeOptions(el("st_"+ds),ov.timeStart||p.timeStart);makeTimeOptions(el("en_"+ds),ov.timeEnd||p.timeEnd);el("st_"+ds).onchange=()=>saveDayShift(p.id,ds);el("en_"+ds).onchange=()=>saveDayShift(p.id,ds)}}
 function saveDayShift(pid,ds){let p=staff.find(x=>String(x.id)===String(pid));if(!p)return;if(!p.overrides)p.overrides={};p.overrides[ds]={timeStart:el("st_"+ds).value,timeEnd:el("en_"+ds).value,off:el("off_"+ds).checked};save();renderMonthly()}
