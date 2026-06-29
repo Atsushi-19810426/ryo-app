@@ -116,6 +116,34 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 .wp-bettei{background:#fef3c7;color:#92400e}
 .wp-both{background:#ede9fe;color:#5b21b6}
 
+
+/* Ver63: 月間表・出勤場所ラベル最終調整 */
+#monthlyTable th,#monthlyTable td{font-size:11px}
+#monthlyTable .name{font-size:11px;min-width:106px}
+.wpBadge{display:inline-block;border-radius:999px;padding:1px 6px;font-size:9px;font-weight:900;margin-left:4px;vertical-align:middle;line-height:1.45}
+.wp-gspot{background:#e0f2fe;color:#075985}
+.wp-bettei{background:#fef3c7;color:#92400e}
+.wp-both{background:#ede9fe;color:#5b21b6}
+@media(max-width:760px){
+  #monthlyTable th,#monthlyTable td{font-size:10.5px}
+  #monthlyTable .name{font-size:10.5px;min-width:102px}
+  .wpBadge{font-size:8.5px;padding:1px 5px}
+}
+
+
+/* Ver64: 出勤場所ラベル同期・小さめ表示 */
+#monthlyTable th,#monthlyTable td{font-size:11px}
+#monthlyTable .name{font-size:11px;min-width:112px}
+.wpBadge{display:inline-block;border-radius:999px;padding:1px 5px;font-size:8.8px;font-weight:900;margin-left:4px;vertical-align:middle;line-height:1.45}
+.wp-gspot{background:#e0f2fe;color:#075985}
+.wp-bettei{background:#fef3c7;color:#92400e}
+.wp-both{background:#ede9fe;color:#5b21b6}
+@media(max-width:760px){
+  #monthlyTable th,#monthlyTable td{font-size:10.5px}
+  #monthlyTable .name{font-size:10.5px;min-width:108px}
+  .wpBadge{font-size:8.3px;padding:1px 4px}
+}
+
 </style>
 </head>
 <body>
@@ -320,8 +348,20 @@ function makeTimeOptions(sel,val){if(!sel)return;sel.innerHTML="";for(let h=0;h<
 
 function workPlaceBadge(wp){
   wp=wp||"G-SPOT";
+  let label=wp==="G-SPOT/別邸"?"G/別":wp;
   let cls=wp==="別邸"?"wp-bettei":(wp==="G-SPOT/別邸"?"wp-both":"wp-gspot");
-  return `<span class="wpBadge ${cls}">${esc(wp)}</span>`;
+  return `<span class="wpBadge ${cls}" title="${esc(wp)}">${esc(label)}</span>`;
+}
+function groupDisplayWorkPlace(group,base,days){
+  for(let i=0;i<days;i++){
+    let d=new Date(base);d.setDate(base.getDate()+i);
+    let ds=ymd(d);
+    for(let p of group.list){
+      let w=workFor(p,ds);
+      if(w)return p.workPlace||"G-SPOT";
+    }
+  }
+  return (group.list&&group.list[0]?(group.list[0].workPlace||"G-SPOT"):"G-SPOT");
 }
 
 function showPage(id){document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));document.querySelectorAll(".menu button").forEach(b=>b.classList.remove("active"));el(id).classList.remove("hidden");el("tab_"+id).classList.add("active");if(id==="staff")renderStaff();if(id==="shiftEdit")renderShiftEditor();if(id==="master")renderMaster();if(id==="dorm"){syncMasterFromDorms();renderDorm();updateRoomSelect();updateDormSelect()}if(id==="vacancy")renderVacancy();if(id==="monthly"){renderMonthly();renderDormMonthly()}if(id==="ai"&&!el("updateDate").value)el("updateDate").value=today();renderStats();renderDashboard()}
@@ -710,7 +750,7 @@ function renderMonthly(){
 
   sortMonthlyGroups(monthCastGroups(),base,days).forEach(function(g){
     var isNew=g.list.some(function(p){return p.newbie;});
-    var wp=(g.list&&g.list[0]?(g.list[0].workPlace||"G-SPOT"):"G-SPOT");h+="<tr><td class='name'>"+esc(g.name)+(isNew?" 🆕":"")+workPlaceBadge(wp)+"</td>";
+    var wp=groupDisplayWorkPlace(g,base,days);h+="<tr><td class='name'>"+esc(g.name)+(isNew?" 🆕":"")+workPlaceBadge(wp)+"</td>";
     for(var i=0;i<days;i++){
       var d=new Date(base);d.setDate(base.getDate()+i);
       var ds=ymd(d),hit=monthWorkForGroup(g,ds),cls=dateClass(d);
