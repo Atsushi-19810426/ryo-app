@@ -2910,5 +2910,97 @@ init();
 })();
 </script>
 
+
+<script>
+(function(){
+  function v75MinutesOfTime(t){
+    if(!t)return 99999;
+    var p=String(t).split(":");
+    return Number(p[0]||0)*60+Number(p[1]||0);
+  }
+
+  function v75IsExplicitOff(p,ds){
+    return !!(p && p.overrides && p.overrides[ds] && p.overrides[ds].off);
+  }
+
+  function v75WorkHitForGroupOnDate(group,ds){
+    var hits=[];
+    (group.list||[]).forEach(function(p){
+      var w=null;
+      try{w=workFor(p,ds);}catch(e){w=null;}
+      if(w)hits.push({staff:p,work:w});
+    });
+    if(!hits.length)return null;
+    hits.sort(function(a,b){
+      return v75MinutesOfTime(a.work.timeStart)-v75MinutesOfTime(b.work.timeStart);
+    });
+    return hits[0];
+  }
+
+  function v75HasOffForGroupOnDate(group,ds){
+    return (group.list||[]).some(function(p){return v75IsExplicitOff(p,ds);});
+  }
+
+  function v75NextSegment(group,base,days){
+    for(var i=0;i<days;i++){
+      var d=new Date(base);d.setDate(base.getDate()+i);
+      var ds=ymd(d);
+      var hit=v75WorkHitForGroupOnDate(group,ds);
+      if(!hit)continue;
+
+      var end=ds;
+      for(var j=i+1;j<days;j++){
+        var d2=new Date(base);d2.setDate(base.getDate()+j);
+        var ds2=ymd(d2);
+
+        if(v75HasOffForGroupOnDate(group,ds2))break;
+
+        var hit2=v75WorkHitForGroupOnDate(group,ds2);
+        if(!hit2)break;
+
+        end=ds2;
+      }
+
+      return {
+        start:ds,
+        end:end,
+        staff:hit.staff,
+        work:hit.work,
+        startMinutes:v75MinutesOfTime(hit.work.timeStart)
+      };
+    }
+
+    return null;
+  }
+
+  window.sortMonthlyGroups=function(groups,base,days){
+    return (groups||[]).slice().sort(function(a,b){
+      var as=v75NextSegment(a,base,days);
+      var bs=v75NextSegment(b,base,days);
+
+      var ad=as?as.start:"9999-12-31";
+      var bd=bs?bs.start:"9999-12-31";
+      if(ad!==bd)return ad.localeCompare(bd);
+
+      var ae=as?as.end:"9999-12-31";
+      var be=bs?bs.end:"9999-12-31";
+      if(ae!==be)return ae.localeCompare(be);
+
+      var at=as?as.startMinutes:99999;
+      var bt=bs?bs.startMinutes:99999;
+      if(at!==bt)return at-bt;
+
+      return String(a.name||"").localeCompare(String(b.name||""),"ja");
+    });
+  };
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(function(){
+      if(typeof renderMonthly==="function" && document.getElementById("monthlyTable"))renderMonthly();
+    },300);
+  });
+})();
+</script>
+
 </body>
 </html>
