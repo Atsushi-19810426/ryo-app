@@ -206,6 +206,44 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   box-sizing:border-box;
 }
 
+
+/* Ver71: 出勤一覧 検索・編集ボタンコンパクト */
+.staffSearchBox{margin-bottom:10px}
+.staffSearchBox input{font-size:14px;padding:10px 12px;border-radius:12px}
+.staffActionLine{display:flex;gap:8px;margin-top:8px;align-items:center}
+.staffEditBtn{box-shadow:none;border:1px solid #dbeafe;background:#eef2ff;color:#1d4ed8;padding:6px 12px;border-radius:10px;font-size:12px;min-width:64px;line-height:1.1}
+.staffPeriodDeleteBtn{margin-top:8px;background:#ef4444!important;color:#fff!important}
+#staffList .item{padding:10px 12px}
+@media(min-width:761px){
+  #staffList .item{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+  #staffList .item .staffMainInfo{min-width:0}
+  #staffList .item .staffActionLine{margin-top:0;justify-content:flex-end}
+  #staffList .staffEditBtn{padding:5px 11px;font-size:12px;min-width:58px;border-radius:9px}
+}
+@media(max-width:760px){
+  .staffEditBtn{padding:8px 12px;font-size:13px;min-width:78px}
+}
+
+
+/* Ver72: 7時間超えは10-0と同じ出勤色 */
+
+
+/* Ver73: 清掃予定日の色を強調 */
+#dormMonthlyTable td.cleanPlan{
+  background:#ffedd5!important;
+  color:#9a3412!important;
+  font-weight:900!important;
+  box-shadow:inset 0 0 0 2px #fb923c;
+}
+#dormMonthlyTable td.cleanPlan::first-letter{
+  font-size:1.05em;
+}
+#dormMonthlyTable td.cleanPlan.done{
+  background:#dbeafe!important;
+  color:#1d4ed8!important;
+  box-shadow:inset 0 0 0 2px #60a5fa;
+}
+
 </style>
 </head>
 <body>
@@ -277,7 +315,13 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   <div class="row"><div><label>出勤開始</label><select id="timeStart"></select></div><div><label>出勤終了</label><select id="timeEnd"></select></div></div>
   <label>備考</label><textarea id="staffNote" placeholder="出勤に関する備考"></textarea><button class="primary" onclick="addStaff()">登録</button>
  </div>
- <div class="card"><h2>出勤一覧</h2><div id="staffList"></div></div>
+ <div class="card"><h2>出勤一覧</h2>
+  <div class="staffSearchBox">
+    <label>名前検索</label>
+    <input id="staffSearch" placeholder="源氏名で検索" oninput="renderStaff()">
+  </div>
+  <div id="staffList"></div>
+</div>
 </section>
 
 <section id="shiftEdit" class="page hidden">
@@ -848,7 +892,7 @@ function renderMonthly(){
       }else{
         var w=hit.work;
         var place=hit.staff.workPlace||"G-SPOT";
-        var wc=w.hours>=10?"green":(w.hours<=8?"orange":"");
+        var wc=w.hours>7?"green":(w.hours>0?"orange":"");
         var placeMini=place==="別邸"?"<br><span class='wpBadge wp-bettei'>別邸</span>":(place==="G-SPOT/別邸"?"<br><span class='wpBadge wp-both'>G/別</span>":"");
         h+="<td class='"+cls+" "+wc+" shiftCell jsShiftCell' data-staffid='"+esc(hit.staff.id)+"' data-cast='"+esc(g.name)+"' data-date='"+ds+"'>"+shortRange(w.timeStart,w.timeEnd)+placeMini+"</td>";
       }
@@ -2302,7 +2346,7 @@ init();
 <div id="staffPeriodEditPopup" class="shiftEditPopup">
   <div class="shiftEditPopupBox">
     <div class="shiftEditPopupHead">
-      <b id="staffPeriodEditTitle">期間全体を編集</b>
+      <b id="staffPeriodEditTitle">編集</b>
       <button class="shiftEditPopupClose" onclick="closeStaffPeriodEdit()">×</button>
     </div>
 
@@ -2353,6 +2397,7 @@ init();
     <textarea id="staffPeriodEditNote"></textarea>
 
     <button class="shiftEditPopupBtn" onclick="saveStaffPeriodEdit()">保存</button>
+    <button class="shiftEditPopupBtn danger staffPeriodDeleteBtn" onclick="deleteStaffPeriodEdit()">削除</button>
   </div>
 </div>
 
@@ -2649,6 +2694,187 @@ init();
     e.stopImmediatePropagation();
     openMonthlyShiftEditV70(td);
   },true);
+})();
+</script>
+
+
+<script>
+(function(){
+  function staffSearchKeyword(){
+    var input=document.getElementById("staffSearch");
+    return input?(input.value||"").trim().toLowerCase():"";
+  }
+
+  window.renderStaff=function(){
+    var box=el("staffList");
+    if(!box)return;
+
+    var q=staffSearchKeyword();
+    var list=(staff||[]).filter(function(p){
+      if(!q)return true;
+      return String(p.name||"").toLowerCase().indexOf(q)>=0;
+    });
+
+    if(!staff.length){
+      box.innerHTML="<p class='note'>登録なし</p>";
+      return;
+    }
+
+    if(!list.length){
+      box.innerHTML="<p class='note'>該当するCASTが見つかりません</p>";
+      return;
+    }
+
+    box.innerHTML="";
+    list.forEach(function(p){
+      var div=document.createElement("div");
+      div.className="item";
+      div.innerHTML=
+        "<div class='staffMainInfo'>"+
+          "<b>"+esc(p.name)+"</b>"+
+          (p.newbie?"<span class='badge new'>新人</span>":"")+
+          (typeof workPlaceBadge==="function"?workPlaceBadge(p.workPlace||"G-SPOT"):"<span class='badge info'>"+esc(p.workPlace||"G-SPOT")+"</span>")+
+          "<div class='note'>"+esc(p.start||"")+"〜"+esc(p.end||"")+" / "+shortRange(p.timeStart,p.timeEnd)+"</div>"+
+          (p.note?"<div class='note'>備考："+esc(p.note)+"</div>":"")+
+        "</div>"+
+        "<div class='staffActionLine'>"+
+          "<button class='staffEditBtn' onclick='openStaffPeriodEdit("+p.id+")'>編集</button>"+
+        "</div>";
+      box.appendChild(div);
+    });
+  };
+
+  var oldOpenStaffPeriodEdit=window.openStaffPeriodEdit;
+  window.openStaffPeriodEdit=function(id){
+    if(typeof oldOpenStaffPeriodEdit==="function"){
+      oldOpenStaffPeriodEdit(id);
+    }else{
+      var p=(staff||[]).find(function(x){return String(x.id)===String(id);});
+      if(!p){alert("対象CASTが見つかりません");return;}
+      window.__staffPeriodEditId=p.id;
+    }
+
+    var p2=(staff||[]).find(function(x){return String(x.id)===String(id);});
+    var title=document.getElementById("staffPeriodEditTitle");
+    if(title)title.textContent="編集 / "+(p2&&p2.name?p2.name:"");
+
+    var del=document.querySelector(".staffPeriodDeleteBtn");
+    if(del)del.style.display="";
+  };
+
+  window.deleteStaffPeriodEdit=function(){
+    var p=(staff||[]).find(function(x){return String(x.id)===String(window.__staffPeriodEditId);});
+    if(!p){alert("削除対象が見つかりません");return false;}
+
+    if(!confirm((p.name||"このCAST")+" の出勤登録を削除しますか？"))return false;
+
+    staff=staff.filter(function(x){return String(x.id)!==String(p.id);});
+    save();
+
+    if(typeof closeStaffPeriodEdit==="function")closeStaffPeriodEdit();
+
+    if(typeof renderStaff==="function")renderStaff();
+    if(typeof renderMonthly==="function")renderMonthly();
+    if(typeof renderStats==="function")renderStats();
+    if(typeof renderEditStaffSelect==="function")renderEditStaffSelect();
+    if(typeof generateText==="function" && document.getElementById("output") && document.getElementById("output").value){generateText();}
+
+    return false;
+  };
+
+  var oldSaveStaffPeriodEdit=window.saveStaffPeriodEdit;
+  window.saveStaffPeriodEdit=function(){
+    if(typeof oldSaveStaffPeriodEdit==="function"){
+      var r=oldSaveStaffPeriodEdit.apply(this,arguments);
+      setTimeout(function(){
+        if(typeof renderStaff==="function")renderStaff();
+        if(typeof renderMonthly==="function")renderMonthly();
+      },0);
+      return r;
+    }
+    return false;
+  };
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(function(){if(typeof renderStaff==="function")renderStaff();},200);
+  });
+  window.addEventListener("load",function(){
+    setTimeout(function(){if(typeof renderStaff==="function")renderStaff();},300);
+  });
+
+  setTimeout(function(){if(typeof renderStaff==="function")renderStaff();},0);
+})();
+</script>
+
+
+<script>
+(function(){
+  function cleanRoomLabel(cell){
+    return (cell&&cell.textContent?cell.textContent:"").trim();
+  }
+
+  function roomKeyOf(r){
+    return String(r.dormName||"")+"-"+String(r.roomNo||"");
+  }
+
+  function applyCleanPlanColors(){
+    var box=document.getElementById("dormMonthlyTable");
+    if(!box)return;
+
+    var baseEl=document.getElementById("monthBase");
+    var base=parseDate((baseEl&&baseEl.value)||today());
+
+    var rows=box.querySelectorAll("tbody tr");
+    rows.forEach(function(tr){
+      var nameCell=tr.querySelector("td.name");
+      var roomLabel=cleanRoomLabel(nameCell);
+      if(!roomLabel)return;
+
+      var related=(Array.isArray(dorms)?dorms:[]).filter(function(r){
+        return roomKeyOf(r)===roomLabel;
+      });
+      if(!related.length)return;
+
+      var cells=tr.querySelectorAll("td");
+      for(var ci=1;ci<cells.length;ci++){
+        var td=cells[ci];
+        var d=new Date(base);
+        d.setDate(base.getDate()+ci-1);
+        var ds=ymd(d);
+
+        var hasPlan=related.some(function(r){
+          return r.cleanDate===ds;
+        });
+
+        if(hasPlan){
+          td.classList.add("cleanPlan");
+
+          var txt=(td.textContent||"").trim();
+          if(txt==="清"){
+            td.textContent="清掃";
+          }else if(!txt){
+            td.textContent="清掃";
+          }
+        }
+      }
+    });
+  }
+
+  var oldRenderDormMonthly=window.renderDormMonthly;
+  if(typeof oldRenderDormMonthly==="function"){
+    window.renderDormMonthly=function(){
+      var r=oldRenderDormMonthly.apply(this,arguments);
+      setTimeout(applyCleanPlanColors,0);
+      return r;
+    };
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(applyCleanPlanColors,300);
+  });
+  window.addEventListener("load",function(){
+    setTimeout(applyCleanPlanColors,500);
+  });
 })();
 </script>
 
