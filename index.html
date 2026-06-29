@@ -2424,5 +2424,233 @@ init();
 })();
 </script>
 
+
+<script>
+(function(){
+  function v70CleanCastName(cell){
+    if(!cell)return "";
+    var c=cell.cloneNode(true);
+    c.querySelectorAll(".wpBadge,.badge").forEach(function(x){x.remove();});
+    return (c.textContent||"").replace("🆕","").trim();
+  }
+
+  function v70CellDate(td){
+    var ds=td.getAttribute("data-date");
+    if(ds)return ds;
+    try{
+      var base=parseDate(el("monthBase").value||today());
+      var d=new Date(base);
+      d.setDate(base.getDate()+td.cellIndex-1);
+      return ymd(d);
+    }catch(e){
+      return today();
+    }
+  }
+
+  function v70CellCastName(td){
+    var cast=td.getAttribute("data-cast");
+    if(cast)return cast;
+    var tr=td.closest("tr");
+    return v70CleanCastName(tr?tr.querySelector("td.name"):null);
+  }
+
+  function v70FindStaff(td,ds,name){
+    var sid=td && td.getAttribute("data-staffid");
+    if(sid){
+      var byId=(staff||[]).find(function(p){return String(p.id)===String(sid);});
+      if(byId)return byId;
+    }
+
+    var list=(staff||[]).filter(function(p){
+      return String(p.name||"").trim()===String(name||"").trim();
+    });
+
+    if(!list.length)return null;
+
+    return list.find(function(p){
+      try{return typeof workFor==="function" && !!workFor(p,ds);}catch(e){return false;}
+    }) || list.find(function(p){
+      return (!p.start || ds>=p.start) && (!p.end || ds<=p.end);
+    }) || list[0];
+  }
+
+  function v70EnsureWorkPlaceSelect(selected){
+    var sel=document.getElementById("shiftEditPopupWorkPlace");
+    if(!sel){
+      var end=document.getElementById("shiftEditPopupEnd");
+      var row=end?end.closest(".shiftEditPopupRow"):null;
+      if(row){
+        row.insertAdjacentHTML("afterend",'<label>出勤場所</label><select id="shiftEditPopupWorkPlace"></select>');
+      }
+      sel=document.getElementById("shiftEditPopupWorkPlace");
+    }
+    if(sel){
+      var opts=["G-SPOT","別邸","G-SPOT/別邸"];
+      sel.innerHTML=opts.map(function(v){
+        return "<option value='"+v+"'>"+v+"</option>";
+      }).join("");
+      sel.value=selected||"G-SPOT";
+    }
+    return sel;
+  }
+
+  function v70ParseTimes(td,p,ds){
+    var ov=(p.overrides||{})[ds]||{};
+    var st=ov.timeStart||p.timeStart||"10:00";
+    var en=ov.timeEnd||p.timeEnd||"00:00";
+    var off=!!ov.off;
+    var note=ov.note||"";
+    var txt=(td.textContent||"").replace("別邸","").replace("G/別","").replace("G-SPOT","").trim();
+
+    if(txt==="休"){
+      off=false;
+    }else{
+      var m=txt.match(/(\d{1,2})(?::(\d{2}))?\s*-\s*(\d{1,2})(?::(\d{2}))?/);
+      if(m){
+        st=String(Number(m[1])).padStart(2,"0")+":"+(m[2]||"00");
+        en=String(Number(m[3])).padStart(2,"0")+":"+(m[4]||"00");
+      }
+    }
+    return {st:st,en:en,off:off,note:note};
+  }
+
+  window.openMonthlyShiftEditV70=function(td){
+    var ds=v70CellDate(td);
+    var name=v70CellCastName(td);
+    var p=v70FindStaff(td,ds,name);
+
+    if(!p){
+      alert("対象CASTが見つかりません");
+      return;
+    }
+
+    window.__v70ShiftStaffId=p.id;
+    window.__v70ShiftName=p.name||name;
+    window.__v70ShiftDate=ds;
+
+    if(!p.overrides)p.overrides={};
+
+    var parsed=v70ParseTimes(td,p,ds);
+    var d=parseDate(ds);
+
+    var title=document.getElementById("shiftEditPopupTitle");
+    if(title)title.textContent=(p.name||name)+" / "+md(d)+"（"+wds[d.getDay()]+"）";
+
+    makeTimeOptions(document.getElementById("shiftEditPopupStart"),parsed.st);
+    makeTimeOptions(document.getElementById("shiftEditPopupEnd"),parsed.en);
+    v70EnsureWorkPlaceSelect(p.workPlace||"G-SPOT");
+
+    var off=document.getElementById("shiftEditPopupOff");
+    if(off)off.checked=parsed.off;
+
+    var note=document.getElementById("shiftEditPopupNote");
+    if(note)note.value=parsed.note||"";
+
+    var btn=document.querySelector("#shiftEditPopup .shiftEditPopupBtn");
+    if(btn){
+      btn.textContent="保存";
+      btn.onclick=function(ev){
+        if(ev){ev.preventDefault();ev.stopPropagation();}
+        return saveMonthlyShiftEditV70();
+      };
+    }
+
+    var box=document.getElementById("shiftEditPopup");
+    if(box)box.style.display="flex";
+  };
+
+  window.saveMonthlyShiftEditV70=function(){
+    var ds=window.__v70ShiftDate || window.__v68ShiftDate || window.__shiftWpDate;
+    var name=window.__v70ShiftName || window.__v68ShiftName || window.__shiftWpName || "";
+
+    var ids=[window.__v70ShiftStaffId,window.__v68ShiftStaffId,window.__shiftWpStaffId,window.__shiftPopupStaffId].filter(Boolean);
+    var p=null;
+
+    for(var i=0;i<ids.length;i++){
+      p=(staff||[]).find(function(x){return String(x.id)===String(ids[i]);});
+      if(p)break;
+    }
+
+    if(!p && name){
+      p=(staff||[]).find(function(x){
+        return String(x.name||"").trim()===String(name||"").trim();
+      });
+    }
+
+    if(!p || !ds){
+      alert("保存対象が見つかりません");
+      return false;
+    }
+
+    var selectedWp=(document.getElementById("shiftEditPopupWorkPlace")?document.getElementById("shiftEditPopupWorkPlace").value:"G-SPOT")||"G-SPOT";
+
+    // 同じ源氏名の登録すべてに出勤場所を同期
+    (staff||[]).forEach(function(x){
+      if(String(x.name||"").trim()===String(p.name||"").trim()){
+        x.workPlace=selectedWp;
+      }
+    });
+
+    if(!p.overrides)p.overrides={};
+    p.overrides[ds]={
+      timeStart:document.getElementById("shiftEditPopupStart").value,
+      timeEnd:document.getElementById("shiftEditPopupEnd").value,
+      off:!!document.getElementById("shiftEditPopupOff").checked,
+      note:(document.getElementById("shiftEditPopupNote").value||"")
+    };
+
+    // 「休」セルなど、元の期間外でも保存できるように期間を広げる
+    if(!p.start || ds<p.start)p.start=ds;
+    if(!p.end || ds>p.end)p.end=ds;
+
+    save();
+
+    var box=document.getElementById("shiftEditPopup");
+    if(box)box.style.display="none";
+
+    if(typeof renderMonthly==="function")renderMonthly();
+    if(typeof renderStats==="function")renderStats();
+    if(typeof renderStaff==="function")renderStaff();
+    if(typeof renderEditStaffSelect==="function")renderEditStaffSelect();
+    if(typeof generateText==="function" && document.getElementById("output") && document.getElementById("output").value){generateText();}
+
+    return false;
+  };
+
+  // 既存保存関数も、休セル対応版へ寄せる
+  window.saveShiftWorkPlaceFixedV68=window.saveMonthlyShiftEditV70;
+  window.saveShiftEditPopupWorkPlaceFixed=window.saveMonthlyShiftEditV70;
+  window.saveShiftEditPopupFinal=window.saveMonthlyShiftEditV70;
+
+  var lastTouch=0,ts=null;
+  document.addEventListener("touchstart",function(e){
+    var t=e.touches&&e.touches[0];
+    if(t)ts={x:t.clientX,y:t.clientY};
+  },true);
+
+  document.addEventListener("touchend",function(e){
+    var td=e.target.closest&&e.target.closest("#monthlyTable td.shiftCell");
+    if(!td)return;
+    var t=e.changedTouches&&e.changedTouches[0];
+    var dx=t&&ts?Math.abs(t.clientX-ts.x):0;
+    var dy=t&&ts?Math.abs(t.clientY-ts.y):0;
+    if(dx>10 || dy>10)return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    lastTouch=Date.now();
+    openMonthlyShiftEditV70(td);
+  },true);
+
+  document.addEventListener("click",function(e){
+    var td=e.target.closest&&e.target.closest("#monthlyTable td.shiftCell");
+    if(!td)return;
+    if(Date.now()-lastTouch<650)return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    openMonthlyShiftEditV70(td);
+  },true);
+})();
+</script>
+
 </body>
 </html>
