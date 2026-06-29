@@ -244,6 +244,15 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   box-shadow:inset 0 0 0 2px #60a5fa;
 }
 
+
+/* Ver77: 清掃済みは清掃予定色にしない */
+#dormMonthlyTable td.cleanPlan.done{
+  background:#dbeafe!important;
+  color:#1d4ed8!important;
+  font-weight:900!important;
+  box-shadow:inset 0 0 0 2px #60a5fa!important;
+}
+
 </style>
 </head>
 <body>
@@ -3088,6 +3097,91 @@ init();
     setTimeout(function(){
       if(typeof renderMonthly==="function" && document.getElementById("monthlyTable"))renderMonthly();
     },300);
+  });
+})();
+</script>
+
+
+<script>
+(function(){
+  function v77RoomKey(r){
+    return String(r.dormName||"")+"-"+String(r.roomNo||"");
+  }
+
+  function v77RoomLabel(cell){
+    return (cell&&cell.textContent?cell.textContent:"").trim();
+  }
+
+  function v77IsCleanDone(r){
+    var st=String(r.cleanStatus||"").trim();
+    return st==="清掃済み" || st==="済" || !!r.cleanDoneDate;
+  }
+
+  window.applyCleanPlanColors=function(){
+    var box=document.getElementById("dormMonthlyTable");
+    if(!box)return;
+
+    var baseEl=document.getElementById("monthBase");
+    var base=parseDate((baseEl&&baseEl.value)||today());
+
+    var rows=box.querySelectorAll("tbody tr");
+    rows.forEach(function(tr){
+      var nameCell=tr.querySelector("td.name");
+      var roomLabel=v77RoomLabel(nameCell);
+      if(!roomLabel)return;
+
+      var related=(Array.isArray(dorms)?dorms:[]).filter(function(r){
+        return v77RoomKey(r)===roomLabel;
+      });
+
+      var cells=tr.querySelectorAll("td");
+      for(var ci=1;ci<cells.length;ci++){
+        var td=cells[ci];
+
+        // 以前の清掃予定色を一度リセット
+        td.classList.remove("cleanPlan","done");
+
+        var d=new Date(base);
+        d.setDate(base.getDate()+ci-1);
+        var ds=ymd(d);
+
+        var hasPlan=related.some(function(r){
+          return r.cleanDate===ds && !v77IsCleanDone(r);
+        });
+
+        var hasDone=related.some(function(r){
+          return (r.cleanDate===ds || r.cleanDoneDate===ds) && v77IsCleanDone(r);
+        });
+
+        if(hasDone){
+          td.classList.add("cleanPlan","done");
+          var txtDone=(td.textContent||"").trim();
+          if(txtDone==="清" || txtDone==="清掃" || !txtDone)td.textContent="済";
+        }else if(hasPlan){
+          td.classList.add("cleanPlan");
+          var txt=(td.textContent||"").trim();
+          if(txt==="清" || !txt)td.textContent="清掃";
+        }
+      }
+    });
+  };
+
+  var oldRenderDormMonthly=window.renderDormMonthly;
+  if(typeof oldRenderDormMonthly==="function" && !oldRenderDormMonthly.__v77CleanDoneFix){
+    var wrapped=function(){
+      var r=oldRenderDormMonthly.apply(this,arguments);
+      setTimeout(applyCleanPlanColors,0);
+      return r;
+    };
+    wrapped.__v77CleanDoneFix=true;
+    window.renderDormMonthly=wrapped;
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(applyCleanPlanColors,300);
+  });
+  window.addEventListener("load",function(){
+    setTimeout(applyCleanPlanColors,500);
   });
 })();
 </script>
