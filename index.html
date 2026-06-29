@@ -144,6 +144,34 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   .wpBadge{font-size:8.3px;padding:1px 4px}
 }
 
+
+/* Ver65: 出勤場所ラベル同期修正 */
+#monthlyTable th,#monthlyTable td{font-size:11px}
+#monthlyTable .name{font-size:11px;min-width:112px}
+.wpBadge{display:inline-block;border-radius:999px;padding:1px 5px;font-size:8.8px;font-weight:900;margin-left:4px;vertical-align:middle;line-height:1.45}
+.wp-gspot{background:#e0f2fe;color:#075985}
+.wp-bettei{background:#fef3c7;color:#92400e}
+.wp-both{background:#ede9fe;color:#5b21b6}
+@media(max-width:760px){
+  #monthlyTable th,#monthlyTable td{font-size:10.5px}
+  #monthlyTable .name{font-size:10.5px;min-width:108px}
+  .wpBadge{font-size:8.3px;padding:1px 4px}
+}
+
+
+/* Ver66: 出勤場所ラベル確実同期 */
+.wpBadge{display:inline-block;border-radius:999px;padding:1px 5px;font-size:8.8px;font-weight:900;margin-left:4px;vertical-align:middle;line-height:1.45}
+.wp-gspot{background:#e0f2fe;color:#075985}
+.wp-bettei{background:#fef3c7;color:#92400e}
+.wp-both{background:#ede9fe;color:#5b21b6}
+#monthlyTable th,#monthlyTable td{font-size:11px}
+#monthlyTable .name{font-size:11px;min-width:112px}
+@media(max-width:760px){
+  #monthlyTable th,#monthlyTable td{font-size:10.5px}
+  #monthlyTable .name{font-size:10.5px;min-width:108px}
+  .wpBadge{font-size:8.3px;padding:1px 4px}
+}
+
 </style>
 </head>
 <body>
@@ -353,15 +381,18 @@ function workPlaceBadge(wp){
   return `<span class="wpBadge ${cls}" title="${esc(wp)}">${esc(label)}</span>`;
 }
 function groupDisplayWorkPlace(group,base,days){
-  for(let i=0;i<days;i++){
-    let d=new Date(base);d.setDate(base.getDate()+i);
-    let ds=ymd(d);
-    for(let p of group.list){
-      let w=workFor(p,ds);
-      if(w)return p.workPlace||"G-SPOT";
+  // 同名CAST内で「別邸」や「G-SPOT/別邸」へ変更された値を優先して表示する
+  let places=(group.list||[]).map(p=>p.workPlace||"G-SPOT");
+  if(places.includes("G-SPOT/別邸"))return "G-SPOT/別邸";
+  if(places.includes("別邸"))return "別邸";
+  return "G-SPOT";
+}
+function syncWorkPlaceByName(name,wp){
+  (staff||[]).forEach(function(p){
+    if(String(p.name||"").trim()===String(name||"").trim()){
+      p.workPlace=wp||"G-SPOT";
     }
-  }
-  return (group.list&&group.list[0]?(group.list[0].workPlace||"G-SPOT"):"G-SPOT");
+  });
 }
 
 function showPage(id){document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));document.querySelectorAll(".menu button").forEach(b=>b.classList.remove("active"));el(id).classList.remove("hidden");el("tab_"+id).classList.add("active");if(id==="staff")renderStaff();if(id==="shiftEdit")renderShiftEditor();if(id==="master")renderMaster();if(id==="dorm"){syncMasterFromDorms();renderDorm();updateRoomSelect();updateDormSelect()}if(id==="vacancy")renderVacancy();if(id==="monthly"){renderMonthly();renderDormMonthly()}if(id==="ai"&&!el("updateDate").value)el("updateDate").value=today();renderStats();renderDashboard()}
@@ -398,7 +429,13 @@ function saveShiftPopup(){
   var ds=el("shiftPopupDate").value;
   if(!p||!ds)return;
   if(!p.overrides)p.overrides={};
-  p.overrides[ds]={
+  
+    var wpEl=document.getElementById("shiftEditPopupWorkPlace");
+    var selectedWp=wpEl?(wpEl.value||"G-SPOT"):(p.workPlace||"G-SPOT");
+    p.workPlace=selectedWp;
+    if(typeof syncWorkPlaceByName==="function")syncWorkPlaceByName(p.name,selectedWp);
+
+    p.overrides[ds]={
     timeStart:el("shiftPopupStart").value,
     timeEnd:el("shiftPopupEnd").value,
     off:el("shiftPopupOff").checked,
@@ -1099,6 +1136,7 @@ init();
     <select id="shiftEditPopupWorkPlace">
       <option>G-SPOT</option>
       <option>別邸</option>
+      <option>G-SPOT/別邸</option>
     </select>
     <label style="display:flex;gap:8px;align-items:center;margin:10px 0">
       <input type="checkbox" id="shiftEditPopupOff" style="width:auto"> 休みで登録する
@@ -1721,6 +1759,255 @@ init();
       return r;
     };
   }
+})();
+</script>
+
+
+<script>
+(function(){
+  function wpOptionsHtml(selected){
+    var opts=["G-SPOT","別邸","G-SPOT/別邸"];
+    return opts.map(function(v){return "<option value='"+v+"' "+(v===selected?"selected":"")+">"+v+"</option>";}).join("");
+  }
+
+  window.workPlaceBadge=function(wp){
+    wp=wp||"G-SPOT";
+    var label=wp==="G-SPOT/別邸"?"G/別":wp;
+    var cls=wp==="別邸"?"wp-bettei":(wp==="G-SPOT/別邸"?"wp-both":"wp-gspot");
+    return '<span class="wpBadge '+cls+'" title="'+esc(wp)+'">'+esc(label)+'</span>';
+  };
+
+  window.groupDisplayWorkPlace=function(group,base,days){
+    var places=(group.list||[]).map(function(p){return p.workPlace||"G-SPOT";});
+    if(places.indexOf("G-SPOT/別邸")>=0)return "G-SPOT/別邸";
+    if(places.indexOf("別邸")>=0)return "別邸";
+    return "G-SPOT";
+  };
+
+  function cleanCastNameFromCell(nameCell){
+    if(!nameCell)return "";
+    var clone=nameCell.cloneNode(true);
+    clone.querySelectorAll(".wpBadge").forEach(function(x){x.remove();});
+    return (clone.textContent||"").replace("🆕","").trim();
+  }
+
+  function pickWorkPlaceByName(name){
+    var list=(staff||[]).filter(function(p){return String(p.name||"").trim()===String(name||"").trim();});
+    var places=list.map(function(p){return p.workPlace||"G-SPOT";});
+    if(places.indexOf("G-SPOT/別邸")>=0)return "G-SPOT/別邸";
+    if(places.indexOf("別邸")>=0)return "別邸";
+    return "G-SPOT";
+  }
+
+  window.applyWorkPlaceLabels=function(){
+    var box=document.getElementById("monthlyTable");
+    if(!box)return;
+    box.querySelectorAll("tbody tr").forEach(function(tr){
+      var nameCell=tr.querySelector("td.name");
+      if(!nameCell)return;
+      var raw=cleanCastNameFromCell(nameCell);
+      if(!raw || raw==="合計")return;
+      nameCell.querySelectorAll(".wpBadge").forEach(function(x){x.remove();});
+      var wp=pickWorkPlaceByName(raw);
+      nameCell.insertAdjacentHTML("beforeend", workPlaceBadge(wp));
+    });
+  };
+
+  function ensureWorkPlaceSelect(selected){
+    var box=document.getElementById("shiftEditPopup");
+    if(!box)return null;
+    var sel=document.getElementById("shiftEditPopupWorkPlace");
+    if(!sel){
+      var endSel=document.getElementById("shiftEditPopupEnd");
+      if(endSel){
+        var row=endSel.closest(".shiftEditPopupRow");
+        if(row){
+          row.insertAdjacentHTML("afterend", '<label>出勤場所</label><select id="shiftEditPopupWorkPlace"></select>');
+        }
+      }
+      sel=document.getElementById("shiftEditPopupWorkPlace");
+    }
+    if(sel){
+      sel.innerHTML=wpOptionsHtml(selected||"G-SPOT");
+      sel.value=selected||"G-SPOT";
+    }
+    return sel;
+  }
+
+  function monthlyDateFromCell(td){
+    var ds=td.getAttribute("data-date");
+    if(ds)return ds;
+    try{
+      var base=parseDate(el("monthBase").value||today());
+      var d=new Date(base);
+      d.setDate(base.getDate()+td.cellIndex-1);
+      return ymd(d);
+    }catch(e){return today();}
+  }
+
+  function castNameFromCell(td){
+    var cast=td.getAttribute("data-cast");
+    if(cast)return cast;
+    var tr=td.closest("tr");
+    return cleanCastNameFromCell(tr?tr.querySelector("td.name"):null);
+  }
+
+  function findStaffForCell(td,ds,name){
+    var sid=td.getAttribute("data-staffid");
+    if(sid){
+      var byId=(staff||[]).find(function(p){return String(p.id)===String(sid);});
+      if(byId)return byId;
+    }
+    var list=(staff||[]).filter(function(p){return String(p.name||"").trim()===String(name||"").trim();});
+    return list.find(function(p){return typeof workFor==="function" && !!workFor(p,ds);}) ||
+           list.find(function(p){return ds>=p.start && ds<=p.end;}) ||
+           list[0] || null;
+  }
+
+  function parseCellTime(text,p,ds){
+    var ov=(p.overrides||{})[ds]||{};
+    var st=ov.timeStart||p.timeStart||"10:00";
+    var en=ov.timeEnd||p.timeEnd||"00:00";
+    var off=!!ov.off;
+    var note=ov.note||"";
+    var t=String(text||"").trim();
+    if(t==="休"){off=false;}
+    else{
+      var parts=t.split("-");
+      function norm(x){
+        if(!x)return "";
+        if(x.indexOf(":")>=0){
+          var a=x.split(":");
+          return String(Number(a[0])).padStart(2,"0")+":"+(a[1]||"00");
+        }
+        return String(Number(x)).padStart(2,"0")+":00";
+      }
+      if(parts.length===2){
+        st=norm(parts[0])||st;
+        en=norm(parts[1])||en;
+      }
+    }
+    return {st:st,en:en,off:off,note:note};
+  }
+
+  window.openShiftEditPopupWorkPlaceFixed=function(td){
+    var ds=monthlyDateFromCell(td);
+    var name=castNameFromCell(td);
+    var p=findStaffForCell(td,ds,name);
+    if(!p){alert("対象CASTが見つかりません");return;}
+
+    window.__shiftWpStaffId=p.id;
+    window.__shiftWpName=p.name||name;
+    window.__shiftWpDate=ds;
+
+    if(!p.overrides)p.overrides={};
+    var parsed=parseCellTime((td.textContent||"").trim(),p,ds);
+    var d=parseDate(ds);
+
+    var title=document.getElementById("shiftEditPopupTitle");
+    if(title)title.textContent=(p.name||name)+" / "+md(d)+"（"+wds[d.getDay()]+"）";
+
+    makeTimeOptions(document.getElementById("shiftEditPopupStart"),parsed.st);
+    makeTimeOptions(document.getElementById("shiftEditPopupEnd"),parsed.en);
+    ensureWorkPlaceSelect(p.workPlace||"G-SPOT");
+
+    var offEl=document.getElementById("shiftEditPopupOff");
+    if(offEl)offEl.checked=parsed.off;
+    var noteEl=document.getElementById("shiftEditPopupNote");
+    if(noteEl)noteEl.value=parsed.note||"";
+
+    var btn=document.querySelector("#shiftEditPopup .shiftEditPopupBtn");
+    if(btn){
+      btn.textContent="保存";
+      btn.onclick=function(){saveShiftEditPopupWorkPlaceFixed();};
+    }
+
+    var popup=document.getElementById("shiftEditPopup");
+    if(popup)popup.style.display="flex";
+  };
+
+  window.saveShiftEditPopupWorkPlaceFixed=function(){
+    var ds=window.__shiftWpDate;
+    var p=(staff||[]).find(function(x){return String(x.id)===String(window.__shiftWpStaffId);});
+    if(!p||!ds){alert("保存対象が見つかりません");return;}
+    if(!p.overrides)p.overrides={};
+
+    var wpSel=ensureWorkPlaceSelect(p.workPlace||"G-SPOT");
+    var selectedWp=wpSel?(wpSel.value||"G-SPOT"):"G-SPOT";
+
+    // 同じ源氏名すべてに出勤場所を同期するため、源氏名横ラベルも必ず変わる
+    (staff||[]).forEach(function(x){
+      if(String(x.name||"").trim()===String(p.name||"").trim()){
+        x.workPlace=selectedWp;
+      }
+    });
+
+    p.overrides[ds]={
+      timeStart:document.getElementById("shiftEditPopupStart").value,
+      timeEnd:document.getElementById("shiftEditPopupEnd").value,
+      off:!!document.getElementById("shiftEditPopupOff").checked,
+      note:(document.getElementById("shiftEditPopupNote").value||"")
+    };
+
+    if(!p.start || ds<p.start)p.start=ds;
+    if(!p.end || ds>p.end)p.end=ds;
+
+    save();
+
+    var popup=document.getElementById("shiftEditPopup");
+    if(popup)popup.style.display="none";
+
+    if(typeof renderMonthly==="function")renderMonthly();
+    setTimeout(applyWorkPlaceLabels,0);
+    if(typeof renderStaff==="function")renderStaff();
+    if(typeof renderStats==="function")renderStats();
+    if(typeof generateText==="function" && document.getElementById("output") && document.getElementById("output").value){generateText();}
+  };
+
+  var touchStart=null,lastTouchOpen=0;
+  document.addEventListener("touchstart",function(e){
+    var t=e.touches&&e.touches[0];
+    if(t)touchStart={x:t.clientX,y:t.clientY,time:Date.now()};
+  },true);
+
+  document.addEventListener("touchend",function(e){
+    var td=e.target.closest&&e.target.closest("#monthlyTable td.shiftCell");
+    if(!td)return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    var t=e.changedTouches&&e.changedTouches[0];
+    var dx=t&&touchStart?Math.abs(t.clientX-touchStart.x):0;
+    var dy=t&&touchStart?Math.abs(t.clientY-touchStart.y):0;
+    if(dx<=10 && dy<=10){
+      lastTouchOpen=Date.now();
+      openShiftEditPopupWorkPlaceFixed(td);
+    }
+  },true);
+
+  document.addEventListener("click",function(e){
+    var td=e.target.closest&&e.target.closest("#monthlyTable td.shiftCell");
+    if(!td)return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if(Date.now()-lastTouchOpen<650)return;
+    openShiftEditPopupWorkPlaceFixed(td);
+  },true);
+
+  var oldRender=window.renderMonthly;
+  if(typeof oldRender==="function"){
+    window.renderMonthly=function(){
+      var r=oldRender.apply(this,arguments);
+      setTimeout(applyWorkPlaceLabels,0);
+      return r;
+    };
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(function(){ensureWorkPlaceSelect("G-SPOT");applyWorkPlaceLabels();},300);
+  });
+  window.addEventListener("load",function(){
+    setTimeout(function(){ensureWorkPlaceSelect("G-SPOT");applyWorkPlaceLabels();},500);
+  });
 })();
 </script>
 
