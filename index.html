@@ -186,6 +186,20 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   .wpBadge{font-size:8.3px;padding:1px 4px}
 }
 
+
+/* Ver68: 出勤場所保存修正 */
+#monthlyTable th,#monthlyTable td{font-size:11px}
+#monthlyTable .name{font-size:11px;min-width:118px;white-space:nowrap}
+.wpBadge{display:inline-block;border-radius:999px;padding:1px 5px;font-size:8.8px;font-weight:900;margin-left:4px;vertical-align:middle;line-height:1.45}
+.wp-gspot{background:#e0f2fe;color:#075985}
+.wp-bettei{background:#fef3c7;color:#92400e}
+.wp-both{background:#ede9fe;color:#5b21b6}
+@media(max-width:760px){
+  #monthlyTable th,#monthlyTable td{font-size:10.5px}
+  #monthlyTable .name{font-size:10.5px;min-width:112px}
+  .wpBadge{font-size:8.3px;padding:1px 4px}
+}
+
 </style>
 </head>
 <body>
@@ -2034,20 +2048,231 @@ init();
     forceRefreshMonthlyWorkPlaceLabels();
   };
 
+  // Ver68: 出勤場所は変更時ではなく保存ボタンで確定するため、change時の自動保存/再描画は無効化
   document.addEventListener("change",function(e){
     if(e.target && e.target.id==="shiftEditPopupWorkPlace"){
-      var p=getPopupTargetStaff();
-      if(p && typeof syncWorkPlaceByName==="function"){
-        syncWorkPlaceByName(p.name,e.target.value||"G-SPOT");
-        save();
-        forceRefreshMonthlyWorkPlaceLabels();
-      }
+      window.__shiftWpPendingValue=e.target.value||"G-SPOT";
     }
   },true);
 
   document.addEventListener("DOMContentLoaded",function(){
     setTimeout(function(){if(typeof renderMonthly==="function" && document.getElementById("monthlyTable"))renderMonthly();},300);
   });
+})();
+</script>
+
+
+<script>
+(function(){
+  function wpOptionHtml(selected){
+    selected=selected||"G-SPOT";
+    return ["G-SPOT","別邸","G-SPOT/別邸"].map(function(v){
+      return "<option value='"+v+"' "+(v===selected?"selected":"")+">"+v+"</option>";
+    }).join("");
+  }
+
+  window.workPlaceBadge=function(wp){
+    wp=wp||"G-SPOT";
+    var label=wp==="G-SPOT/別邸"?"G/別":wp;
+    var cls=wp==="別邸"?"wp-bettei":(wp==="G-SPOT/別邸"?"wp-both":"wp-gspot");
+    return '<span class="wpBadge '+cls+'" title="'+esc(wp)+'">'+esc(label)+'</span>';
+  };
+
+  window.groupDisplayWorkPlace=function(group,base,days){
+    var places=(group.list||[]).map(function(p){return p.workPlace||"G-SPOT";});
+    if(places.indexOf("G-SPOT/別邸")>=0)return "G-SPOT/別邸";
+    if(places.indexOf("別邸")>=0)return "別邸";
+    return "G-SPOT";
+  };
+
+  window.syncWorkPlaceByName=function(name,wp){
+    (staff||[]).forEach(function(p){
+      if(String(p.name||"").trim()===String(name||"").trim()){
+        p.workPlace=wp||"G-SPOT";
+      }
+    });
+  };
+
+  function ensureSelect(selected){
+    var sel=document.getElementById("shiftEditPopupWorkPlace");
+    if(!sel){
+      var end=document.getElementById("shiftEditPopupEnd");
+      var row=end?end.closest(".shiftEditPopupRow"):null;
+      if(row)row.insertAdjacentHTML("afterend",'<label>出勤場所</label><select id="shiftEditPopupWorkPlace"></select>');
+      sel=document.getElementById("shiftEditPopupWorkPlace");
+    }
+    if(sel){
+      sel.innerHTML=wpOptionHtml(selected||"G-SPOT");
+      sel.value=selected||"G-SPOT";
+    }
+    return sel;
+  }
+
+  function cleanName(cell){
+    if(!cell)return "";
+    var c=cell.cloneNode(true);
+    c.querySelectorAll(".wpBadge").forEach(function(x){x.remove();});
+    return (c.textContent||"").replace("🆕","").trim();
+  }
+
+  function cellDate(td){
+    var ds=td.getAttribute("data-date");
+    if(ds)return ds;
+    var base=parseDate(el("monthBase").value||today());
+    var d=new Date(base);
+    d.setDate(base.getDate()+td.cellIndex-1);
+    return ymd(d);
+  }
+
+  function cellName(td){
+    return td.getAttribute("data-cast") || cleanName(td.closest("tr").querySelector("td.name"));
+  }
+
+  function findStaff(td,ds,name){
+    var sid=td.getAttribute("data-staffid");
+    if(sid){
+      var p=(staff||[]).find(function(x){return String(x.id)===String(sid);});
+      if(p)return p;
+    }
+    var list=(staff||[]).filter(function(x){return String(x.name||"").trim()===String(name||"").trim();});
+    return list.find(function(x){return typeof workFor==="function" && workFor(x,ds);}) ||
+           list.find(function(x){return (!x.start || ds>=x.start) && (!x.end || ds<=x.end);}) ||
+           list[0] || null;
+  }
+
+  function parseTimesFromCell(td,p,ds){
+    var ov=(p.overrides||{})[ds]||{};
+    var st=ov.timeStart||p.timeStart||"10:00";
+    var en=ov.timeEnd||p.timeEnd||"00:00";
+    var off=!!ov.off;
+    var note=ov.note||"";
+    var txt=(td.textContent||"").replace("別邸","").replace("G/別","").replace("G-SPOT","").trim();
+    if(txt==="休"){
+      off=false;
+    }else{
+      var m=txt.match(/(\d{1,2})(?::(\d{2}))?\s*-\s*(\d{1,2})(?::(\d{2}))?/);
+      if(m){
+        st=String(Number(m[1])).padStart(2,"0")+":"+(m[2]||"00");
+        en=String(Number(m[3])).padStart(2,"0")+":"+(m[4]||"00");
+      }
+    }
+    return {st:st,en:en,off:off,note:note};
+  }
+
+  window.openShiftWorkPlaceFixedV68=function(td){
+    var ds=cellDate(td);
+    var name=cellName(td);
+    var p=findStaff(td,ds,name);
+    if(!p){alert("対象CASTが見つかりません");return;}
+
+    window.__v68ShiftStaffId=p.id;
+    window.__v68ShiftDate=ds;
+    window.__v68ShiftName=p.name||name;
+    window.__shiftWpPendingValue=p.workPlace||"G-SPOT";
+
+    if(!p.overrides)p.overrides={};
+    var parsed=parseTimesFromCell(td,p,ds);
+    var d=parseDate(ds);
+
+    var title=document.getElementById("shiftEditPopupTitle");
+    if(title)title.textContent=(p.name||name)+" / "+md(d)+"（"+wds[d.getDay()]+"）";
+
+    makeTimeOptions(document.getElementById("shiftEditPopupStart"),parsed.st);
+    makeTimeOptions(document.getElementById("shiftEditPopupEnd"),parsed.en);
+
+    ensureSelect(p.workPlace||"G-SPOT");
+
+    var off=document.getElementById("shiftEditPopupOff");
+    if(off)off.checked=parsed.off;
+    var note=document.getElementById("shiftEditPopupNote");
+    if(note)note.value=parsed.note||"";
+
+    var btn=document.querySelector("#shiftEditPopup .shiftEditPopupBtn");
+    if(btn){
+      btn.textContent="保存";
+      btn.onclick=function(ev){
+        if(ev){ev.preventDefault();ev.stopPropagation();}
+        saveShiftWorkPlaceFixedV68();
+        return false;
+      };
+    }
+
+    var box=document.getElementById("shiftEditPopup");
+    if(box)box.style.display="flex";
+  };
+
+  window.saveShiftWorkPlaceFixedV68=function(){
+    var ds=window.__v68ShiftDate;
+    var p=(staff||[]).find(function(x){return String(x.id)===String(window.__v68ShiftStaffId);});
+    if(!p||!ds){alert("保存対象が見つかりません");return false;}
+
+    var sel=document.getElementById("shiftEditPopupWorkPlace");
+    var selectedWp=sel?(sel.value||"G-SPOT"):(window.__shiftWpPendingValue||p.workPlace||"G-SPOT");
+
+    // 選択した出勤場所を先に確定。ここでG-SPOTに戻さない。
+    syncWorkPlaceByName(p.name,selectedWp);
+
+    if(!p.overrides)p.overrides={};
+    p.overrides[ds]={
+      timeStart:document.getElementById("shiftEditPopupStart").value,
+      timeEnd:document.getElementById("shiftEditPopupEnd").value,
+      off:!!document.getElementById("shiftEditPopupOff").checked,
+      note:(document.getElementById("shiftEditPopupNote").value||"")
+    };
+
+    if(!p.start || ds<p.start)p.start=ds;
+    if(!p.end || ds>p.end)p.end=ds;
+
+    save();
+
+    var box=document.getElementById("shiftEditPopup");
+    if(box)box.style.display="none";
+
+    if(typeof renderMonthly==="function")renderMonthly();
+    if(typeof renderStats==="function")renderStats();
+    if(typeof renderStaff==="function")renderStaff();
+    if(typeof generateText==="function" && document.getElementById("output") && document.getElementById("output").value){generateText();}
+    return false;
+  };
+
+  // 既存保存関数も最終的にVer68保存へ向ける
+  window.saveShiftEditPopupWorkPlaceFixed=window.saveShiftWorkPlaceFixedV68;
+  window.saveShiftEditPopupFinal=window.saveShiftWorkPlaceFixedV68;
+
+  document.addEventListener("change",function(e){
+    if(e.target && e.target.id==="shiftEditPopupWorkPlace"){
+      window.__shiftWpPendingValue=e.target.value||"G-SPOT";
+      // ここでは保存・再描画しない。保存ボタンで確定する。
+    }
+  },true);
+
+  var lastTouch=0,ts=null;
+  document.addEventListener("touchstart",function(e){
+    var t=e.touches&&e.touches[0];
+    if(t)ts={x:t.clientX,y:t.clientY};
+  },true);
+
+  document.addEventListener("touchend",function(e){
+    var td=e.target.closest&&e.target.closest("#monthlyTable td.shiftCell");
+    if(!td)return;
+    var t=e.changedTouches&&e.changedTouches[0];
+    var dx=t&&ts?Math.abs(t.clientX-ts.x):0;
+    var dy=t&&ts?Math.abs(t.clientY-ts.y):0;
+    if(dx>10 || dy>10)return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    lastTouch=Date.now();
+    openShiftWorkPlaceFixedV68(td);
+  },true);
+
+  document.addEventListener("click",function(e){
+    var td=e.target.closest&&e.target.closest("#monthlyTable td.shiftCell");
+    if(!td)return;
+    if(Date.now()-lastTouch<650)return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    openShiftWorkPlaceFixedV68(td);
+  },true);
 })();
 </script>
 
