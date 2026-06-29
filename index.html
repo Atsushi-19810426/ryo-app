@@ -200,6 +200,12 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   .wpBadge{font-size:8.3px;padding:1px 4px}
 }
 
+
+/* Ver69: 出勤一覧 期間全体編集 */
+#staffPeriodEditPopup input,#staffPeriodEditPopup select,#staffPeriodEditPopup textarea{
+  box-sizing:border-box;
+}
+
 </style>
 </head>
 <body>
@@ -536,7 +542,23 @@ function closePopupTest(){
 init();alert("復元しました")}catch(e){alert("復元できませんでした")}};r.readAsText(file)}
 function showStorageInfo(){el("storageInfo").value=JSON.stringify({staff:staff.length,dorms:dorms.length,dormMaster:dormMaster.length,keys:Object.keys(localStorage)},null,2)}
 function addStaff(){let name=el("name").value.trim();if(!name)return alert("源氏名を入力してください");staff.push({id:Date.now(),name,newbie:el("newbie").value==="1",workPlace:(el("workPlace")?el("workPlace").value:"G-SPOT"),start:el("start").value,end:el("end").value,timeStart:el("timeStart").value,timeEnd:el("timeEnd").value,note:el("staffNote").value,overrides:{}});el("name").value="";if(el("staffNote"))el("staffNote").value="";save();renderStaff();renderMonthly();renderEditStaffSelect()}
-function renderStaff(){let box=el("staffList");box.innerHTML=staff.length?"":"<p class='note'>登録なし</p>";staff.forEach(p=>{let div=document.createElement("div");div.className="item";div.innerHTML=`<b>${esc(p.name)}</b>${p.newbie?"<span class='badge new'>新人</span>":""}${workPlaceBadge(p.workPlace||"G-SPOT")}<div class='note'>${p.start}〜${p.end} / ${shortRange(p.timeStart,p.timeEnd)}</div>${p.note?`<div class="note">備考：${esc(p.note)}</div>`:""}<div class='row3'><button class='sub' onclick='openStaffMonth(${p.id})'>月間表で編集</button><button onclick='toggleNewbie(${p.id})'>新人切替</button><button class='danger' onclick='removeStaff(${p.id})'>削除</button></div>`;box.appendChild(div)})}
+function renderStaff(){
+  let box=el("staffList");
+  box.innerHTML=staff.length?"":"<p class='note'>登録なし</p>";
+  staff.forEach(p=>{
+    let div=document.createElement("div");
+    div.className="item";
+    div.innerHTML=`<b>${esc(p.name)}</b>${p.newbie?"<span class='badge new'>新人</span>":""}${workPlaceBadge(p.workPlace||"G-SPOT")}
+      <div class='note'>${p.start}〜${p.end} / ${shortRange(p.timeStart,p.timeEnd)}</div>
+      ${p.note?`<div class="note">備考：${esc(p.note)}</div>`:""}
+      <div class='row3'>
+        <button class='sub' onclick='openStaffPeriodEdit(${p.id})'>期間全体を編集</button>
+        <button onclick='toggleNewbie(${p.id})'>新人切替</button>
+        <button class='danger' onclick='removeStaff(${p.id})'>削除</button>
+      </div>`;
+    box.appendChild(div);
+  });
+}
 function openStaffMonth(id){showPage("shiftEdit");el("editStaffSelect").value=String(id);renderShiftEditor()}
 function toggleNewbie(id){let p=staff.find(x=>x.id===id);if(p){p.newbie=!p.newbie;save();renderStaff();renderMonthly()}}
 function removeStaff(id){if(confirm("削除しますか？")){staff=staff.filter(x=>x.id!==id);save();renderStaff();renderMonthly();renderEditStaffSelect()}}
@@ -2273,6 +2295,132 @@ init();
     e.stopImmediatePropagation();
     openShiftWorkPlaceFixedV68(td);
   },true);
+})();
+</script>
+
+
+<div id="staffPeriodEditPopup" class="shiftEditPopup">
+  <div class="shiftEditPopupBox">
+    <div class="shiftEditPopupHead">
+      <b id="staffPeriodEditTitle">期間全体を編集</b>
+      <button class="shiftEditPopupClose" onclick="closeStaffPeriodEdit()">×</button>
+    </div>
+
+    <label>源氏名</label>
+    <input id="staffPeriodEditName" style="width:100%;border:1px solid #e5e7eb;border-radius:10px;padding:9px;font-size:14px;background:#fff">
+
+    <div class="shiftEditPopupRow">
+      <div>
+        <label>新人</label>
+        <select id="staffPeriodEditNewbie">
+          <option value="0">通常</option>
+          <option value="1">新人</option>
+        </select>
+      </div>
+      <div>
+        <label>出勤場所</label>
+        <select id="staffPeriodEditWorkPlace">
+          <option>G-SPOT</option>
+          <option>別邸</option>
+          <option>G-SPOT/別邸</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="shiftEditPopupRow">
+      <div>
+        <label>開始日</label>
+        <input id="staffPeriodEditStart" type="date" style="width:100%;border:1px solid #e5e7eb;border-radius:10px;padding:9px;font-size:14px;background:#fff">
+      </div>
+      <div>
+        <label>終了日</label>
+        <input id="staffPeriodEditEnd" type="date" style="width:100%;border:1px solid #e5e7eb;border-radius:10px;padding:9px;font-size:14px;background:#fff">
+      </div>
+    </div>
+
+    <div class="shiftEditPopupRow">
+      <div>
+        <label>出勤開始</label>
+        <select id="staffPeriodEditTimeStart"></select>
+      </div>
+      <div>
+        <label>出勤終了</label>
+        <select id="staffPeriodEditTimeEnd"></select>
+      </div>
+    </div>
+
+    <label>備考</label>
+    <textarea id="staffPeriodEditNote"></textarea>
+
+    <button class="shiftEditPopupBtn" onclick="saveStaffPeriodEdit()">保存</button>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  window.openStaffPeriodEdit=function(id){
+    var p=(staff||[]).find(function(x){return String(x.id)===String(id);});
+    if(!p){alert("対象CASTが見つかりません");return;}
+    window.__staffPeriodEditId=p.id;
+
+    var title=document.getElementById("staffPeriodEditTitle");
+    if(title)title.textContent="期間全体を編集 / "+(p.name||"");
+
+    document.getElementById("staffPeriodEditName").value=p.name||"";
+    document.getElementById("staffPeriodEditNewbie").value=p.newbie?"1":"0";
+    document.getElementById("staffPeriodEditWorkPlace").value=p.workPlace||"G-SPOT";
+    document.getElementById("staffPeriodEditStart").value=p.start||today();
+    document.getElementById("staffPeriodEditEnd").value=p.end||p.start||today();
+    document.getElementById("staffPeriodEditNote").value=p.note||"";
+
+    makeTimeOptions(document.getElementById("staffPeriodEditTimeStart"),p.timeStart||"10:00");
+    makeTimeOptions(document.getElementById("staffPeriodEditTimeEnd"),p.timeEnd||"00:00");
+
+    var box=document.getElementById("staffPeriodEditPopup");
+    if(box)box.style.display="flex";
+  };
+
+  window.closeStaffPeriodEdit=function(){
+    var box=document.getElementById("staffPeriodEditPopup");
+    if(box)box.style.display="none";
+  };
+
+  window.saveStaffPeriodEdit=function(){
+    var p=(staff||[]).find(function(x){return String(x.id)===String(window.__staffPeriodEditId);});
+    if(!p){alert("保存対象が見つかりません");return false;}
+
+    var name=(document.getElementById("staffPeriodEditName").value||"").trim();
+    var start=document.getElementById("staffPeriodEditStart").value;
+    var end=document.getElementById("staffPeriodEditEnd").value;
+
+    if(!name){alert("源氏名を入力してください");return false;}
+    if(!start || !end){alert("開始日・終了日を入力してください");return false;}
+    if(end<start){alert("終了日は開始日以降にしてください");return false;}
+
+    p.name=name;
+    p.newbie=document.getElementById("staffPeriodEditNewbie").value==="1";
+    p.workPlace=document.getElementById("staffPeriodEditWorkPlace").value||"G-SPOT";
+    p.start=start;
+    p.end=end;
+    p.timeStart=document.getElementById("staffPeriodEditTimeStart").value;
+    p.timeEnd=document.getElementById("staffPeriodEditTimeEnd").value;
+    p.note=document.getElementById("staffPeriodEditNote").value||"";
+
+    // 月間表で作った日別編集は消さずに残す
+    if(!p.overrides)p.overrides={};
+
+    save();
+    closeStaffPeriodEdit();
+
+    if(typeof renderStaff==="function")renderStaff();
+    if(typeof renderMonthly==="function")renderMonthly();
+    if(typeof renderStats==="function")renderStats();
+    if(typeof renderEditStaffSelect==="function")renderEditStaffSelect();
+    if(typeof generateText==="function" && document.getElementById("output") && document.getElementById("output").value){generateText();}
+
+    return false;
+  };
 })();
 </script>
 
