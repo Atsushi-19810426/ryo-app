@@ -3002,5 +3002,95 @@ init();
 })();
 </script>
 
+
+<script>
+(function(){
+  function v76Min(t){
+    if(!t)return 99999;
+    var p=String(t).split(":");
+    return Number(p[0]||0)*60+Number(p[1]||0);
+  }
+
+  function v76IsOff(p,ds){
+    return !!(p && p.overrides && p.overrides[ds] && p.overrides[ds].off);
+  }
+
+  function v76Hit(group,ds){
+    var hits=[];
+    (group.list||[]).forEach(function(p){
+      var w=null;
+      try{w=workFor(p,ds);}catch(e){w=null;}
+      if(w)hits.push({staff:p,work:w});
+    });
+    if(!hits.length)return null;
+    hits.sort(function(a,b){return v76Min(a.work.timeStart)-v76Min(b.work.timeStart);});
+    return hits[0];
+  }
+
+  function v76HasOff(group,ds){
+    return (group.list||[]).some(function(p){return v76IsOff(p,ds);});
+  }
+
+  function v76Segment(group,base,days){
+    for(var i=0;i<days;i++){
+      var d=new Date(base);d.setDate(base.getDate()+i);
+      var ds=ymd(d);
+      var hit=v76Hit(group,ds);
+      if(!hit)continue;
+
+      var end=ds;
+      for(var j=i+1;j<days;j++){
+        var d2=new Date(base);d2.setDate(base.getDate()+j);
+        var ds2=ymd(d2);
+
+        // 明示休みで1つの出勤ブロックを終了
+        if(v76HasOff(group,ds2))break;
+
+        var h2=v76Hit(group,ds2);
+        if(!h2)break;
+
+        end=ds2;
+      }
+
+      return {
+        start:ds,
+        end:end,
+        startMinutes:v76Min(hit.work.timeStart),
+        staff:hit.staff,
+        work:hit.work
+      };
+    }
+    return null;
+  }
+
+  window.sortMonthlyGroups=function(groups,base,days){
+    return (groups||[]).slice().sort(function(a,b){
+      var as=v76Segment(a,base,days);
+      var bs=v76Segment(b,base,days);
+
+      var ae=as?as.end:"9999-12-31";
+      var be=bs?bs.end:"9999-12-31";
+      if(ae!==be)return ae.localeCompare(be);
+
+      var ad=as?as.start:"9999-12-31";
+      var bd=bs?bs.start:"9999-12-31";
+      if(ad!==bd)return ad.localeCompare(bd);
+
+      var at=as?as.startMinutes:99999;
+      var bt=bs?bs.startMinutes:99999;
+      if(at!==bt)return at-bt;
+
+      return String(a.name||"").localeCompare(String(b.name||""),"ja");
+    });
+  };
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(function(){
+      if(typeof renderMonthly==="function" && document.getElementById("monthlyTable"))renderMonthly();
+    },300);
+  });
+})();
+</script>
+
 </body>
 </html>
