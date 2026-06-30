@@ -3813,5 +3813,374 @@ init();
 })();
 </script>
 
+
+<script>
+(function(){
+  function v83Val(id){
+    var el=document.getElementById(id);
+    return el ? (el.value||"").trim() : "";
+  }
+
+  function v83Txt(el){
+    return el ? (el.textContent||"").trim() : "";
+  }
+
+  function v83CleanRoomLabel(cell){
+    return v83Txt(cell).replace(/\s+/g,"").trim();
+  }
+
+  function v83CleanName(txt){
+    return String(txt||"")
+      .replace(/入[:：]?/g,"")
+      .replace(/退[:：]?/g,"")
+      .replace(/清掃/g,"")
+      .replace(/清/g,"")
+      .replace(/済/g,"")
+      .replace(/未/g,"")
+      .replace(/休/g,"")
+      .trim();
+  }
+
+  function v83AddDays(ds,add){
+    var d=parseDate(ds);
+    d.setDate(d.getDate()+add);
+    return ymd(d);
+  }
+
+  function v83DateByCell(td){
+    var ds=td.getAttribute("data-date");
+    if(ds)return ds;
+    try{
+      var base=parseDate(el("monthBase").value||today());
+      var d=new Date(base);
+      d.setDate(base.getDate()+td.cellIndex-1);
+      return ymd(d);
+    }catch(e){
+      return today();
+    }
+  }
+
+  function v83RoomByCell(td){
+    var tr=td.closest("tr");
+    var nameCell=tr?tr.querySelector("td.name"):null;
+    var label=v83CleanRoomLabel(nameCell);
+    var parts=label.split("-");
+    return {label:label,dormName:parts[0]||"",roomNo:parts.slice(1).join("-")||""};
+  }
+
+  function v83DateInRecord(r,ds){
+    if(!r || !ds || !r.moveIn)return false;
+    var end=r.moveOut||r.moveIn;
+    return ds>=r.moveIn && ds<=end;
+  }
+
+  function v83RoomKey(r){
+    return String(r.dormName||"")+"-"+String(r.roomNo||"");
+  }
+
+  function v83FindRecordByContext(ctx){
+    ctx=ctx||{};
+    var ds=ctx.date||today();
+    var dn=ctx.dormName||"";
+    var rn=ctx.roomNo||"";
+    var name=v83CleanName(ctx.name||"");
+
+    var list=(dorms||[]).slice();
+
+    // 1. 名前 + 日付 + 部屋
+    if(name && dn && rn){
+      var a=list.find(function(r){
+        return String(r.residentName||"").trim()===name &&
+               String(r.dormName||"")===dn &&
+               String(r.roomNo||"")===rn &&
+               v83DateInRecord(r,ds);
+      });
+      if(a)return a;
+    }
+
+    // 2. 名前 + 日付
+    if(name){
+      var b=list.find(function(r){
+        return String(r.residentName||"").trim()===name && v83DateInRecord(r,ds);
+      });
+      if(b)return b;
+    }
+
+    // 3. 部屋 + 日付
+    if(dn && rn){
+      var c=list.find(function(r){
+        return String(r.dormName||"")===dn && String(r.roomNo||"")===rn && v83DateInRecord(r,ds);
+      });
+      if(c)return c;
+    }
+
+    // 4. 名前のみ
+    if(name){
+      var d=list.find(function(r){
+        return String(r.residentName||"").trim()===name;
+      });
+      if(d)return d;
+    }
+
+    return null;
+  }
+
+  function v83ContextFromDormEditPopup(){
+    var ctx={};
+
+    // 既存ポップアップのいろいろなIDに対応
+    ctx.date=v83Val("dormEditDate") || v83Val("dormMoveOnlyDate") || (window.__v83DormCellContext&&window.__v83DormCellContext.date) || today();
+    ctx.dormName=v83Val("dormEditDorm") || v83Val("dormEditDormName") || v83Val("dormName") || "";
+    ctx.roomNo=v83Val("dormEditRoom") || v83Val("dormEditRoomNo") || v83Val("roomNo") || "";
+    ctx.name=v83Val("dormEditResident") || v83Val("dormEditResidentName") || v83Val("residentName") || v83Val("dormResidentName") || "";
+
+    // title/currentから推定
+    if(!ctx.name){
+      var title=v83Txt(document.getElementById("dormEditTitle")) || v83Txt(document.getElementById("dormEditPopupTitle"));
+      if(title.indexOf("/")>=0)ctx.name=title.split("/")[0].replace("寮編集","").trim();
+    }
+
+    // セルクリック時の文脈を優先補完
+    var c=window.__v83DormCellContext;
+    if(c){
+      if(!ctx.date)ctx.date=c.date;
+      if(!ctx.dormName)ctx.dormName=c.dormName;
+      if(!ctx.roomNo)ctx.roomNo=c.roomNo;
+      if(!ctx.name)ctx.name=c.name;
+    }
+
+    return ctx;
+  }
+
+  function v83CaptureDormCell(td){
+    var room=v83RoomByCell(td);
+    var ds=v83DateByCell(td);
+    var txt=v83Txt(td);
+    var name=v83CleanName(txt);
+
+    var rec=v83FindRecordByContext({
+      date:ds,
+      dormName:room.dormName,
+      roomNo:room.roomNo,
+      name:name
+    });
+
+    if(rec){
+      name=rec.residentName||name;
+      window.__v83DormActiveRecordId=rec.id;
+      window.__dormMoveOnlyRecordId=rec.id;
+    }else{
+      window.__v83DormActiveRecordId=null;
+      window.__dormMoveOnlyRecordId=null;
+    }
+
+    window.__v83DormCellContext={
+      date:ds,
+      dormName:room.dormName,
+      roomNo:room.roomNo,
+      name:name
+    };
+  }
+
+  // 寮月間表のセルを押した時点で、対象を記録
+  document.addEventListener("click",function(e){
+    var td=e.target.closest&&e.target.closest("#dormMonthlyTable td");
+    if(!td || td.classList.contains("name"))return;
+    v83CaptureDormCell(td);
+  },true);
+
+  document.addEventListener("touchend",function(e){
+    var td=e.target.closest&&e.target.closest("#dormMonthlyTable td");
+    if(!td || td.classList.contains("name"))return;
+    v83CaptureDormCell(td);
+  },true);
+
+  function v83DormNames(){
+    return [...new Set((dormMaster||[]).map(function(m){return m.dormName;}))].filter(Boolean).sort();
+  }
+
+  function v83RoomsOf(dn){
+    return (dormMaster||[]).filter(function(m){return m.dormName===dn;})
+      .map(function(m){return m.roomNo;})
+      .filter(Boolean)
+      .sort(function(a,b){return String(a).localeCompare(String(b),'ja');});
+  }
+
+  window.updateDormMoveOnlyRooms=function(){
+    var dnEl=document.getElementById("dormMoveOnlyDorm");
+    var rnEl=document.getElementById("dormMoveOnlyRoom");
+    if(!dnEl||!rnEl)return;
+    var rooms=v83RoomsOf(dnEl.value);
+    rnEl.innerHTML="";
+    rooms.forEach(function(r){
+      var o=document.createElement("option");
+      o.value=r;
+      o.textContent=r+"号室";
+      rnEl.appendChild(o);
+    });
+  };
+
+  function v83FillMoveSelect(rec){
+    var dnEl=document.getElementById("dormMoveOnlyDorm");
+    if(!dnEl)return;
+    var names=v83DormNames();
+    dnEl.innerHTML="";
+    names.forEach(function(n){
+      var o=document.createElement("option");
+      o.value=n;
+      o.textContent=n;
+      dnEl.appendChild(o);
+    });
+    var firstOther=names.find(function(n){return n!==rec.dormName;});
+    dnEl.value=firstOther||rec.dormName||names[0]||"";
+    updateDormMoveOnlyRooms();
+
+    var rnEl=document.getElementById("dormMoveOnlyRoom");
+    if(rnEl && dnEl.value===rec.dormName && rec.roomNo){
+      var other=[...rnEl.options].map(function(o){return o.value;}).find(function(r){return r!==rec.roomNo;});
+      if(other)rnEl.value=other;
+    }
+  }
+
+  function v83ResolveCurrentRecord(){
+    // staleな前回IDは使わず、現在のポップアップ/セル文脈から毎回検索
+    var ctx=v83ContextFromDormEditPopup();
+    var rec=v83FindRecordByContext(ctx);
+
+    // 最後に、直近セルで確定していたIDだけ補助的に使う
+    if(!rec && window.__v83DormActiveRecordId){
+      rec=(dorms||[]).find(function(r){return String(r.id)===String(window.__v83DormActiveRecordId);});
+    }
+
+    if(rec){
+      window.__dormMoveOnlyRecordId=rec.id;
+      window.__v83DormActiveRecordId=rec.id;
+    }
+
+    return rec;
+  }
+
+  window.openDormMoveOnlyPopup=function(){
+    var rec=v83ResolveCurrentRecord();
+
+    if(!rec){
+      alert("移動元の寮データが見つかりません。移動したいCASTの寮月間表セルを一度タップしてから操作してください。");
+      return false;
+    }
+
+    var ctx=v83ContextFromDormEditPopup();
+    var baseDate=ctx.date || rec.moveIn || today();
+    if(baseDate<rec.moveIn)baseDate=rec.moveIn;
+    if(rec.moveOut && baseDate>rec.moveOut)baseDate=rec.moveOut;
+
+    window.__dormMoveOnlyRecordId=rec.id;
+
+    var dateEl=document.getElementById("dormMoveOnlyDate");
+    if(dateEl)dateEl.value=baseDate;
+
+    var cur=document.getElementById("dormMoveOnlyCurrent");
+    if(cur){
+      cur.textContent=(rec.residentName||"-")+" / 現在："+(rec.dormName||"-")+"-"+(rec.roomNo||"-")+" / 入:"+ (rec.moveIn||"-")+" / 退:"+(rec.moveOut||"-");
+    }
+
+    var title=document.getElementById("dormMoveOnlyTitle");
+    if(title)title.textContent="寮のみ移動 / "+(rec.residentName||"");
+
+    v83FillMoveSelect(rec);
+
+    var box=document.getElementById("dormMoveOnlyPopup");
+    if(box)box.style.display="flex";
+
+    return false;
+  };
+
+  window.saveDormMoveOnly=function(){
+    var rec=(dorms||[]).find(function(r){return String(r.id)===String(window.__dormMoveOnlyRecordId);});
+
+    if(!rec){
+      rec=v83ResolveCurrentRecord();
+    }
+
+    if(!rec){
+      alert("移動元の寮データが見つかりません");
+      return false;
+    }
+
+    var moveDate=v83Val("dormMoveOnlyDate");
+    var newDorm=v83Val("dormMoveOnlyDorm");
+    var newRoom=v83Val("dormMoveOnlyRoom");
+
+    if(!moveDate){alert("移動日を入力してください");return false;}
+    if(!newDorm||!newRoom){alert("移動先の寮・部屋を選択してください");return false;}
+
+    var oldMoveIn=rec.moveIn||moveDate;
+    var oldMoveOut=rec.moveOut||moveDate;
+    var oldCleanDate=rec.cleanDate||"";
+    var oldCleanStatus=rec.cleanStatus||"未清掃";
+    var oldCleanDoneDate=rec.cleanDoneDate||"";
+    var oldNote=rec.note||"";
+    var oldDorm=rec.dormName||"";
+    var oldRoom=rec.roomNo||"";
+
+    if(moveDate<=oldMoveIn){
+      rec.dormName=newDorm;
+      rec.roomNo=newRoom;
+      rec.moveIn=moveDate;
+      rec.status=rec.residentName?"入寮中":"空室";
+      rec.note=(oldNote?oldNote+" / ":"")+"寮変更："+newDorm+"-"+newRoom;
+    }else{
+      var beforeMove=v83AddDays(moveDate,-1);
+
+      rec.moveOut=beforeMove;
+      rec.cleanDate=moveDate;
+      if(rec.cleanStatus!=="清掃済み" && rec.cleanStatus!=="済"){
+        rec.cleanStatus="清掃予定";
+        rec.cleanDoneDate="";
+      }
+      rec.note=(oldNote?oldNote+" / ":"")+"寮移動："+moveDate+"から"+newDorm+"-"+newRoom;
+
+      var newRec={
+        id:Date.now()+Math.floor(Math.random()*10000),
+        dormName:newDorm,
+        roomNo:newRoom,
+        residentName:rec.residentName||"",
+        status:rec.residentName?"入寮中":"空室",
+        moveIn:moveDate,
+        moveOut:(oldMoveOut && oldMoveOut>=moveDate)?oldMoveOut:"",
+        cleanDate:(oldCleanDate && oldCleanDate>=moveDate)?oldCleanDate:"",
+        cleanStatus:(oldCleanDate && oldCleanDate>=moveDate)?oldCleanStatus:"未清掃",
+        cleanDoneDate:(oldCleanDate && oldCleanDate>=moveDate)?oldCleanDoneDate:"",
+        note:"寮移動："+oldDorm+"-"+oldRoom+"から移動"
+      };
+
+      dorms.push(newRec);
+    }
+
+    if(typeof dedupeDormSameNameSameDate==="function"){
+      try{dedupeDormSameNameSameDate();}catch(e){}
+    }
+
+    save();
+
+    var moveBox=document.getElementById("dormMoveOnlyPopup");
+    if(moveBox)moveBox.style.display="none";
+    if(typeof closeDormEditPopup==="function")closeDormEditPopup();
+
+    window.__dormMoveOnlyRecordId=null;
+    window.__v83DormActiveRecordId=null;
+    window.__v83DormCellContext=null;
+
+    if(typeof renderDorm==="function")renderDorm();
+    if(typeof renderDorms==="function")renderDorms();
+    if(typeof renderDormMonthly==="function")renderDormMonthly();
+    if(typeof renderVacancy==="function")renderVacancy();
+    if(typeof renderStats==="function")renderStats();
+    if(typeof generateText==="function" && document.getElementById("output") && document.getElementById("output").value){generateText();}
+
+    return false;
+  };
+})();
+</script>
+
 </body>
 </html>
