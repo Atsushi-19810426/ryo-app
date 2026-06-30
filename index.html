@@ -1980,6 +1980,114 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   border:2px solid #e5e7eb!important;
 }
 
+
+/* Ver105: 寮名と部屋番号の隙間を完全に詰める */
+.dormMatrixTable{
+  border-collapse:collapse!important;
+  border-spacing:0!important;
+}
+
+/* 寮名行を薄く固定 */
+.dormMatrixTable thead tr:first-child,
+.dormMatrixTable thead tr:first-child th{
+  height:18px!important;
+  min-height:18px!important;
+  max-height:18px!important;
+  padding:0 2px!important;
+  line-height:18px!important;
+  vertical-align:middle!important;
+  box-sizing:border-box!important;
+}
+
+/* 部屋番号行を寮名行の直下へ */
+.dormMatrixTable thead tr:nth-child(2),
+.dormMatrixTable thead tr:nth-child(2) th{
+  height:18px!important;
+  min-height:18px!important;
+  max-height:18px!important;
+  padding:0 2px!important;
+  line-height:18px!important;
+  vertical-align:middle!important;
+  box-sizing:border-box!important;
+}
+
+.dormMatrixTable thead tr:nth-child(2) th{
+  top:18px!important;
+}
+
+/* 左上の日付ヘッダーも2段分ぴったり */
+.dormMatrixDateHead{
+  height:36px!important;
+  min-height:36px!important;
+  max-height:36px!important;
+  padding:0 2px!important;
+  line-height:36px!important;
+  vertical-align:middle!important;
+  box-sizing:border-box!important;
+}
+
+/* 寮名内の余白・サブ表記の余白を削除 */
+.dormMatrixGroup{
+  padding:0 2px!important;
+  line-height:18px!important;
+  font-size:8px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+.dormMatrixGroup small{
+  display:none!important;
+}
+
+.dormMatrixRoom{
+  padding:0 2px!important;
+  line-height:18px!important;
+  font-size:9px!important;
+  white-space:nowrap!important;
+}
+
+/* セル線のズレ防止 */
+.dormMatrixTable th,
+.dormMatrixTable td{
+  border-spacing:0!important;
+  margin:0!important;
+}
+
+@media(max-width:760px){
+  .dormMatrixTable thead tr:first-child,
+  .dormMatrixTable thead tr:first-child th{
+    height:17px!important;
+    min-height:17px!important;
+    max-height:17px!important;
+    line-height:17px!important;
+  }
+  .dormMatrixTable thead tr:nth-child(2),
+  .dormMatrixTable thead tr:nth-child(2) th{
+    height:17px!important;
+    min-height:17px!important;
+    max-height:17px!important;
+    line-height:17px!important;
+  }
+  .dormMatrixTable thead tr:nth-child(2) th{
+    top:17px!important;
+  }
+  .dormMatrixDateHead{
+    height:34px!important;
+    min-height:34px!important;
+    max-height:34px!important;
+    line-height:34px!important;
+  }
+  .dormMatrixGroup{
+    line-height:17px!important;
+    font-size:7px!important;
+  }
+  .dormMatrixRoom{
+    line-height:17px!important;
+    font-size:8px!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -9036,6 +9144,136 @@ init();
 
   window.addEventListener("load",function(){
     setTimeout(applyMonthlySlideFix104,500);
+  });
+})();
+</script>
+
+
+<script id="ver105-dorm-header-gap-fix">
+(function(){
+  function fixDormHeaderGap105(){
+    var table=document.querySelector("#dormMonthlyTable .dormMatrixTable");
+    if(!table)return;
+
+    var isMobile=window.matchMedia && window.matchMedia("(max-width:760px)").matches;
+    var h=isMobile ? 17 : 18;
+
+    table.style.borderCollapse="collapse";
+    table.style.borderSpacing="0";
+
+    var row1=table.querySelector("thead tr:first-child");
+    var row2=table.querySelector("thead tr:nth-child(2)");
+
+    [row1,row2].forEach(function(row,idx){
+      if(!row)return;
+      row.style.height=h+"px";
+      row.style.minHeight=h+"px";
+      row.style.maxHeight=h+"px";
+
+      row.querySelectorAll("th").forEach(function(th){
+        th.style.height=h+"px";
+        th.style.minHeight=h+"px";
+        th.style.maxHeight=h+"px";
+        th.style.padding="0 2px";
+        th.style.lineHeight=h+"px";
+        th.style.verticalAlign="middle";
+        th.style.boxSizing="border-box";
+        th.style.margin="0";
+        if(idx===1){
+          th.style.top=h+"px";
+        }
+      });
+    });
+
+    table.querySelectorAll(".dormMatrixGroup small").forEach(function(s){
+      s.style.display="none";
+    });
+
+    table.querySelectorAll(".dormMatrixGroup").forEach(function(th){
+      th.style.padding="0 2px";
+      th.style.lineHeight=h+"px";
+      th.style.fontSize=(isMobile?7:8)+"px";
+      th.style.whiteSpace="nowrap";
+      th.style.overflow="hidden";
+      th.style.textOverflow="ellipsis";
+    });
+
+    table.querySelectorAll(".dormMatrixRoom").forEach(function(th){
+      th.style.padding="0 2px";
+      th.style.lineHeight=h+"px";
+      th.style.fontSize=(isMobile?8:9)+"px";
+      th.style.whiteSpace="nowrap";
+    });
+
+    var dateHead=table.querySelector(".dormMatrixDateHead");
+    if(dateHead){
+      dateHead.style.height=(h*2)+"px";
+      dateHead.style.minHeight=(h*2)+"px";
+      dateHead.style.maxHeight=(h*2)+"px";
+      dateHead.style.padding="0 2px";
+      dateHead.style.lineHeight=(h*2)+"px";
+      dateHead.style.verticalAlign="middle";
+      dateHead.style.boxSizing="border-box";
+    }
+
+    document.documentElement.style.setProperty("--dormMatrixHead1",h+"px");
+  }
+
+  window.fixDormHeaderGap105=fixDormHeaderGap105;
+
+  var oldRenderDormMonthly105=window.renderDormMonthly;
+  if(typeof oldRenderDormMonthly105==="function" && !oldRenderDormMonthly105.__v105Gap){
+    var wrapped=function(){
+      var r=oldRenderDormMonthly105.apply(this,arguments);
+      setTimeout(fixDormHeaderGap105,0);
+      setTimeout(fixDormHeaderGap105,150);
+      setTimeout(fixDormHeaderGap105,500);
+      return r;
+    };
+    wrapped.__v105Gap=true;
+    window.renderDormMonthly=wrapped;
+  }
+
+  var oldRenderDormMonthlyMatrix105=window.renderDormMonthlyMatrix;
+  if(typeof oldRenderDormMonthlyMatrix105==="function" && !oldRenderDormMonthlyMatrix105.__v105Gap){
+    var matrixWrapped=function(){
+      var r=oldRenderDormMonthlyMatrix105.apply(this,arguments);
+      setTimeout(fixDormHeaderGap105,0);
+      setTimeout(fixDormHeaderGap105,150);
+      setTimeout(fixDormHeaderGap105,500);
+      return r;
+    };
+    matrixWrapped.__v105Gap=true;
+    window.renderDormMonthlyMatrix=matrixWrapped;
+  }
+
+  var oldShowMonthlySubTab105=window.showMonthlySubTab;
+  if(typeof oldShowMonthlySubTab105==="function" && !oldShowMonthlySubTab105.__v105Gap){
+    var tabWrapped=function(type){
+      var r=oldShowMonthlySubTab105.apply(this,arguments);
+      if(type==="dorm"){
+        setTimeout(fixDormHeaderGap105,100);
+        setTimeout(fixDormHeaderGap105,400);
+        setTimeout(fixDormHeaderGap105,900);
+      }
+      return r;
+    };
+    tabWrapped.__v105Gap=true;
+    window.showMonthlySubTab=tabWrapped;
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(fixDormHeaderGap105,800);
+    setTimeout(fixDormHeaderGap105,1600);
+  });
+
+  window.addEventListener("load",function(){
+    setTimeout(fixDormHeaderGap105,500);
+    setTimeout(fixDormHeaderGap105,1500);
+  });
+
+  window.addEventListener("resize",function(){
+    fixDormHeaderGap105();
   });
 })();
 </script>
