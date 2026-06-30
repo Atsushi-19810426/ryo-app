@@ -392,6 +392,10 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 .dormMoveBtn{background:#7c3aed!important;color:#fff!important;margin-top:8px}
 #dormMoveOnlyPopup select,#dormMoveOnlyPopup input{box-sizing:border-box}
 
+
+/* Ver84: 寮移動なしで継続 */
+.dormMoveCancelBtn{background:#0f766e!important;color:#fff!important;margin-top:8px}
+
 </style>
 </head>
 <body>
@@ -4179,6 +4183,159 @@ init();
 
     return false;
   };
+})();
+</script>
+
+
+<script>
+(function(){
+  function v84AddDays(ds,add){
+    var d=parseDate(ds);
+    d.setDate(d.getDate()+add);
+    return ymd(d);
+  }
+
+  function v84IsSameRoom(a,b){
+    return String(a.dormName||"")===String(b.dormName||"") &&
+           String(a.roomNo||"")===String(b.roomNo||"");
+  }
+
+  function v84IsSameName(a,b){
+    return String(a.residentName||"").trim() &&
+           String(a.residentName||"").trim()===String(b.residentName||"").trim();
+  }
+
+  function v84CanMerge(a,b){
+    if(!v84IsSameName(a,b) || !v84IsSameRoom(a,b))return false;
+    if(!a.moveIn || !b.moveIn)return false;
+
+    var aEnd=a.moveOut||a.moveIn;
+    var bEnd=b.moveOut||b.moveIn;
+
+    // 期間が重なる、または前日/当日でつながる場合は継続扱い
+    return b.moveIn<=v84AddDays(aEnd,1);
+  }
+
+  window.mergeDormContinuityBySameRoom=function(){
+    if(!Array.isArray(dorms))return 0;
+
+    var list=dorms.slice().sort(function(a,b){
+      var na=String(a.residentName||"");
+      var nb=String(b.residentName||"");
+      if(na!==nb)return na.localeCompare(nb,"ja");
+      var ra=String(a.dormName||"")+"-"+String(a.roomNo||"");
+      var rb=String(b.dormName||"")+"-"+String(b.roomNo||"");
+      if(ra!==rb)return ra.localeCompare(rb,"ja");
+      return String(a.moveIn||"").localeCompare(String(b.moveIn||""));
+    });
+
+    var merged=[];
+    var removed=0;
+
+    list.forEach(function(r){
+      var last=merged[merged.length-1];
+
+      if(last && v84CanMerge(last,r)){
+        var lastEnd=last.moveOut||last.moveIn;
+        var rEnd=r.moveOut||r.moveIn;
+
+        // 終了日を長い方にする
+        if(!last.moveOut || (rEnd && rEnd>lastEnd)){
+          last.moveOut=rEnd;
+        }
+
+        // つなぎ目の清掃予定は削除
+        // 元データ側の清掃日が、後続データの入寮日またはその前後なら消す
+        if(last.cleanDate && (last.cleanDate===r.moveIn || last.cleanDate===v84AddDays(r.moveIn,-1) || last.cleanDate===v84AddDays(lastEnd,1))){
+          last.cleanDate="";
+          last.cleanStatus="未清掃";
+          last.cleanDoneDate="";
+        }
+
+        // 後続データの清掃情報は最終退寮後の清掃なら引き継ぐ
+        if(r.cleanDate && (!last.cleanDate || r.cleanDate>last.cleanDate)){
+          last.cleanDate=r.cleanDate;
+          last.cleanStatus=r.cleanStatus||last.cleanStatus||"未清掃";
+          last.cleanDoneDate=r.cleanDoneDate||"";
+        }
+
+        // 備考は必要最小限で残す
+        if(r.note && String(last.note||"").indexOf(r.note)<0){
+          last.note=(last.note?last.note+" / ":"")+r.note;
+        }
+
+        removed++;
+      }else{
+        merged.push(Object.assign({},r));
+      }
+    });
+
+    if(removed>0){
+      dorms=merged;
+    }
+
+    return removed;
+  };
+
+  window.cancelDormMoveAndContinue=function(){
+    // 現在の寮データ全体から、同じ名前・同じ寮部屋でつながっているものを結合
+    var removed=mergeDormContinuityBySameRoom();
+
+    if(removed<=0){
+      alert("つなげられる寮移動データはありませんでした");
+      return false;
+    }
+
+    save();
+
+    var moveBox=document.getElementById("dormMoveOnlyPopup");
+    if(moveBox)moveBox.style.display="none";
+    if(typeof closeDormEditPopup==="function")closeDormEditPopup();
+
+    if(typeof renderDorm==="function")renderDorm();
+    if(typeof renderDorms==="function")renderDorms();
+    if(typeof renderDormMonthly==="function")renderDormMonthly();
+    if(typeof renderVacancy==="function")renderVacancy();
+    if(typeof renderStats==="function")renderStats();
+    if(typeof generateText==="function" && document.getElementById("output") && document.getElementById("output").value){generateText();}
+
+    alert("移動をつなげて、途中の清掃予定を削除しました");
+    return false;
+  };
+
+  // 保存後にも自動でつながるデータがあれば結合
+  var oldSaveDormMoveOnly=window.saveDormMoveOnly;
+  if(typeof oldSaveDormMoveOnly==="function" && !oldSaveDormMoveOnly.__v84Merge){
+    var wrapped=function(){
+      var r=oldSaveDormMoveOnly.apply(this,arguments);
+      try{
+        var removed=mergeDormContinuityBySameRoom();
+        if(removed>0){
+          save();
+          if(typeof renderDorm==="function")renderDorm();
+          if(typeof renderDorms==="function")renderDorms();
+          if(typeof renderDormMonthly==="function")renderDormMonthly();
+          if(typeof renderVacancy==="function")renderVacancy();
+          if(typeof renderStats==="function")renderStats();
+        }
+      }catch(e){}
+      return r;
+    };
+    wrapped.__v84Merge=true;
+    window.saveDormMoveOnly=wrapped;
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    // 寮のみ移動ポップアップに「移動なしでつなげる」ボタンを追加
+    setTimeout(function(){
+      var box=document.getElementById("dormMoveOnlyPopup");
+      if(!box || document.getElementById("dormMoveCancelConnectBtn"))return;
+      var btn=box.querySelector(".dormEditPopupBtn[onclick='saveDormMoveOnly()']");
+      if(btn){
+        btn.insertAdjacentHTML("afterend", '<button id="dormMoveCancelConnectBtn" class="dormEditPopupBtn dormMoveCancelBtn" onclick="cancelDormMoveAndContinue()">移動なしでつなげる</button>');
+      }
+    },500);
+  });
 })();
 </script>
 
