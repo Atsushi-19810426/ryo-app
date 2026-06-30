@@ -5732,5 +5732,118 @@ init();
 })();
 </script>
 
+
+<script>
+(function(){
+  /*
+    Ver90: 月間出勤表 並び再整理
+    以前の並びが「出勤終了が近い順」を最優先にしていたため、
+    出勤開始日が後ろのCASTが上に出て、並びが崩れて見えるケースがあった。
+    今回は自然な並びに修正：
+    1. 表示期間内の次回出勤日が近い順
+    2. 同じ次回出勤日の中で、休みまでの出勤終了が近い順
+    3. 出勤開始時間が早い順
+    4. 源氏名順
+  */
+
+  function v90Min(t){
+    if(!t)return 99999;
+    var p=String(t).split(":");
+    return Number(p[0]||0)*60+Number(p[1]||0);
+  }
+
+  function v90IsOff(p,ds){
+    return !!(p && p.overrides && p.overrides[ds] && p.overrides[ds].off);
+  }
+
+  function v90Hit(group,ds){
+    var hits=[];
+    (group.list||[]).forEach(function(p){
+      var w=null;
+      try{w=workFor(p,ds);}catch(e){w=null;}
+      if(w)hits.push({staff:p,work:w});
+    });
+    if(!hits.length)return null;
+    hits.sort(function(a,b){
+      var am=v90Min(a.work.timeStart);
+      var bm=v90Min(b.work.timeStart);
+      if(am!==bm)return am-bm;
+      return String(a.staff.start||"").localeCompare(String(b.staff.start||""));
+    });
+    return hits[0];
+  }
+
+  function v90HasExplicitOff(group,ds){
+    return (group.list||[]).some(function(p){return v90IsOff(p,ds);});
+  }
+
+  function v90NextSegment(group,base,days){
+    for(var i=0;i<days;i++){
+      var d=new Date(base);
+      d.setDate(base.getDate()+i);
+      var ds=ymd(d);
+
+      var hit=v90Hit(group,ds);
+      if(!hit)continue;
+
+      var end=ds;
+
+      for(var j=i+1;j<days;j++){
+        var d2=new Date(base);
+        d2.setDate(base.getDate()+j);
+        var ds2=ymd(d2);
+
+        // 明示休みが入ったら、そこで1つの出勤ブロックを終了
+        if(v90HasExplicitOff(group,ds2))break;
+
+        var hit2=v90Hit(group,ds2);
+        if(!hit2)break;
+
+        end=ds2;
+      }
+
+      return {
+        start:ds,
+        end:end,
+        startMinutes:v90Min(hit.work.timeStart),
+        staff:hit.staff,
+        work:hit.work
+      };
+    }
+
+    return null;
+  }
+
+  window.sortMonthlyGroups=function(groups,base,days){
+    return (groups||[]).slice().sort(function(a,b){
+      var as=v90NextSegment(a,base,days);
+      var bs=v90NextSegment(b,base,days);
+
+      var ad=as?as.start:"9999-12-31";
+      var bd=bs?bs.start:"9999-12-31";
+      if(ad!==bd)return ad.localeCompare(bd);
+
+      var ae=as?as.end:"9999-12-31";
+      var be=bs?bs.end:"9999-12-31";
+      if(ae!==be)return ae.localeCompare(be);
+
+      var at=as?as.startMinutes:99999;
+      var bt=bs?bs.startMinutes:99999;
+      if(at!==bt)return at-bt;
+
+      return String(a.name||"").localeCompare(String(b.name||""),"ja");
+    });
+  };
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(function(){
+      if(typeof renderMonthly==="function" && document.getElementById("monthlyTable")){
+        renderMonthly();
+      }
+    },500);
+  });
+})();
+</script>
+
 </body>
 </html>
