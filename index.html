@@ -396,6 +396,27 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 /* Ver84: 寮移動なしで継続 */
 .dormMoveCancelBtn{background:#0f766e!important;color:#fff!important;margin-top:8px}
 
+
+/* Ver87: 清掃日自動ルール */
+#dormEditCleanDate,
+#modalCleanDate{
+  display:none!important;
+}
+.dormCleanHiddenLabel{display:none!important}
+#dormMonthlyTable td.cleanPlan{
+  background:#ffedd5!important;
+  color:#9a3412!important;
+  font-weight:900!important;
+  box-shadow:inset 0 0 0 2px #fb923c!important;
+}
+#dormMonthlyTable td.cleanPlan.done,
+#dormMonthlyTable td.done{
+  background:#dbeafe!important;
+  color:#1d4ed8!important;
+  font-weight:900!important;
+  box-shadow:inset 0 0 0 2px #60a5fa!important;
+}
+
 </style>
 </head>
 <body>
@@ -4710,6 +4731,237 @@ init();
         }
       }catch(e){}
     },800);
+  });
+})();
+</script>
+
+
+<script>
+(function(){
+  function v87IsDone(r){
+    var st=String(r.cleanStatus||"").trim();
+    return st==="清掃済み" || st==="済" || !!r.cleanDoneDate;
+  }
+
+  function v87MoveDateFromNote(r){
+    var note=String(r.note||"");
+    var m=note.match(/寮移動：(\d{4}-\d{2}-\d{2})/);
+    return m?m[1]:"";
+  }
+
+  function v87PlanDate(r){
+    // 寮移動データは「移動日」が清掃日、それ以外は退寮日が清掃日
+    return v87MoveDateFromNote(r) || r.cleanDate || r.moveOut || "";
+  }
+
+  window.normalizeDormCleanAutoRule=function(){
+    if(!Array.isArray(dorms))return;
+
+    dorms.forEach(function(r){
+      if(!r)return;
+
+      if(v87IsDone(r)){
+        // 清掃済みは青の「済」。清掃予定としては扱わない
+        if(!r.cleanDoneDate){
+          r.cleanDoneDate=r.cleanDate || r.moveOut || today();
+        }
+        r.cleanStatus="清掃済み";
+        return;
+      }
+
+      var plan=v87MoveDateFromNote(r) || r.moveOut || r.cleanDate || "";
+      if(plan){
+        r.cleanDate=plan;
+        r.cleanStatus="清掃予定";
+        r.cleanDoneDate="";
+      }else{
+        r.cleanDate="";
+        r.cleanStatus="未清掃";
+        r.cleanDoneDate="";
+      }
+    });
+  };
+
+  function v87HideCleanDateInputs(){
+    ["dormEditCleanDate","modalCleanDate"].forEach(function(id){
+      var input=document.getElementById(id);
+      if(!input)return;
+      var parent=input.closest("div");
+      if(parent)parent.style.display="none";
+      var prev=parent?parent.querySelector("label"):null;
+      if(prev)prev.classList.add("dormCleanHiddenLabel");
+    });
+
+    // 清掃状態ラベルを分かりやすく
+    var st=document.getElementById("dormEditCleanStatus");
+    if(st){
+      var label=st.closest("div") ? st.closest("div").querySelector("label") : null;
+      if(label)label.textContent="清掃完了";
+      // 選択肢は未清掃/清掃済みに寄せる
+      if(!st.__v87OptionsFixed){
+        st.innerHTML="<option>未清掃</option><option>清掃済み</option>";
+        st.__v87OptionsFixed=true;
+      }
+    }
+  }
+
+  function v87PrepareDormEditBeforeSave(){
+    v87HideCleanDateInputs();
+
+    var moveOut=document.getElementById("dormEditMoveOut");
+    var cleanDate=document.getElementById("dormEditCleanDate");
+    var status=document.getElementById("dormEditCleanStatus");
+
+    if(cleanDate){
+      if(status && status.value==="清掃済み"){
+        cleanDate.value=moveOut ? (moveOut.value||cleanDate.value||today()) : (cleanDate.value||today());
+      }else{
+        cleanDate.value=moveOut ? (moveOut.value||"") : "";
+      }
+    }
+  }
+
+  function v87RoomKey(r){
+    return String(r.dormName||"")+"-"+String(r.roomNo||"");
+  }
+
+  function v87CellDateByIndex(ci){
+    var base=parseDate((document.getElementById("monthBase")&&document.getElementById("monthBase").value)||today());
+    var d=new Date(base);
+    d.setDate(base.getDate()+ci-1);
+    return ymd(d);
+  }
+
+  function v87ApplyCleanVisuals(){
+    var box=document.getElementById("dormMonthlyTable");
+    if(!box)return;
+
+    // 先に最新ルールへ整える
+    try{normalizeDormCleanAutoRule();}catch(e){}
+
+    box.querySelectorAll("tbody tr").forEach(function(tr){
+      var nameCell=tr.querySelector("td.name");
+      var roomLabel=(nameCell&&nameCell.textContent?nameCell.textContent:"").trim();
+      if(!roomLabel)return;
+
+      var related=(dorms||[]).filter(function(r){
+        return v87RoomKey(r)===roomLabel;
+      });
+
+      var cells=tr.querySelectorAll("td");
+      for(var ci=1;ci<cells.length;ci++){
+        var td=cells[ci];
+        var ds=v87CellDateByIndex(ci);
+
+        td.classList.remove("cleanPlan","done");
+
+        var done=related.some(function(r){
+          return v87IsDone(r) && (r.cleanDoneDate===ds || r.cleanDate===ds);
+        });
+
+        var plan=related.some(function(r){
+          if(v87IsDone(r))return false;
+          var pd=v87PlanDate(r);
+          return pd===ds;
+        });
+
+        if(done){
+          td.classList.add("done");
+          td.textContent="済";
+        }else if(plan){
+          td.classList.add("cleanPlan");
+          var txt=(td.textContent||"").trim();
+          if(!txt || txt==="未" || txt==="清" || txt==="清掃"){
+            td.textContent="清掃";
+          }else if(txt.indexOf("清")<0){
+            td.textContent=txt+"→清掃";
+          }
+        }
+      }
+    });
+  }
+
+  // 寮編集を開いた時に清掃日の入力を隠す
+  var oldOpenDormEditPopup=window.openDormEditPopup;
+  if(typeof oldOpenDormEditPopup==="function" && !oldOpenDormEditPopup.__v87CleanAuto){
+    var openWrap=function(){
+      var r=oldOpenDormEditPopup.apply(this,arguments);
+      setTimeout(v87HideCleanDateInputs,0);
+      return r;
+    };
+    openWrap.__v87CleanAuto=true;
+    window.openDormEditPopup=openWrap;
+  }
+
+  // 保存時は退寮日を清掃予定日に自動セット
+  var oldSaveDormEditPopup=window.saveDormEditPopup;
+  if(typeof oldSaveDormEditPopup==="function" && !oldSaveDormEditPopup.__v87CleanAuto){
+    var saveWrap=function(){
+      v87PrepareDormEditBeforeSave();
+      var r=oldSaveDormEditPopup.apply(this,arguments);
+      try{
+        normalizeDormCleanAutoRule();
+        save();
+        if(typeof renderDorm==="function")renderDorm();
+        if(typeof renderDorms==="function")renderDorms();
+        if(typeof renderDormMonthly==="function")renderDormMonthly();
+        if(typeof renderVacancy==="function")renderVacancy();
+        if(typeof renderStats==="function")renderStats();
+      }catch(e){}
+      return r;
+    };
+    saveWrap.__v87CleanAuto=true;
+    window.saveDormEditPopup=saveWrap;
+  }
+
+  // 寮移動時は、元データの cleanDate=移動日 を維持しつつ表示をオレンジへ
+  var oldSaveDormMoveOnly=window.saveDormMoveOnly;
+  if(typeof oldSaveDormMoveOnly==="function" && !oldSaveDormMoveOnly.__v87CleanAuto){
+    var moveWrap=function(){
+      var r=oldSaveDormMoveOnly.apply(this,arguments);
+      try{
+        normalizeDormCleanAutoRule();
+        save();
+        if(typeof renderDormMonthly==="function")renderDormMonthly();
+        if(typeof renderDorm==="function")renderDorm();
+        if(typeof renderDorms==="function")renderDorms();
+        if(typeof renderStats==="function")renderStats();
+      }catch(e){}
+      return r;
+    };
+    moveWrap.__v87CleanAuto=true;
+    window.saveDormMoveOnly=moveWrap;
+  }
+
+  var oldRenderDormMonthly=window.renderDormMonthly;
+  if(typeof oldRenderDormMonthly==="function" && !oldRenderDormMonthly.__v87CleanAuto){
+    var renderWrap=function(){
+      try{normalizeDormCleanAutoRule();}catch(e){}
+      var r=oldRenderDormMonthly.apply(this,arguments);
+      setTimeout(v87ApplyCleanVisuals,0);
+      return r;
+    };
+    renderWrap.__v87CleanAuto=true;
+    window.renderDormMonthly=renderWrap;
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(function(){
+      v87HideCleanDateInputs();
+      try{
+        normalizeDormCleanAutoRule();
+        save();
+        if(typeof renderDormMonthly==="function")renderDormMonthly();
+        else v87ApplyCleanVisuals();
+      }catch(e){}
+    },700);
+  });
+
+  window.addEventListener("load",function(){
+    setTimeout(function(){
+      v87HideCleanDateInputs();
+      v87ApplyCleanVisuals();
+    },900);
   });
 })();
 </script>
