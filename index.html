@@ -1199,6 +1199,302 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   background:#fff!important;
 }
 
+
+/* Ver99: 月間表コンパクト化・寮表は横表仕様のまま縦向き表示 */
+#monthly .monthlyTopCard{
+  padding:12px 14px!important;
+}
+#monthly .monthlyTopCard h2{
+  margin:0 0 8px!important;
+  font-size:18px!important;
+}
+#monthly .monthlyTabs{
+  margin:6px 0 8px!important;
+}
+#monthly .monthlyTab{
+  padding:9px 8px!important;
+  font-size:13px!important;
+}
+#monthly .monthlyTopCard .row{
+  gap:8px!important;
+}
+#monthly .monthlyTopCard label{
+  font-size:11px!important;
+}
+#monthly .monthlyTopCard input,
+#monthly .monthlyTopCard select{
+  padding:7px 8px!important;
+  font-size:12px!important;
+}
+
+/* 出勤月間表をより多く見えるように */
+#monthlyStaffPanel{
+  padding:12px!important;
+}
+#monthlyStaffPanel h2{
+  font-size:17px!important;
+  margin:0 0 6px!important;
+}
+#monthlyStaffPanel .note{
+  font-size:10px!important;
+  margin:3px 0!important;
+  line-height:1.25!important;
+}
+#monthlyTable{
+  max-height:calc(100vh - 245px)!important;
+}
+#monthlyTable table th,
+#monthlyTable table td{
+  padding:2px 3px!important;
+  height:26px!important;
+  font-size:10px!important;
+  line-height:1.1!important;
+}
+#monthlyTable .name{
+  min-width:74px!important;
+  max-width:74px!important;
+  font-size:10px!important;
+}
+
+/* 寮月間表：左に日付、上に寮、部屋は横並び。横表の仕様を縦にしただけ */
+#monthlyDormPanel{
+  padding:12px!important;
+}
+#monthlyDormPanel h2{
+  font-size:17px!important;
+  margin:0 0 6px!important;
+}
+#monthlyDormPanel .note{
+  font-size:10px!important;
+  margin:3px 0 6px!important;
+  line-height:1.25!important;
+}
+#monthlyDormPanel #dormMonthlyTable{
+  position:relative!important;
+  max-height:calc(100vh - 245px)!important;
+  overflow:auto!important;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  border:1px solid #d1d5db!important;
+  border-radius:12px!important;
+  background:#fff!important;
+  padding:0!important;
+}
+
+/* スライド表示を常に見えるように */
+.slideGuide{
+  position:sticky;
+  top:calc(var(--monthlyStickyTop,72px) + 116px);
+  z-index:950;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  margin:4px 0 6px;
+  padding:6px 10px;
+  border:1px solid #cbd5e1;
+  border-radius:999px;
+  background:rgba(15,23,42,.92);
+  color:#fff;
+  font-size:11px;
+  font-weight:900;
+  box-shadow:0 4px 12px rgba(15,23,42,.15);
+}
+.slideGuide::before{content:"←"}
+.slideGuide::after{content:"→"}
+
+/* スクロールバーを見やすく */
+#monthlyTable::-webkit-scrollbar,
+#dormMonthlyTable::-webkit-scrollbar{
+  height:12px;
+  width:12px;
+}
+#monthlyTable::-webkit-scrollbar-track,
+#dormMonthlyTable::-webkit-scrollbar-track{
+  background:#e5e7eb;
+  border-radius:999px;
+}
+#monthlyTable::-webkit-scrollbar-thumb,
+#dormMonthlyTable::-webkit-scrollbar-thumb{
+  background:#64748b;
+  border-radius:999px;
+  border:2px solid #e5e7eb;
+}
+
+/* 寮マトリクスを小さくして全体を見やすく */
+.dormMatrixTable{
+  border-collapse:separate!important;
+  border-spacing:0!important;
+  width:max-content!important;
+  min-width:100%!important;
+  background:#fff!important;
+  font-size:9px!important;
+}
+.dormMatrixTable th,
+.dormMatrixTable td{
+  min-width:48px!important;
+  width:48px!important;
+  height:27px!important;
+  padding:1px 2px!important;
+  font-size:9px!important;
+  line-height:1.05!important;
+  border-right:1px dotted #94a3b8!important;
+  border-bottom:1px dotted #94a3b8!important;
+  text-align:center!important;
+  vertical-align:middle!important;
+  box-sizing:border-box!important;
+  white-space:normal!important;
+}
+.dormMatrixDateHead,
+.dormMatrixDate{
+  min-width:62px!important;
+  width:62px!important;
+  font-size:10px!important;
+  position:sticky!important;
+  left:0!important;
+  z-index:90!important;
+}
+.dormMatrixDateHead{
+  top:0!important;
+  z-index:130!important;
+  background:#111827!important;
+  color:#fff!important;
+}
+.dormMatrixTable thead tr:first-child th{
+  position:sticky!important;
+  top:0!important;
+  z-index:100!important;
+}
+.dormMatrixTable thead tr:nth-child(2) th{
+  position:sticky!important;
+  top:var(--dormMatrixHead1,38px)!important;
+  z-index:98!important;
+}
+.dormMatrixGroup{
+  background:#f1f5f9!important;
+  font-size:10px!important;
+  font-weight:900!important;
+  line-height:1.05!important;
+  min-width:48px!important;
+}
+.dormMatrixGroup small{
+  display:block;
+  font-size:8px!important;
+  line-height:1.0!important;
+  margin-top:1px!important;
+}
+.dormMatrixRoom{
+  font-size:10px!important;
+  font-weight:900!important;
+  background:#fff!important;
+}
+.dormMatrixCell{
+  font-size:9px!important;
+  cursor:pointer;
+  overflow:hidden;
+}
+.dormMatrixCell.empty{
+  cursor:default!important;
+}
+.dmTags{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:1px!important;
+  justify-content:center!important;
+  align-items:center!important;
+  margin-bottom:0!important;
+}
+.dmTag{
+  border-radius:999px!important;
+  padding:1px 3px!important;
+  font-size:7px!important;
+  font-weight:900!important;
+  line-height:1!important;
+}
+.dmName{
+  display:block!important;
+  max-width:44px!important;
+  margin:0 auto!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  font-size:8px!important;
+  font-weight:900!important;
+  line-height:1.05!important;
+}
+
+/* 横表と同じ色付け */
+.dormMatrixCell.hasIn{
+  background:#dcfce7!important;
+  color:#166534!important;
+  font-weight:900!important;
+}
+.dormMatrixCell.hasOrange{
+  background:#ffedd5!important;
+  color:#9a3412!important;
+  font-weight:900!important;
+}
+.dormMatrixCell.hasDone{
+  background:#dbeafe!important;
+  color:#1d4ed8!important;
+  font-weight:900!important;
+}
+.dormMatrixCell.multiEvent{
+  background:linear-gradient(90deg,#ffedd5 0%,#ffedd5 34%,#dbeafe 34%,#dbeafe 67%,#dcfce7 67%,#dcfce7 100%)!important;
+  color:#111827!important;
+  font-weight:900!important;
+}
+.dmIn{background:#dcfce7!important;color:#166534!important;border:1px solid #86efac!important}
+.dmOut,.dmClean{background:#ffedd5!important;color:#9a3412!important;border:1px solid #fb923c!important}
+.dmDone{background:#dbeafe!important;color:#1d4ed8!important;border:1px solid #60a5fa!important}
+.dmStay{background:#f1f5f9!important;color:#334155!important;border:1px solid #cbd5e1!important}
+
+@media(max-width:760px){
+  .slideGuide{
+    top:calc(var(--monthlyStickyTop,64px) + 104px);
+    font-size:10px;
+    padding:5px 8px;
+    margin:3px 0 5px;
+  }
+  #monthlyTable{
+    max-height:calc(100vh - 220px)!important;
+  }
+  #monthlyDormPanel #dormMonthlyTable{
+    max-height:calc(100vh - 220px)!important;
+  }
+  .dormMatrixTable th,
+  .dormMatrixTable td{
+    min-width:43px!important;
+    width:43px!important;
+    height:25px!important;
+    padding:1px!important;
+    font-size:8px!important;
+  }
+  .dormMatrixDateHead,
+  .dormMatrixDate{
+    min-width:56px!important;
+    width:56px!important;
+    font-size:9px!important;
+  }
+  .dormMatrixGroup{
+    font-size:9px!important;
+  }
+  .dormMatrixGroup small{
+    font-size:7px!important;
+  }
+  .dormMatrixRoom{
+    font-size:9px!important;
+  }
+  .dmTag{
+    font-size:7px!important;
+    padding:1px 2px!important;
+  }
+  .dmName{
+    max-width:39px!important;
+    font-size:8px!important;
+  }
+}
+
 </style>
 </head>
 <body>
