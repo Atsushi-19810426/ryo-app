@@ -574,6 +574,54 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   .monthlyTab{font-size:13px;padding:10px 6px}
 }
 
+
+/* Ver92: 月間表の上部メニュー・タブを固定 */
+:root{
+  --monthlyStickyTop:72px;
+}
+
+/* 上部のメインメニューも固定 */
+.menu{
+  position:sticky!important;
+  top:0!important;
+  z-index:1200!important;
+  background:rgba(244,245,247,.94)!important;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  padding-top:8px!important;
+  padding-bottom:8px!important;
+}
+
+/* 月間表のタイトル・出勤/寮タブ・日付設定を固定 */
+#monthly .monthlyTopCard{
+  position:sticky!important;
+  top:var(--monthlyStickyTop)!important;
+  z-index:1100!important;
+  background:rgba(255,255,255,.96)!important;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  box-shadow:0 8px 20px rgba(15,23,42,.10)!important;
+  border:1px solid rgba(226,232,240,.95)!important;
+}
+
+/* 固定した時に下の表が少し見やすいように余白を調整 */
+#monthly .monthlyPanel{
+  scroll-margin-top:180px;
+}
+
+@media(max-width:760px){
+  :root{
+    --monthlyStickyTop:64px;
+  }
+  .menu{
+    padding-top:6px!important;
+    padding-bottom:6px!important;
+  }
+  #monthly .monthlyTopCard{
+    top:var(--monthlyStickyTop)!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -5891,6 +5939,52 @@ init();
       }
     },500);
   });
+})();
+</script>
+
+
+<script>
+(function(){
+  function setMonthlyStickyTop(){
+    var menu=document.querySelector(".menu");
+    var h=menu ? Math.ceil(menu.getBoundingClientRect().height) : 64;
+    document.documentElement.style.setProperty("--monthlyStickyTop",(h+8)+"px");
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(setMonthlyStickyTop,100);
+    setTimeout(setMonthlyStickyTop,800);
+  });
+
+  window.addEventListener("load",function(){
+    setTimeout(setMonthlyStickyTop,200);
+  });
+
+  window.addEventListener("resize",function(){
+    setMonthlyStickyTop();
+  });
+
+  var oldShowPage=window.showPage;
+  if(typeof oldShowPage==="function" && !oldShowPage.__v92StickyTabs){
+    var wrapped=function(){
+      var r=oldShowPage.apply(this,arguments);
+      setTimeout(setMonthlyStickyTop,50);
+      return r;
+    };
+    wrapped.__v92StickyTabs=true;
+    window.showPage=wrapped;
+  }
+
+  var oldShowMonthlySubTab=window.showMonthlySubTab;
+  if(typeof oldShowMonthlySubTab==="function" && !oldShowMonthlySubTab.__v92StickyTabs){
+    var subWrapped=function(){
+      var r=oldShowMonthlySubTab.apply(this,arguments);
+      setTimeout(setMonthlyStickyTop,50);
+      return r;
+    };
+    subWrapped.__v92StickyTabs=true;
+    window.showMonthlySubTab=subWrapped;
+  }
 })();
 </script>
 
