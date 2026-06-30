@@ -1776,6 +1776,210 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   .dmName{font-size:7px!important;max-width:38px!important}
 }
 
+
+/* Ver103: 寮表の部屋番号・日付曜日の段差修正 */
+.dormMatrixTable{
+  border-collapse:separate!important;
+  border-spacing:0!important;
+  table-layout:fixed!important;
+}
+
+/* ヘッダー全体の高さを統一 */
+.dormMatrixTable thead tr:first-child th{
+  height:24px!important;
+  min-height:24px!important;
+  max-height:24px!important;
+  padding:1px 2px!important;
+  line-height:1!important;
+  vertical-align:middle!important;
+  box-sizing:border-box!important;
+}
+
+.dormMatrixTable thead tr:nth-child(2) th{
+  position:sticky!important;
+  top:24px!important;
+  height:22px!important;
+  min-height:22px!important;
+  max-height:22px!important;
+  padding:1px 2px!important;
+  line-height:1!important;
+  vertical-align:middle!important;
+  box-sizing:border-box!important;
+}
+
+/* 左上の日付ヘッダーは2段分ぴったり */
+.dormMatrixDateHead{
+  position:sticky!important;
+  left:0!important;
+  top:0!important;
+  height:46px!important;
+  min-height:46px!important;
+  max-height:46px!important;
+  padding:1px!important;
+  line-height:1!important;
+  vertical-align:middle!important;
+  box-sizing:border-box!important;
+  z-index:140!important;
+}
+
+/* 日付・曜日行と各部屋セルの高さを完全に揃える */
+.dormMatrixTable tbody th,
+.dormMatrixTable tbody td{
+  height:26px!important;
+  min-height:26px!important;
+  max-height:26px!important;
+  padding:1px 2px!important;
+  line-height:1!important;
+  vertical-align:middle!important;
+  box-sizing:border-box!important;
+}
+
+.dormMatrixDate{
+  height:26px!important;
+  min-height:26px!important;
+  max-height:26px!important;
+  padding:1px 2px!important;
+  line-height:1!important;
+  vertical-align:middle!important;
+  box-sizing:border-box!important;
+  background:#fff!important;
+}
+
+/* 左列と部屋列の線ズレ防止 */
+.dormMatrixTable th,
+.dormMatrixTable td{
+  border-top:0!important;
+  border-left:0!important;
+  background-clip:padding-box!important;
+}
+
+/* 寮名と部屋番号の間を詰める */
+.dormMatrixGroup{
+  font-size:8px!important;
+  line-height:1!important;
+  padding:1px!important;
+}
+
+.dormMatrixGroup small{
+  font-size:6px!important;
+  line-height:1!important;
+  margin:0!important;
+  padding:0!important;
+}
+
+.dormMatrixRoom{
+  font-size:9px!important;
+  line-height:1!important;
+  padding:1px!important;
+}
+
+/* セル内も高さに合わせてコンパクトに */
+.dmTags{
+  margin:0!important;
+  padding:0!important;
+  gap:1px!important;
+  line-height:1!important;
+}
+
+.dmTag{
+  font-size:7px!important;
+  line-height:1!important;
+  padding:1px 2px!important;
+}
+
+.dmName{
+  font-size:7px!important;
+  line-height:1!important;
+  max-width:40px!important;
+}
+
+@media(max-width:760px){
+  .dormMatrixTable thead tr:first-child th{
+    height:22px!important;
+    min-height:22px!important;
+    max-height:22px!important;
+  }
+  .dormMatrixTable thead tr:nth-child(2) th{
+    top:22px!important;
+    height:20px!important;
+    min-height:20px!important;
+    max-height:20px!important;
+  }
+  .dormMatrixDateHead{
+    height:42px!important;
+    min-height:42px!important;
+    max-height:42px!important;
+  }
+  .dormMatrixTable tbody th,
+  .dormMatrixTable tbody td,
+  .dormMatrixDate{
+    height:25px!important;
+    min-height:25px!important;
+    max-height:25px!important;
+  }
+}
+
+
+/* Ver104: 月間表 左右スライド操作修正 */
+#monthlyTable,
+#dormMonthlyTable{
+  overflow-x:auto!important;
+  overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+  touch-action:pan-x pan-y!important;
+  overscroll-behavior:contain!important;
+  cursor:grab;
+}
+
+#monthlyTable:active,
+#dormMonthlyTable:active{
+  cursor:grabbing;
+}
+
+/* 中の表は横幅を持たせて、横スクロールできる状態を維持 */
+#monthlyTable table,
+#monthlyTable > table,
+#dormMonthlyTable table,
+#dormMonthlyTable > table,
+#dormMonthlyTable .dormMatrixTable{
+  width:max-content!important;
+  min-width:100%!important;
+}
+
+/* スライド案内がタップ・スワイプを邪魔しないようにする */
+.slideGuide,
+#monthlySlideGuide,
+#dormSlideGuide{
+  pointer-events:none!important;
+  user-select:none!important;
+}
+
+/* 寮表の固定ヘッダー・日付列は残しつつスクロール可能に */
+#dormMonthlyTable .dormMatrixTable th,
+#dormMonthlyTable .dormMatrixTable td,
+#monthlyTable th,
+#monthlyTable td{
+  touch-action:pan-x pan-y!important;
+}
+
+/* スクロールバーを常に分かりやすく */
+#monthlyTable::-webkit-scrollbar,
+#dormMonthlyTable::-webkit-scrollbar{
+  height:14px!important;
+  width:14px!important;
+}
+#monthlyTable::-webkit-scrollbar-track,
+#dormMonthlyTable::-webkit-scrollbar-track{
+  background:#e5e7eb!important;
+  border-radius:999px!important;
+}
+#monthlyTable::-webkit-scrollbar-thumb,
+#dormMonthlyTable::-webkit-scrollbar-thumb{
+  background:#475569!important;
+  border-radius:999px!important;
+  border:2px solid #e5e7eb!important;
+}
+
 </style>
 </head>
 <body>
@@ -8538,6 +8742,300 @@ init();
   window.addEventListener("load",function(){
     setTimeout(forceDormMatrix102,500);
     setTimeout(forceDormMatrix102,1500);
+  });
+})();
+</script>
+
+
+<script id="ver103-dorm-header-align-fix">
+(function(){
+  function setDormHeaderAlignment103(){
+    var table=document.querySelector("#dormMonthlyTable .dormMatrixTable");
+    if(!table)return;
+
+    var row1=table.querySelector("thead tr:first-child");
+    var row2=table.querySelector("thead tr:nth-child(2)");
+    if(!row1 || !row2)return;
+
+    var isMobile=window.matchMedia && window.matchMedia("(max-width:760px)").matches;
+    var h1=isMobile ? 22 : 24;
+    var h2=isMobile ? 20 : 22;
+    var bodyH=isMobile ? 25 : 26;
+
+    table.style.setProperty("--dm-h1",h1+"px");
+    table.style.setProperty("--dm-h2",h2+"px");
+
+    row1.querySelectorAll("th").forEach(function(th){
+      th.style.height=h1+"px";
+      th.style.minHeight=h1+"px";
+      th.style.maxHeight=h1+"px";
+      th.style.lineHeight="1";
+      th.style.verticalAlign="middle";
+      th.style.boxSizing="border-box";
+    });
+
+    row2.querySelectorAll("th").forEach(function(th){
+      th.style.top=h1+"px";
+      th.style.height=h2+"px";
+      th.style.minHeight=h2+"px";
+      th.style.maxHeight=h2+"px";
+      th.style.lineHeight="1";
+      th.style.verticalAlign="middle";
+      th.style.boxSizing="border-box";
+    });
+
+    var dateHead=table.querySelector(".dormMatrixDateHead");
+    if(dateHead){
+      dateHead.style.height=(h1+h2)+"px";
+      dateHead.style.minHeight=(h1+h2)+"px";
+      dateHead.style.maxHeight=(h1+h2)+"px";
+      dateHead.style.lineHeight="1";
+      dateHead.style.verticalAlign="middle";
+      dateHead.style.boxSizing="border-box";
+    }
+
+    table.querySelectorAll("tbody th, tbody td").forEach(function(cell){
+      cell.style.height=bodyH+"px";
+      cell.style.minHeight=bodyH+"px";
+      cell.style.maxHeight=bodyH+"px";
+      cell.style.lineHeight="1";
+      cell.style.verticalAlign="middle";
+      cell.style.boxSizing="border-box";
+    });
+
+    document.documentElement.style.setProperty("--dormMatrixHead1",h1+"px");
+  }
+
+  window.setDormHeaderAlignment103=setDormHeaderAlignment103;
+
+  var oldRenderDormMonthly103=window.renderDormMonthly;
+  if(typeof oldRenderDormMonthly103==="function" && !oldRenderDormMonthly103.__v103Align){
+    var wrapped=function(){
+      var r=oldRenderDormMonthly103.apply(this,arguments);
+      setTimeout(setDormHeaderAlignment103,0);
+      setTimeout(setDormHeaderAlignment103,200);
+      return r;
+    };
+    wrapped.__v103Align=true;
+    window.renderDormMonthly=wrapped;
+  }
+
+  var oldRenderDormMonthlyMatrix103=window.renderDormMonthlyMatrix;
+  if(typeof oldRenderDormMonthlyMatrix103==="function" && !oldRenderDormMonthlyMatrix103.__v103Align){
+    var matrixWrapped=function(){
+      var r=oldRenderDormMonthlyMatrix103.apply(this,arguments);
+      setTimeout(setDormHeaderAlignment103,0);
+      setTimeout(setDormHeaderAlignment103,200);
+      return r;
+    };
+    matrixWrapped.__v103Align=true;
+    window.renderDormMonthlyMatrix=matrixWrapped;
+    window.renderDormMonthly=matrixWrapped;
+  }
+
+  var oldShowMonthlySubTab103=window.showMonthlySubTab;
+  if(typeof oldShowMonthlySubTab103==="function" && !oldShowMonthlySubTab103.__v103Align){
+    var tabWrapped=function(type){
+      var r=oldShowMonthlySubTab103.apply(this,arguments);
+      if(type==="dorm"){
+        setTimeout(setDormHeaderAlignment103,100);
+        setTimeout(setDormHeaderAlignment103,400);
+      }
+      return r;
+    };
+    tabWrapped.__v103Align=true;
+    window.showMonthlySubTab=tabWrapped;
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(setDormHeaderAlignment103,800);
+    setTimeout(setDormHeaderAlignment103,1500);
+  });
+
+  window.addEventListener("load",function(){
+    setTimeout(setDormHeaderAlignment103,500);
+  });
+
+  window.addEventListener("resize",function(){
+    setDormHeaderAlignment103();
+  });
+})();
+</script>
+
+
+<script id="ver104-monthly-slide-fix">
+(function(){
+  /*
+    Ver104:
+    月間表の左右スライドが効かない問題の修正。
+    - スライド案内が操作を邪魔しないよう pointer-events:none
+    - #monthlyTable / #dormMonthlyTable に手動ドラッグスクロールを追加
+    - スワイプ中はセル編集ポップアップを抑止
+  */
+
+  function enableDragScroll104(box){
+    if(!box || box.__v104DragScroll)return;
+    box.__v104DragScroll=true;
+
+    var down=false;
+    var moved=false;
+    var sx=0, sy=0, sl=0, st=0;
+
+    box.addEventListener("pointerdown",function(e){
+      // ボタンや入力欄からの操作は除外
+      if(e.target && e.target.closest && e.target.closest("button,input,select,textarea"))return;
+
+      down=true;
+      moved=false;
+      sx=e.clientX;
+      sy=e.clientY;
+      sl=box.scrollLeft;
+      st=box.scrollTop;
+      box.classList.add("draggingScroll104");
+    },true);
+
+    box.addEventListener("pointermove",function(e){
+      if(!down)return;
+
+      var dx=e.clientX-sx;
+      var dy=e.clientY-sy;
+
+      if(Math.abs(dx)>4 || Math.abs(dy)>4){
+        moved=true;
+        window.__monthlySlideDraggingUntil=Date.now()+500;
+        box.scrollLeft=sl-dx;
+        box.scrollTop=st-dy;
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    },true);
+
+    function endDrag(e){
+      if(!down)return;
+      down=false;
+      box.classList.remove("draggingScroll104");
+
+      if(moved){
+        window.__monthlySlideDraggingUntil=Date.now()+700;
+        if(e){
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }
+
+      setTimeout(function(){moved=false;},100);
+    }
+
+    box.addEventListener("pointerup",endDrag,true);
+    box.addEventListener("pointercancel",endDrag,true);
+    box.addEventListener("pointerleave",endDrag,true);
+
+    // ドラッグ直後のクリックで編集画面が開くのを防ぐ
+    box.addEventListener("click",function(e){
+      if(Date.now() < (window.__monthlySlideDraggingUntil||0)){
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+      }
+    },true);
+
+    box.addEventListener("touchend",function(e){
+      if(Date.now() < (window.__monthlySlideDraggingUntil||0)){
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+      }
+    },true);
+  }
+
+  function applyMonthlySlideFix104(){
+    enableDragScroll104(document.getElementById("monthlyTable"));
+    enableDragScroll104(document.getElementById("dormMonthlyTable"));
+
+    // 案内表示が無い時は追加
+    var mt=document.getElementById("monthlyTable");
+    if(mt && !document.getElementById("monthlySlideGuide")){
+      mt.insertAdjacentHTML("beforebegin",'<div id="monthlySlideGuide" class="slideGuide">左右にスライド</div>');
+    }
+
+    var dt=document.getElementById("dormMonthlyTable");
+    if(dt && !document.getElementById("dormSlideGuide")){
+      dt.insertAdjacentHTML("beforebegin",'<div id="dormSlideGuide" class="slideGuide">左右にスライド</div>');
+    }
+  }
+
+  window.applyMonthlySlideFix104=applyMonthlySlideFix104;
+
+  var oldRenderMonthly104=window.renderMonthly;
+  if(typeof oldRenderMonthly104==="function" && !oldRenderMonthly104.__v104SlideFix){
+    var monthlyWrap=function(){
+      var r=oldRenderMonthly104.apply(this,arguments);
+      setTimeout(applyMonthlySlideFix104,0);
+      setTimeout(applyMonthlySlideFix104,200);
+      return r;
+    };
+    monthlyWrap.__v104SlideFix=true;
+    window.renderMonthly=monthlyWrap;
+  }
+
+  var oldRenderDormMonthly104=window.renderDormMonthly;
+  if(typeof oldRenderDormMonthly104==="function" && !oldRenderDormMonthly104.__v104SlideFix){
+    var dormWrap=function(){
+      var r=oldRenderDormMonthly104.apply(this,arguments);
+      setTimeout(applyMonthlySlideFix104,0);
+      setTimeout(applyMonthlySlideFix104,200);
+      return r;
+    };
+    dormWrap.__v104SlideFix=true;
+    window.renderDormMonthly=dormWrap;
+  }
+
+  var oldRenderDormMonthlyMatrix104=window.renderDormMonthlyMatrix;
+  if(typeof oldRenderDormMonthlyMatrix104==="function" && !oldRenderDormMonthlyMatrix104.__v104SlideFix){
+    var matrixWrap=function(){
+      var r=oldRenderDormMonthlyMatrix104.apply(this,arguments);
+      setTimeout(applyMonthlySlideFix104,0);
+      setTimeout(applyMonthlySlideFix104,200);
+      return r;
+    };
+    matrixWrap.__v104SlideFix=true;
+    window.renderDormMonthlyMatrix=matrixWrap;
+  }
+
+  var oldShowMonthlySubTab104=window.showMonthlySubTab;
+  if(typeof oldShowMonthlySubTab104==="function" && !oldShowMonthlySubTab104.__v104SlideFix){
+    var tabWrap=function(){
+      var r=oldShowMonthlySubTab104.apply(this,arguments);
+      setTimeout(applyMonthlySlideFix104,50);
+      setTimeout(applyMonthlySlideFix104,300);
+      return r;
+    };
+    tabWrap.__v104SlideFix=true;
+    window.showMonthlySubTab=tabWrap;
+  }
+
+  // 旧寮表クリック処理より前で、スライド中のタップを止める
+  document.addEventListener("click",function(e){
+    if(Date.now() < (window.__monthlySlideDraggingUntil||0)){
+      var inMonthly=e.target.closest && e.target.closest("#monthlyTable,#dormMonthlyTable");
+      if(inMonthly){
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+      }
+    }
+  },true);
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(applyMonthlySlideFix104,300);
+    setTimeout(applyMonthlySlideFix104,1000);
+  });
+
+  window.addEventListener("load",function(){
+    setTimeout(applyMonthlySlideFix104,500);
   });
 })();
 </script>
