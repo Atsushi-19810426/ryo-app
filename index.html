@@ -3435,6 +3435,77 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   }
 }
 
+
+/* Ver115: 月日・曜日・寮名・部屋番号を左右スライドボタンの下へ固定 */
+#monthlyStaffPanel .v114StickyHead,
+#monthlyDormPanel .v114StickyHead,
+#monthlyStaffPanel .v115StickyHead,
+#monthlyDormPanel .v115StickyHead{
+  display:block!important;
+}
+
+/* 表示順を明確化：タイトル → 説明 → 左右スライド → 固定ヘッダー */
+#monthlyStaffPanel .v114StickyHead h2,
+#monthlyDormPanel .v114StickyHead h2,
+#monthlyStaffPanel .v115StickyHead h2,
+#monthlyDormPanel .v115StickyHead h2{
+  display:block!important;
+  order:1!important;
+}
+
+#monthlyStaffPanel .v114StickyHead .note,
+#monthlyDormPanel .v114StickyHead .note,
+#monthlyStaffPanel .v115StickyHead .note,
+#monthlyDormPanel .v115StickyHead .note{
+  display:block!important;
+  order:2!important;
+}
+
+#monthlyStaffPanel .v114StickyHead .slideGuide,
+#monthlyDormPanel .v114StickyHead .slideGuide,
+#monthlyStaffPanel .v115StickyHead .slideGuide,
+#monthlyDormPanel .v115StickyHead .slideGuide{
+  display:flex!important;
+  order:3!important;
+  position:relative!important;
+  z-index:60!important;
+  margin:6px 0 7px!important;
+}
+
+/* 固定ヘッダーを必ず左右スライドボタンの下に配置 */
+.v114HeaderMirror,
+.v115HeaderMirror{
+  display:block!important;
+  order:4!important;
+  position:relative!important;
+  z-index:45!important;
+  margin-top:0!important;
+  clear:both!important;
+}
+
+/* ボタン下に少し余白を作って見やすく */
+#monthlyHeaderMirror,
+#dormHeaderMirror{
+  margin-top:4px!important;
+}
+
+/* 固定ヘッダーの文字を少し見やすく */
+.v114HeaderMirror th,
+.v115HeaderMirror th{
+  font-weight:900!important;
+}
+
+.v114HeaderMirror .v114Corner,
+.v115HeaderMirror .v114Corner{
+  font-weight:900!important;
+}
+
+/* スライドボタン下の固定ヘッダーが隠れないように高さを維持 */
+.v114HeaderMirror,
+.v115HeaderMirror{
+  min-height:32px!important;
+}
+
 </style>
 </head>
 <body>
@@ -12474,6 +12545,122 @@ init();
   window.addEventListener("load",function(){setTimeout(apply114,500);setTimeout(apply114,1600)});
   window.addEventListener("resize",function(){setTimeout(apply114,150)});
   document.addEventListener("scroll",function(){setOffsets114();syncMirrors114()},true);
+})();
+</script>
+
+
+<script id="ver115-header-below-slide-buttons">
+(function(){
+  function q(s,r){return (r||document).querySelector(s)}
+  function qa(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+
+  function forceHeaderBelowButtons115(){
+    [
+      {panel:"monthlyStaffPanel", guide:"monthlySlideGuide", mirror:"monthlyHeaderMirror"},
+      {panel:"monthlyDormPanel", guide:"dormSlideGuide", mirror:"dormHeaderMirror"}
+    ].forEach(function(x){
+      var panel=document.getElementById(x.panel);
+      if(!panel)return;
+
+      var head=q(".v114StickyHead",panel)||q(".v115StickyHead",panel);
+      if(!head)return;
+
+      head.classList.add("v115StickyHead");
+
+      var h2=q("h2",panel);
+      var note=q(".note",panel);
+      var guide=document.getElementById(x.guide);
+      var mirror=document.getElementById(x.mirror);
+
+      // 順番を必ず固定：タイトル → 説明 → 左右スライド → 固定ヘッダー
+      [h2,note,guide,mirror].forEach(function(el){
+        if(el && el.parentElement!==head){
+          head.appendChild(el);
+        }
+      });
+
+      if(h2)h2.style.order="1";
+      if(note)note.style.order="2";
+      if(guide){
+        guide.style.order="3";
+        guide.style.position="relative";
+        guide.style.zIndex="60";
+        guide.style.margin="6px 0 7px";
+      }
+      if(mirror){
+        mirror.classList.add("v115HeaderMirror");
+        mirror.style.order="4";
+        mirror.style.position="relative";
+        mirror.style.zIndex="45";
+        mirror.style.marginTop="4px";
+        mirror.style.clear="both";
+      }
+    });
+
+    // Ver114の横スクロール同期をそのまま使う
+    if(typeof window.applyTrueFixedHeaderLayer114==="function"){
+      try{
+        // 既に実行済みの場合も、ミラー位置だけ再調整する
+      }catch(e){}
+    }
+  }
+
+  window.forceHeaderBelowButtons115=forceHeaderBelowButtons115;
+
+  var oldApply114=window.applyTrueFixedHeaderLayer114;
+  if(typeof oldApply114==="function" && !oldApply114.__v115BelowButtons){
+    var wrappedApply=function(){
+      var r=oldApply114.apply(this,arguments);
+      setTimeout(forceHeaderBelowButtons115,0);
+      setTimeout(forceHeaderBelowButtons115,150);
+      return r;
+    };
+    wrappedApply.__v115BelowButtons=true;
+    window.applyTrueFixedHeaderLayer114=wrappedApply;
+  }
+
+  ["renderMonthly","renderDormMonthly","renderDormMonthlyMatrix"].forEach(function(name){
+    var old=window[name];
+    if(typeof old==="function" && !old.__v115BelowButtons){
+      var w=function(){
+        var r=old.apply(this,arguments);
+        setTimeout(forceHeaderBelowButtons115,0);
+        setTimeout(forceHeaderBelowButtons115,250);
+        setTimeout(forceHeaderBelowButtons115,800);
+        return r;
+      };
+      w.__v115BelowButtons=true;
+      window[name]=w;
+    }
+  });
+
+  var oldTab=window.showMonthlySubTab;
+  if(typeof oldTab==="function" && !oldTab.__v115BelowButtons){
+    var tw=function(){
+      var r=oldTab.apply(this,arguments);
+      setTimeout(forceHeaderBelowButtons115,50);
+      setTimeout(forceHeaderBelowButtons115,300);
+      setTimeout(forceHeaderBelowButtons115,900);
+      return r;
+    };
+    tw.__v115BelowButtons=true;
+    window.showMonthlySubTab=tw;
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(forceHeaderBelowButtons115,600);
+    setTimeout(forceHeaderBelowButtons115,1400);
+    setTimeout(forceHeaderBelowButtons115,2400);
+  });
+
+  window.addEventListener("load",function(){
+    setTimeout(forceHeaderBelowButtons115,600);
+    setTimeout(forceHeaderBelowButtons115,1600);
+  });
+
+  window.addEventListener("resize",function(){
+    setTimeout(forceHeaderBelowButtons115,150);
+  });
 })();
 </script>
 

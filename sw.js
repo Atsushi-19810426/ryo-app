@@ -1,4 +1,4 @@
-const CACHE='gspot-ver114-true-fixed-header-layer';
+const CACHE='gspot-ver115-header-below-slide-buttons';
 const FILES=['./','./index.html','./manifest.json'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim()});
