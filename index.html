@@ -478,6 +478,72 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   .dormEventName{font-size:9px}
 }
 
+
+/* Ver89: 寮移動・戻し表示の再整理 */
+#cleanDate{display:none!important}
+#cleanDateWrap{display:none!important}
+.dormRepairBtn{
+  margin-top:8px;
+  background:#334155!important;
+  color:#fff!important;
+}
+#dormMonthlyTable td.dormIn{
+  background:#dcfce7!important;
+  color:#166534!important;
+  font-weight:900!important;
+  box-shadow:inset 0 0 0 2px #86efac!important;
+}
+#dormMonthlyTable td.dormOut,
+#dormMonthlyTable td.cleanPlan{
+  background:#ffedd5!important;
+  color:#9a3412!important;
+  font-weight:900!important;
+  box-shadow:inset 0 0 0 2px #fb923c!important;
+}
+#dormMonthlyTable td.done{
+  background:#dbeafe!important;
+  color:#1d4ed8!important;
+  font-weight:900!important;
+  box-shadow:inset 0 0 0 2px #60a5fa!important;
+}
+#dormMonthlyTable td.dormMultiEvent{
+  background:#fff!important;
+  color:#111827!important;
+  box-shadow:inset 0 0 0 1px #e5e7eb!important;
+}
+.dormEventWrap{
+  display:flex;
+  flex-wrap:wrap;
+  gap:2px;
+  justify-content:center;
+  align-items:center;
+  line-height:1.1;
+}
+.dormEventTag{
+  display:inline-block;
+  border-radius:999px;
+  padding:2px 5px;
+  font-size:10px;
+  font-weight:900;
+  line-height:1.1;
+  white-space:nowrap;
+}
+.dormTagIn{background:#dcfce7;color:#166534;border:1px solid #86efac}
+.dormTagOut,.dormTagClean{background:#ffedd5;color:#9a3412;border:1px solid #fb923c}
+.dormTagDone{background:#dbeafe;color:#1d4ed8;border:1px solid #60a5fa}
+.dormEventName{
+  display:block;
+  width:100%;
+  font-size:10px;
+  color:#374151;
+  margin-top:1px;
+  line-height:1.1;
+}
+@media(max-width:760px){
+  .dormEventTag{font-size:9px;padding:1px 4px}
+  .dormEventName{font-size:9px}
+}
+
 </style>
 </head>
 <body>
@@ -5188,6 +5254,480 @@ init();
   });
   window.addEventListener("load",function(){
     setTimeout(applyDormEventColors,1000);
+  });
+})();
+</script>
+
+
+<script>
+(function(){
+  function v89Val(id){
+    var el=document.getElementById(id);
+    return el ? (el.value||"").trim() : "";
+  }
+  function v89AddDays(ds,add){
+    var d=parseDate(ds);
+    d.setDate(d.getDate()+add);
+    return ymd(d);
+  }
+  function v89Name(r){return String(r&&r.residentName||"").trim();}
+  function v89RoomKey(r){return String(r&&r.dormName||"")+"-"+String(r&&r.roomNo||"");}
+  function v89End(r){return (r&&r.moveOut)||((r&&r.moveIn)||"");}
+  function v89IsDone(r){
+    var st=String(r&&r.cleanStatus||"").trim();
+    return st==="清掃済み" || st==="済" || !!(r&&r.cleanDoneDate);
+  }
+  function v89MoveToDate(r){
+    var m=String(r&&r.note||"").match(/寮移動：(\d{4}-\d{2}-\d{2})から/);
+    return m?m[1]:"";
+  }
+  function v89MovedFromRoom(r){
+    var m=String(r&&r.note||"").match(/寮移動：(.+)から移動/);
+    return m?String(m[1]||"").trim():"";
+  }
+  function v89SameNameRoom(a,b){
+    return v89Name(a) && v89Name(a)===v89Name(b) && v89RoomKey(a)===v89RoomKey(b);
+  }
+  function v89Connected(a,b){
+    if(!v89SameNameRoom(a,b))return false;
+    if(!a.moveIn || !b.moveIn)return false;
+    return b.moveIn<=v89AddDays(v89End(a),1);
+  }
+  function v89CleanNote(note){
+    return String(note||"")
+      .replace(/\s*\/?\s*寮移動：\d{4}-\d{2}-\d{2}から[^/]+/g,"")
+      .replace(/\s*\/?\s*寮移動：[^/]+から移動/g,"")
+      .replace(/^ \/\s*/,"")
+      .trim();
+  }
+
+  // 寮移動では同じ名前・同じ日付が別部屋に存在するため、
+  // 重複削除は「同じ名前・同じ部屋・同じ日付」に限定する
+  window.dedupeDormSameNameSameDate=function(){
+    if(!Array.isArray(dorms))return 0;
+
+    var seen={};
+    var result=[];
+    var removed=0;
+
+    for(var i=dorms.length-1;i>=0;i--){
+      var r=dorms[i];
+      var name=v89Name(r);
+      if(!name || !r.moveIn){
+        result.unshift(r);
+        continue;
+      }
+
+      var end=v89End(r);
+      var dup=false;
+      for(var d=parseDate(r.moveIn); d<=parseDate(end); d.setDate(d.getDate()+1)){
+        var ds=ymd(d);
+        var k=name+"|"+v89RoomKey(r)+"|"+ds;
+        if(seen[k]){
+          dup=true;
+          break;
+        }
+      }
+
+      if(dup){
+        removed++;
+        continue;
+      }
+
+      for(d=parseDate(r.moveIn); d<=parseDate(end); d.setDate(d.getDate()+1)){
+        ds=ymd(d);
+        seen[name+"|"+v89RoomKey(r)+"|"+ds]=true;
+      }
+      result.unshift(r);
+    }
+
+    if(removed>0)dorms=result;
+    return removed;
+  };
+
+  // くるみさんのような「移動して戻した」データも含めて全体修復
+  window.repairDormMoveBackAndClean=function(){
+    if(!Array.isArray(dorms))return {merged:0,cleaned:0,removed:0};
+
+    var merged=0, cleaned=0, removed=0;
+
+    // 1) 「移動先を元の寮に戻した」データは移動なし扱いにする
+    dorms.forEach(function(r){
+      var from=v89MovedFromRoom(r);
+      if(from && from===v89RoomKey(r)){
+        r.note=v89CleanNote(r.note);
+      }
+    });
+
+    // 2) 同じCAST・同じ寮部屋で連続/重複するデータは1本化
+    var list=dorms.slice().sort(function(a,b){
+      var ka=v89Name(a)+"|"+v89RoomKey(a);
+      var kb=v89Name(b)+"|"+v89RoomKey(b);
+      if(ka!==kb)return ka.localeCompare(kb,"ja");
+      return String(a.moveIn||"").localeCompare(String(b.moveIn||""));
+    });
+
+    var out=[];
+    list.forEach(function(r){
+      var last=out[out.length-1];
+
+      if(last && v89Connected(last,r)){
+        var finalEnd=v89End(last);
+        var rEnd=v89End(r);
+        if(rEnd && (!finalEnd || rEnd>finalEnd))finalEnd=rEnd;
+        last.moveOut=finalEnd;
+
+        // 途中の清掃・移動メモは消す
+        if(last.cleanDate && last.cleanDate<finalEnd){
+          last.cleanDate="";
+          last.cleanStatus="未清掃";
+          last.cleanDoneDate="";
+          cleaned++;
+        }
+        if(r.cleanDate && r.cleanDate<=finalEnd){
+          cleaned++;
+        }
+
+        last.note=v89CleanNote((last.note?last.note+" / ":"")+(r.note||""));
+
+        // 清掃済みが後ろにある時だけ引継ぎ
+        if(v89IsDone(r)){
+          last.cleanStatus="清掃済み";
+          last.cleanDoneDate=r.cleanDoneDate||r.cleanDate||finalEnd;
+          last.cleanDate=r.cleanDate||last.cleanDoneDate;
+        }
+
+        merged++;
+        removed++;
+      }else{
+        out.push(Object.assign({},r));
+      }
+    });
+
+    dorms=out;
+
+    // 3) 通常ルールへ正規化
+    //    通常退寮 = 退寮日が清掃予定
+    //    寮移動 = 移動日が清掃予定
+    //    清掃済み = 済み青
+    dorms.forEach(function(r){
+      if(!r)return;
+
+      if(v89IsDone(r)){
+        r.cleanStatus="清掃済み";
+        if(!r.cleanDoneDate)r.cleanDoneDate=r.cleanDate||r.moveOut||today();
+        if(!r.cleanDate)r.cleanDate=r.cleanDoneDate;
+        return;
+      }
+
+      var moveDate=v89MoveToDate(r);
+      if(moveDate){
+        r.cleanDate=moveDate;
+        r.cleanStatus="清掃予定";
+        r.cleanDoneDate="";
+      }else if(r.moveOut){
+        r.cleanDate=r.moveOut;
+        r.cleanStatus="清掃予定";
+        r.cleanDoneDate="";
+      }else{
+        r.cleanDate="";
+        r.cleanStatus="未清掃";
+        r.cleanDoneDate="";
+      }
+    });
+
+    // 4) 同じ名前・同じ部屋・同じ日付の古い重複だけ削除
+    removed += (typeof dedupeDormSameNameSameDate==="function" ? dedupeDormSameNameSameDate() : 0);
+
+    return {merged:merged,cleaned:cleaned,removed:removed};
+  };
+
+  function v89HideCleanInputs(){
+    ["cleanDate","dormEditCleanDate","modalCleanDate"].forEach(function(id){
+      var input=document.getElementById(id);
+      if(!input)return;
+      var parent=input.closest(".row3 > div, .row > div, div");
+      if(parent)parent.style.display="none";
+    });
+
+    var cs=document.getElementById("cleanStatus");
+    if(cs && !cs.__v89Fixed){
+      cs.innerHTML="<option>未清掃</option><option>清掃済み</option>";
+      cs.__v89Fixed=true;
+    }
+    var es=document.getElementById("dormEditCleanStatus");
+    if(es && !es.__v89Fixed){
+      es.innerHTML="<option>未清掃</option><option>清掃済み</option>";
+      es.__v89Fixed=true;
+    }
+  }
+
+  function v89PrepareAddDorm(){
+    var mo=document.getElementById("moveOut");
+    var cd=document.getElementById("cleanDate");
+    var cs=document.getElementById("cleanStatus");
+    var done=document.getElementById("cleanDoneDate");
+    if(!cd)return;
+
+    if(cs && cs.value==="清掃済み"){
+      cd.value=(done&&done.value) || (mo&&mo.value) || today();
+    }else{
+      cd.value=(mo&&mo.value) || "";
+      if(done)done.value="";
+    }
+  }
+
+  var oldAddDorm=window.addDorm;
+  if(typeof oldAddDorm==="function" && !oldAddDorm.__v89CleanAuto){
+    var addWrap=function(){
+      v89PrepareAddDorm();
+      var r=oldAddDorm.apply(this,arguments);
+      try{
+        repairDormMoveBackAndClean();
+        save();
+        if(typeof renderDormMonthly==="function")renderDormMonthly();
+        if(typeof renderDorms==="function")renderDorms();
+        if(typeof renderStats==="function")renderStats();
+      }catch(e){}
+      return r;
+    };
+    addWrap.__v89CleanAuto=true;
+    window.addDorm=addWrap;
+  }
+
+  // 移動保存は「移動日」を退寮/清掃/入寮の日として扱う
+  window.saveDormMoveOnly=function(){
+    var rec=(dorms||[]).find(function(r){return String(r.id)===String(window.__dormMoveOnlyRecordId);});
+
+    if(!rec && window.__v83DormActiveRecordId){
+      rec=(dorms||[]).find(function(r){return String(r.id)===String(window.__v83DormActiveRecordId);});
+    }
+
+    if(!rec){
+      alert("移動元の寮データが見つかりません。対象のセルをタップしてからもう一度お試しください。");
+      return false;
+    }
+
+    var moveDate=v89Val("dormMoveOnlyDate");
+    var newDorm=v89Val("dormMoveOnlyDorm");
+    var newRoom=v89Val("dormMoveOnlyRoom");
+
+    if(!moveDate){alert("移動日を入力してください");return false;}
+    if(!newDorm||!newRoom){alert("移動先の寮・部屋を選択してください");return false;}
+
+    var oldDorm=rec.dormName||"";
+    var oldRoom=rec.roomNo||"";
+    var oldMoveOut=rec.moveOut||"";
+    var oldNote=rec.note||"";
+
+    // 同じ寮・同じ部屋に戻す場合は移動なし扱い
+    if(String(newDorm)===String(oldDorm) && String(newRoom)===String(oldRoom)){
+      rec.note=v89CleanNote(oldNote);
+      if(oldMoveOut && oldMoveOut<moveDate)rec.moveOut=oldMoveOut;
+      repairDormMoveBackAndClean();
+      save();
+
+      var mb=document.getElementById("dormMoveOnlyPopup");
+      if(mb)mb.style.display="none";
+      if(typeof closeDormEditPopup==="function")closeDormEditPopup();
+      if(typeof renderDormMonthly==="function")renderDormMonthly();
+      if(typeof renderDorms==="function")renderDorms();
+      if(typeof renderDorm==="function")renderDorm();
+      if(typeof renderStats==="function")renderStats();
+      return false;
+    }
+
+    // 元の寮は移動日で退寮・清掃予定
+    rec.moveOut=moveDate;
+    rec.cleanDate=moveDate;
+    rec.cleanStatus="清掃予定";
+    rec.cleanDoneDate="";
+    rec.note=(oldNote?oldNote+" / ":"")+"寮移動："+moveDate+"から"+newDorm+"-"+newRoom;
+
+    // 移動先は同日から入寮
+    dorms.push({
+      id:Date.now()+Math.floor(Math.random()*10000),
+      dormName:newDorm,
+      roomNo:newRoom,
+      residentName:rec.residentName||"",
+      status:rec.residentName?"入寮中":"空室",
+      moveIn:moveDate,
+      moveOut:(oldMoveOut && oldMoveOut>=moveDate)?oldMoveOut:"",
+      cleanDate:(oldMoveOut && oldMoveOut>=moveDate)?oldMoveOut:"",
+      cleanStatus:(oldMoveOut && oldMoveOut>=moveDate)?"清掃予定":"未清掃",
+      cleanDoneDate:"",
+      note:"寮移動："+oldDorm+"-"+oldRoom+"から移動"
+    });
+
+    repairDormMoveBackAndClean();
+    save();
+
+    var box=document.getElementById("dormMoveOnlyPopup");
+    if(box)box.style.display="none";
+    if(typeof closeDormEditPopup==="function")closeDormEditPopup();
+
+    window.__dormMoveOnlyRecordId=null;
+    window.__v83DormActiveRecordId=null;
+    window.__v83DormCellContext=null;
+
+    if(typeof renderDormMonthly==="function")renderDormMonthly();
+    if(typeof renderDorms==="function")renderDorms();
+    if(typeof renderDorm==="function")renderDorm();
+    if(typeof renderVacancy==="function")renderVacancy();
+    if(typeof renderStats==="function")renderStats();
+
+    return false;
+  };
+
+  window.cancelDormMoveAndContinue=function(){
+    var res=repairDormMoveBackAndClean();
+    save();
+
+    var box=document.getElementById("dormMoveOnlyPopup");
+    if(box)box.style.display="none";
+    if(typeof closeDormEditPopup==="function")closeDormEditPopup();
+
+    if(typeof renderDormMonthly==="function")renderDormMonthly();
+    if(typeof renderDorms==="function")renderDorms();
+    if(typeof renderDorm==="function")renderDorm();
+    if(typeof renderVacancy==="function")renderVacancy();
+    if(typeof renderStats==="function")renderStats();
+
+    alert("寮移動戻しを整理しました。途中の清掃予定も整理済みです。");
+    return false;
+  };
+
+  function v89CellDate(ci){
+    var base=parseDate((document.getElementById("monthBase")&&document.getElementById("monthBase").value)||today());
+    var d=new Date(base);
+    d.setDate(base.getDate()+ci-1);
+    return ymd(d);
+  }
+  function v89FindOccupant(room,ds){
+    var hits=(dorms||[]).filter(function(r){
+      if(v89RoomKey(r)!==room)return false;
+      if(!r.moveIn)return false;
+      return ds>=r.moveIn && ds<=v89End(r);
+    });
+    if(!hits.length)return "";
+    hits.sort(function(a,b){return String(b.moveIn||"").localeCompare(String(a.moveIn||""));});
+    return hits[0].residentName||"";
+  }
+  function v89Events(room,ds){
+    var ev=[];
+    (dorms||[]).forEach(function(r){
+      if(v89RoomKey(r)!==room)return;
+      var nm=r.residentName||"";
+      var moveDate=v89MoveToDate(r);
+      var plan=moveDate || r.cleanDate || r.moveOut || "";
+
+      if(r.moveOut===ds)ev.push({type:"out",label:"退",name:nm});
+      if(plan===ds && !v89IsDone(r))ev.push({type:"clean",label:"清",name:nm});
+      if((r.cleanDoneDate===ds || r.cleanDate===ds) && v89IsDone(r))ev.push({type:"done",label:"済",name:nm});
+      if(r.moveIn===ds)ev.push({type:"in",label:"入",name:nm});
+    });
+
+    var seen={};
+    ev=ev.filter(function(e){
+      var k=e.type+"|"+e.name;
+      if(seen[k])return false;
+      seen[k]=true;
+      return true;
+    });
+
+    var order={out:1,clean:2,done:3,in:4};
+    ev.sort(function(a,b){return (order[a.type]||9)-(order[b.type]||9);});
+    return ev;
+  }
+  function v89Tag(e){
+    var cls=e.type==="in"?"dormTagIn":e.type==="done"?"dormTagDone":e.type==="clean"?"dormTagClean":"dormTagOut";
+    return '<span class="dormEventTag '+cls+'">'+e.label+'</span>';
+  }
+  window.applyDormEventColors=function(){
+    var box=document.getElementById("dormMonthlyTable");
+    if(!box)return;
+
+    box.querySelectorAll("tbody tr").forEach(function(tr){
+      var nameCell=tr.querySelector("td.name");
+      var room=(nameCell&&nameCell.textContent?nameCell.textContent.trim():"");
+      if(!room)return;
+
+      var cells=tr.querySelectorAll("td");
+      for(var ci=1;ci<cells.length;ci++){
+        var td=cells[ci];
+        var ds=v89CellDate(ci);
+        var ev=v89Events(room,ds);
+
+        td.classList.remove("dormIn","dormOut","cleanPlan","done","dormMultiEvent");
+
+        if(!ev.length)continue;
+
+        var hasIn=ev.some(function(e){return e.type==="in";});
+        var hasOrange=ev.some(function(e){return e.type==="out"||e.type==="clean";});
+        var hasDone=ev.some(function(e){return e.type==="done";});
+        var colorCount=(hasIn?1:0)+(hasOrange?1:0)+(hasDone?1:0);
+
+        var occupant=v89FindOccupant(room,ds);
+        var name=occupant || (ev.find(function(e){return e.name;})||{}).name || "";
+
+        if(colorCount>=2 || ev.length>=2){
+          td.classList.add("dormMultiEvent");
+          td.innerHTML='<div class="dormEventWrap">'+ev.map(v89Tag).join("")+
+            (name?'<span class="dormEventName">'+esc(name)+'</span>':'')+
+            '</div>';
+        }else if(hasIn){
+          td.classList.add("dormIn");
+          td.textContent=name ? "入:"+name : "入寮";
+        }else if(hasDone){
+          td.classList.add("done");
+          td.textContent="済";
+        }else{
+          td.classList.add("cleanPlan");
+          var out=ev.some(function(e){return e.type==="out";});
+          var clean=ev.some(function(e){return e.type==="clean";});
+          td.textContent=(out&&clean) ? "退/清" : out ? (name ? "退:"+name : "退寮") : "清掃";
+        }
+      }
+    });
+  };
+
+  var oldRenderDormMonthly=window.renderDormMonthly;
+  if(typeof oldRenderDormMonthly==="function" && !oldRenderDormMonthly.__v89Repair){
+    var renderWrap=function(){
+      try{repairDormMoveBackAndClean();}catch(e){}
+      var r=oldRenderDormMonthly.apply(this,arguments);
+      setTimeout(applyDormEventColors,0);
+      return r;
+    };
+    renderWrap.__v89Repair=true;
+    window.renderDormMonthly=renderWrap;
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(function(){
+      v89HideCleanInputs();
+
+      // 寮管理画面に手動整理ボタンを追加
+      var dormList=document.getElementById("dormList");
+      if(dormList && !document.getElementById("dormRepairMoveBackBtn")){
+        dormList.insertAdjacentHTML("beforebegin",'<button id="dormRepairMoveBackBtn" class="dormRepairBtn" onclick="cancelDormMoveAndContinue()">寮移動戻し・清掃整理</button>');
+      }
+
+      try{
+        repairDormMoveBackAndClean();
+        save();
+        if(typeof renderDormMonthly==="function")renderDormMonthly();
+        if(typeof renderDorms==="function")renderDorms();
+        if(typeof renderStats==="function")renderStats();
+      }catch(e){}
+    },700);
+  });
+
+  window.addEventListener("load",function(){
+    setTimeout(function(){
+      v89HideCleanInputs();
+      try{applyDormEventColors();}catch(e){}
+    },1000);
   });
 })();
 </script>
