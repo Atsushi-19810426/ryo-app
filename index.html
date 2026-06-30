@@ -1189,6 +1189,16 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   }
 }
 
+
+/* Ver98: 寮表の空白セル誤タップ防止 */
+.dormMatrixCell.empty{
+  cursor:default!important;
+  pointer-events:auto;
+}
+.dormMatrixCell.empty:hover{
+  background:#fff!important;
+}
+
 </style>
 </head>
 <body>
