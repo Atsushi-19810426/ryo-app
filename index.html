@@ -387,6 +387,11 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   }
 }
 
+
+/* Ver81: 寮のみ移動 */
+.dormMoveBtn{background:#7c3aed!important;color:#fff!important;margin-top:8px}
+#dormMoveOnlyPopup select,#dormMoveOnlyPopup input{box-sizing:border-box}
+
 </style>
 </head>
 <body>
@@ -1864,6 +1869,7 @@ init();
     <label>備考</label>
     <textarea id="dormEditNote" placeholder="備考"></textarea>
     <button class="dormEditPopupBtn" onclick="saveDormEditPopup()">保存</button>
+    <button class="dormEditPopupBtn dormMoveBtn" onclick="openDormMoveOnlyPopup()">寮のみ移動</button>
   </div>
 </div>
 
@@ -3525,6 +3531,38 @@ init();
   });
 })();
 </script>
+
+
+<div id="dormMoveOnlyPopup" class="dormEditPopup">
+  <div class="dormEditPopupBox">
+    <div class="dormEditPopupHead">
+      <b id="dormMoveOnlyTitle">寮のみ移動</b>
+      <button class="dormEditPopupClose" onclick="closeDormMoveOnlyPopup()">×</button>
+    </div>
+
+    <div class="note" id="dormMoveOnlyCurrent" style="margin-bottom:10px"></div>
+
+    <label>移動日</label>
+    <input id="dormMoveOnlyDate" type="date" style="width:100%;border:1px solid #e5e7eb;border-radius:10px;padding:9px;font-size:14px;background:#fff">
+
+    <div class="dormEditPopupRow">
+      <div>
+        <label>移動先 寮名</label>
+        <select id="dormMoveOnlyDorm" onchange="updateDormMoveOnlyRooms()"></select>
+      </div>
+      <div>
+        <label>移動先 部屋</label>
+        <select id="dormMoveOnlyRoom"></select>
+      </div>
+    </div>
+
+    <div class="note" style="margin:8px 0 2px">
+      移動日から先を新しい寮に分けます。元の寮は移動日前日までになり、移動日に清掃予定が入ります。
+    </div>
+
+    <button class="dormEditPopupBtn" onclick="saveDormMoveOnly()">移動を反映</button>
+  </div>
+</div>
 
 </body>
 </html>
