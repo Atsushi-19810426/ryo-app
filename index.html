@@ -2088,6 +2088,147 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   }
 }
 
+
+/* Ver106: 寮名+部屋番号を一緒に固定、スライドボタンを動作 */
+#dormMonthlyTable .dormMatrixTable{
+  border-collapse:separate!important;
+  border-spacing:0!important;
+}
+
+/* 寮名行と部屋番号行を thead 全体でまとめて固定 */
+#dormMonthlyTable .dormMatrixTable thead{
+  position:sticky!important;
+  top:0!important;
+  z-index:180!important;
+  background:#fff!important;
+}
+
+/* 個別thのtop指定でズレないようにリセット */
+#dormMonthlyTable .dormMatrixTable thead tr:first-child th,
+#dormMonthlyTable .dormMatrixTable thead tr:nth-child(2) th{
+  position:static!important;
+  top:auto!important;
+  height:18px!important;
+  min-height:18px!important;
+  max-height:18px!important;
+  padding:0 2px!important;
+  line-height:18px!important;
+  vertical-align:middle!important;
+  box-sizing:border-box!important;
+}
+
+/* 左上の日付だけは左固定 */
+#dormMonthlyTable .dormMatrixDateHead{
+  position:sticky!important;
+  left:0!important;
+  top:auto!important;
+  z-index:220!important;
+  height:36px!important;
+  min-height:36px!important;
+  max-height:36px!important;
+  padding:0 2px!important;
+  line-height:36px!important;
+  background:#111827!important;
+  color:#fff!important;
+  box-sizing:border-box!important;
+}
+
+/* 左の日付列は横スライドしても隠れない */
+#dormMonthlyTable tbody .dormMatrixDate{
+  position:sticky!important;
+  left:0!important;
+  z-index:90!important;
+  background:#fff!important;
+  box-shadow:2px 0 0 rgba(15,23,42,.10)!important;
+}
+
+/* 寮名の中の余白をなくす */
+#dormMonthlyTable .dormMatrixGroup{
+  font-size:8px!important;
+  line-height:18px!important;
+  padding:0 2px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#dormMonthlyTable .dormMatrixGroup small{
+  display:none!important;
+}
+#dormMonthlyTable .dormMatrixRoom{
+  font-size:9px!important;
+  line-height:18px!important;
+  padding:0 2px!important;
+}
+
+/* スライドボタン */
+.slideGuide{
+  pointer-events:auto!important;
+  user-select:none!important;
+  display:flex!important;
+  gap:8px!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+.slideGuide .slideText{
+  pointer-events:none!important;
+}
+.slideBtn{
+  pointer-events:auto!important;
+  border:0!important;
+  border-radius:999px!important;
+  padding:5px 12px!important;
+  background:#fff!important;
+  color:#111827!important;
+  font-weight:900!important;
+  font-size:14px!important;
+  line-height:1!important;
+  box-shadow:0 2px 8px rgba(0,0,0,.18)!important;
+}
+.slideBtn:active{
+  transform:scale(.96);
+  background:#e5e7eb!important;
+}
+
+/* スライド案内自体は常に見える */
+#monthlySlideGuide,
+#dormSlideGuide{
+  position:sticky!important;
+  top:calc(var(--monthlyStickyTop,72px) + 112px)!important;
+  z-index:1000!important;
+}
+
+@media(max-width:760px){
+  #dormMonthlyTable .dormMatrixTable thead tr:first-child th,
+  #dormMonthlyTable .dormMatrixTable thead tr:nth-child(2) th{
+    height:17px!important;
+    min-height:17px!important;
+    max-height:17px!important;
+    line-height:17px!important;
+  }
+  #dormMonthlyTable .dormMatrixDateHead{
+    height:34px!important;
+    min-height:34px!important;
+    max-height:34px!important;
+    line-height:34px!important;
+  }
+  #dormMonthlyTable .dormMatrixGroup{
+    font-size:7px!important;
+    line-height:17px!important;
+  }
+  #dormMonthlyTable .dormMatrixRoom{
+    font-size:8px!important;
+    line-height:17px!important;
+  }
+  #monthlySlideGuide,
+  #dormSlideGuide{
+    top:calc(var(--monthlyStickyTop,64px) + 102px)!important;
+  }
+  .slideBtn{
+    padding:5px 10px!important;
+    font-size:13px!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -9274,6 +9415,218 @@ init();
 
   window.addEventListener("resize",function(){
     fixDormHeaderGap105();
+  });
+})();
+</script>
+
+
+<script id="ver106-dorm-header-slide-button-fix">
+(function(){
+  function fixDormHeaderTogether106(){
+    var table=document.querySelector("#dormMonthlyTable .dormMatrixTable");
+    if(!table)return;
+
+    var isMobile=window.matchMedia && window.matchMedia("(max-width:760px)").matches;
+    var h=isMobile ? 17 : 18;
+
+    table.style.borderCollapse="separate";
+    table.style.borderSpacing="0";
+
+    var thead=table.querySelector("thead");
+    if(thead){
+      thead.style.position="sticky";
+      thead.style.top="0";
+      thead.style.zIndex="180";
+      thead.style.background="#fff";
+    }
+
+    table.querySelectorAll("thead tr:first-child th, thead tr:nth-child(2) th").forEach(function(th){
+      th.style.position="static";
+      th.style.top="auto";
+      th.style.height=h+"px";
+      th.style.minHeight=h+"px";
+      th.style.maxHeight=h+"px";
+      th.style.padding="0 2px";
+      th.style.lineHeight=h+"px";
+      th.style.verticalAlign="middle";
+      th.style.boxSizing="border-box";
+    });
+
+    table.querySelectorAll(".dormMatrixGroup small").forEach(function(s){
+      s.style.display="none";
+    });
+
+    table.querySelectorAll(".dormMatrixGroup").forEach(function(th){
+      th.style.fontSize=(isMobile?7:8)+"px";
+      th.style.lineHeight=h+"px";
+      th.style.padding="0 2px";
+      th.style.whiteSpace="nowrap";
+      th.style.overflow="hidden";
+      th.style.textOverflow="ellipsis";
+    });
+
+    table.querySelectorAll(".dormMatrixRoom").forEach(function(th){
+      th.style.fontSize=(isMobile?8:9)+"px";
+      th.style.lineHeight=h+"px";
+      th.style.padding="0 2px";
+      th.style.whiteSpace="nowrap";
+    });
+
+    var dateHead=table.querySelector(".dormMatrixDateHead");
+    if(dateHead){
+      dateHead.style.position="sticky";
+      dateHead.style.left="0";
+      dateHead.style.top="auto";
+      dateHead.style.zIndex="220";
+      dateHead.style.height=(h*2)+"px";
+      dateHead.style.minHeight=(h*2)+"px";
+      dateHead.style.maxHeight=(h*2)+"px";
+      dateHead.style.lineHeight=(h*2)+"px";
+      dateHead.style.padding="0 2px";
+      dateHead.style.background="#111827";
+      dateHead.style.color="#fff";
+      dateHead.style.boxSizing="border-box";
+    }
+
+    table.querySelectorAll("tbody .dormMatrixDate").forEach(function(th){
+      th.style.position="sticky";
+      th.style.left="0";
+      th.style.zIndex="90";
+      th.style.background="#fff";
+    });
+
+    document.documentElement.style.setProperty("--dormMatrixHead1",h+"px");
+  }
+
+  function scrollMonthlyBox106(targetId,dir){
+    var box=document.getElementById(targetId);
+    if(!box)return false;
+
+    var amount=Math.max(160, Math.floor(box.clientWidth*0.72));
+    box.scrollBy({left:amount*dir, behavior:"smooth"});
+    return false;
+  }
+
+  function ensureSlideButtons106(){
+    var targets=[
+      {id:"monthlyTable", guide:"monthlySlideGuide"},
+      {id:"dormMonthlyTable", guide:"dormSlideGuide"}
+    ];
+
+    targets.forEach(function(t){
+      var box=document.getElementById(t.id);
+      if(!box)return;
+
+      var guide=document.getElementById(t.guide);
+      if(!guide){
+        box.insertAdjacentHTML("beforebegin",
+          '<div id="'+t.guide+'" class="slideGuide">'+
+          '<button type="button" class="slideBtn" data-target="'+t.id+'" data-dir="-1">←</button>'+
+          '<span class="slideText">左右にスライド</span>'+
+          '<button type="button" class="slideBtn" data-target="'+t.id+'" data-dir="1">→</button>'+
+          '</div>'
+        );
+      }else if(!guide.querySelector(".slideBtn")){
+        guide.innerHTML=
+          '<button type="button" class="slideBtn" data-target="'+t.id+'" data-dir="-1">←</button>'+
+          '<span class="slideText">左右にスライド</span>'+
+          '<button type="button" class="slideBtn" data-target="'+t.id+'" data-dir="1">→</button>';
+      }
+    });
+
+    document.querySelectorAll(".slideBtn").forEach(function(btn){
+      if(btn.__v106Bound)return;
+      btn.__v106Bound=true;
+
+      btn.addEventListener("click",function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        var target=btn.getAttribute("data-target");
+        var dir=Number(btn.getAttribute("data-dir")||1);
+        return scrollMonthlyBox106(target,dir);
+      },true);
+
+      btn.addEventListener("touchend",function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        var target=btn.getAttribute("data-target");
+        var dir=Number(btn.getAttribute("data-dir")||1);
+        return scrollMonthlyBox106(target,dir);
+      },true);
+    });
+  }
+
+  function applyVer106Fixes(){
+    fixDormHeaderTogether106();
+    ensureSlideButtons106();
+  }
+
+  window.fixDormHeaderTogether106=fixDormHeaderTogether106;
+  window.ensureSlideButtons106=ensureSlideButtons106;
+
+  var oldRenderMonthly106=window.renderMonthly;
+  if(typeof oldRenderMonthly106==="function" && !oldRenderMonthly106.__v106SlideBtn){
+    var monthlyWrap=function(){
+      var r=oldRenderMonthly106.apply(this,arguments);
+      setTimeout(applyVer106Fixes,0);
+      setTimeout(applyVer106Fixes,250);
+      return r;
+    };
+    monthlyWrap.__v106SlideBtn=true;
+    window.renderMonthly=monthlyWrap;
+  }
+
+  var oldRenderDormMonthly106=window.renderDormMonthly;
+  if(typeof oldRenderDormMonthly106==="function" && !oldRenderDormMonthly106.__v106HeaderSlide){
+    var dormWrap=function(){
+      var r=oldRenderDormMonthly106.apply(this,arguments);
+      setTimeout(applyVer106Fixes,0);
+      setTimeout(applyVer106Fixes,250);
+      setTimeout(applyVer106Fixes,700);
+      return r;
+    };
+    dormWrap.__v106HeaderSlide=true;
+    window.renderDormMonthly=dormWrap;
+  }
+
+  var oldRenderDormMonthlyMatrix106=window.renderDormMonthlyMatrix;
+  if(typeof oldRenderDormMonthlyMatrix106==="function" && !oldRenderDormMonthlyMatrix106.__v106HeaderSlide){
+    var matrixWrap=function(){
+      var r=oldRenderDormMonthlyMatrix106.apply(this,arguments);
+      setTimeout(applyVer106Fixes,0);
+      setTimeout(applyVer106Fixes,250);
+      setTimeout(applyVer106Fixes,700);
+      return r;
+    };
+    matrixWrap.__v106HeaderSlide=true;
+    window.renderDormMonthlyMatrix=matrixWrap;
+  }
+
+  var oldShowMonthlySubTab106=window.showMonthlySubTab;
+  if(typeof oldShowMonthlySubTab106==="function" && !oldShowMonthlySubTab106.__v106HeaderSlide){
+    var tabWrap=function(){
+      var r=oldShowMonthlySubTab106.apply(this,arguments);
+      setTimeout(applyVer106Fixes,50);
+      setTimeout(applyVer106Fixes,300);
+      setTimeout(applyVer106Fixes,900);
+      return r;
+    };
+    tabWrap.__v106HeaderSlide=true;
+    window.showMonthlySubTab=tabWrap;
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(applyVer106Fixes,500);
+    setTimeout(applyVer106Fixes,1200);
+  });
+
+  window.addEventListener("load",function(){
+    setTimeout(applyVer106Fixes,500);
+    setTimeout(applyVer106Fixes,1400);
+  });
+
+  window.addEventListener("resize",function(){
+    applyVer106Fixes();
   });
 })();
 </script>
