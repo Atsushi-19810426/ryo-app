@@ -765,6 +765,363 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   }
 }
 
+
+/* Ver95: 寮月間表 横表を縦型へ変換 */
+#monthlyDormPanel #dormMonthlyTable{
+  max-height:none!important;
+  overflow:visible!important;
+  border:0!important;
+  background:transparent!important;
+  padding:0!important;
+}
+
+.dormRoomVertical{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+.dormGroupBlock{
+  border:1px solid #e5e7eb;
+  border-radius:18px;
+  background:#fff;
+  overflow:hidden;
+  box-shadow:0 8px 22px rgba(15,23,42,.07);
+}
+
+.dormGroupTitle{
+  position:sticky;
+  top:calc(var(--monthlyStickyTop,72px) + 112px);
+  z-index:500;
+  background:#111827;
+  color:#fff;
+  padding:12px 14px;
+  font-size:17px;
+  font-weight:900;
+  letter-spacing:.02em;
+}
+
+.dormRoomsWrap{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  padding:12px;
+}
+
+.dormRoomBlock{
+  border:1px solid #e5e7eb;
+  border-radius:16px;
+  background:#f8fafc;
+  overflow:hidden;
+}
+
+.dormRoomTitle{
+  position:sticky;
+  top:calc(var(--monthlyStickyTop,72px) + 156px);
+  z-index:450;
+  background:#e2e8f0;
+  color:#0f172a;
+  padding:10px 12px;
+  font-size:15px;
+  font-weight:900;
+  border-bottom:1px solid #cbd5e1;
+}
+
+.dormDayRows{
+  display:flex;
+  flex-direction:column;
+}
+
+.dormDayRow{
+  display:grid;
+  grid-template-columns:92px 1fr;
+  gap:8px;
+  align-items:center;
+  min-height:40px;
+  padding:7px 10px;
+  border-bottom:1px solid #e5e7eb;
+  background:#fff;
+  cursor:pointer;
+}
+
+.dormDayRow:last-child{
+  border-bottom:0;
+}
+
+.dormDayRow.sun .dormDateCell{color:#dc2626}
+.dormDayRow.sat .dormDateCell{color:#2563eb}
+
+.dormDateCell{
+  font-weight:900;
+  font-size:12px;
+  line-height:1.2;
+}
+
+.dormStatusCell{
+  display:flex;
+  flex-wrap:wrap;
+  gap:4px;
+  align-items:center;
+  min-width:0;
+}
+
+.dormStatusText{
+  font-weight:900;
+  font-size:12px;
+  color:#111827;
+}
+
+.dormTag{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  padding:3px 7px;
+  font-size:11px;
+  line-height:1;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.dormTagIn{background:#dcfce7;color:#166534;border:1px solid #86efac}
+.dormTagOut,.dormTagClean{background:#ffedd5;color:#9a3412;border:1px solid #fb923c}
+.dormTagDone{background:#dbeafe;color:#1d4ed8;border:1px solid #60a5fa}
+.dormTagStay{background:#f1f5f9;color:#334155;border:1px solid #cbd5e1}
+.dormTagEmpty{background:#f8fafc;color:#94a3b8;border:1px solid #e5e7eb}
+
+.dormDayRow.hasIn{background:#f0fdf4}
+.dormDayRow.hasOrange{background:#fff7ed}
+.dormDayRow.hasDone{background:#eff6ff}
+.dormDayRow.multiEvent{
+  background:linear-gradient(90deg,#fff7ed 0%,#fff7ed 34%,#eff6ff 34%,#eff6ff 67%,#f0fdf4 67%,#f0fdf4 100%);
+}
+
+@media(max-width:760px){
+  .dormGroupTitle{
+    top:calc(var(--monthlyStickyTop,64px) + 104px);
+    font-size:16px;
+    padding:11px 12px;
+  }
+  .dormRoomTitle{
+    top:calc(var(--monthlyStickyTop,64px) + 146px);
+    font-size:14px;
+  }
+  .dormDayRow{
+    grid-template-columns:82px 1fr;
+    padding:7px 8px;
+  }
+  .dormTag{
+    font-size:10px;
+    padding:2px 6px;
+  }
+}
+
+
+/* Ver96: 寮月間表 日付左・寮グループ上・部屋横並び */
+#monthlyDormPanel #dormMonthlyTable{
+  max-height:calc(100vh - 250px)!important;
+  overflow:auto!important;
+  -webkit-overflow-scrolling:touch;
+  border:1px solid #e5e7eb!important;
+  border-radius:14px!important;
+  background:#fff!important;
+  padding:0!important;
+}
+
+.dormMatrixTable{
+  border-collapse:separate;
+  border-spacing:0;
+  width:max-content;
+  min-width:100%;
+  background:#fff;
+  font-size:12px;
+}
+
+.dormMatrixTable th,
+.dormMatrixTable td{
+  border-right:1px dotted #94a3b8;
+  border-bottom:1px dotted #94a3b8;
+  padding:4px 5px;
+  text-align:center;
+  vertical-align:middle;
+  min-width:64px;
+  width:64px;
+  height:34px;
+  box-sizing:border-box;
+  white-space:normal;
+  line-height:1.15;
+}
+
+.dormMatrixTable thead th{
+  position:sticky;
+  top:0;
+  z-index:35;
+  background:#f8fafc;
+  color:#0f172a;
+  font-weight:900;
+}
+
+.dormMatrixTable thead tr:nth-child(2) th{
+  top:42px;
+  z-index:36;
+  background:#fff;
+}
+
+.dormMatrixDateHead,
+.dormMatrixDate{
+  position:sticky!important;
+  left:0!important;
+  z-index:50!important;
+  min-width:78px!important;
+  width:78px!important;
+  background:#fff!important;
+  box-shadow:2px 0 0 rgba(15,23,42,.08);
+}
+
+.dormMatrixDateHead{
+  top:0!important;
+  z-index:70!important;
+  background:#111827!important;
+  color:#fff!important;
+}
+
+.dormMatrixGroup{
+  min-width:64px;
+  background:#f1f5f9!important;
+  font-size:12px;
+  line-height:1.15;
+}
+
+.dormMatrixGroup small{
+  display:block;
+  font-size:10px;
+  color:#475569;
+  margin-top:2px;
+  font-weight:700;
+}
+
+.dormMatrixRoom{
+  font-size:12px;
+  background:#fff!important;
+}
+
+.dormMatrixDate{
+  font-weight:900;
+  color:#111827;
+  font-size:12px;
+}
+
+.dormMatrixDate.sun{color:#dc2626!important}
+.dormMatrixDate.sat{color:#2563eb!important}
+
+.dormMatrixCell{
+  cursor:pointer;
+  color:#111827;
+  font-size:11px;
+  overflow:hidden;
+}
+
+.dormMatrixCell.empty{
+  color:#cbd5e1;
+  background:#fff;
+}
+
+.dormMatrixCell.hasIn{
+  background:#dcfce7!important;
+  color:#166534!important;
+  font-weight:900;
+}
+
+.dormMatrixCell.hasOrange{
+  background:#ffedd5!important;
+  color:#9a3412!important;
+  font-weight:900;
+}
+
+.dormMatrixCell.hasDone{
+  background:#dbeafe!important;
+  color:#1d4ed8!important;
+  font-weight:900;
+}
+
+.dormMatrixCell.multiEvent{
+  background:linear-gradient(90deg,#ffedd5 0%,#ffedd5 34%,#dbeafe 34%,#dbeafe 67%,#dcfce7 67%,#dcfce7 100%)!important;
+  color:#111827!important;
+  font-weight:900;
+}
+
+.dmTags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:1px;
+  justify-content:center;
+  align-items:center;
+  margin-bottom:1px;
+}
+
+.dmTag{
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  border-radius:999px;
+  padding:1px 4px;
+  font-size:9px;
+  font-weight:900;
+  line-height:1;
+}
+
+.dmIn{background:#dcfce7;color:#166534;border:1px solid #86efac}
+.dmOut,.dmClean{background:#ffedd5;color:#9a3412;border:1px solid #fb923c}
+.dmDone{background:#dbeafe;color:#1d4ed8;border:1px solid #60a5fa}
+.dmStay{background:#f1f5f9;color:#334155;border:1px solid #cbd5e1}
+
+.dmName{
+  display:block;
+  font-size:10px;
+  font-weight:900;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  max-width:58px;
+  margin:0 auto;
+}
+
+@media(max-width:760px){
+  #monthlyDormPanel #dormMonthlyTable{
+    max-height:calc(100vh - 230px)!important;
+  }
+
+  .dormMatrixTable th,
+  .dormMatrixTable td{
+    min-width:56px;
+    width:56px;
+    height:32px;
+    padding:3px 3px;
+    font-size:11px;
+  }
+
+  .dormMatrixDateHead,
+  .dormMatrixDate{
+    min-width:68px!important;
+    width:68px!important;
+    font-size:11px;
+  }
+
+  .dormMatrixTable thead tr:nth-child(2) th{
+    top:40px;
+  }
+
+  .dmName{
+    max-width:50px;
+    font-size:9px;
+  }
+
+  .dmTag{
+    font-size:8px;
+    padding:1px 3px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -6542,6 +6899,295 @@ init();
     setTimeout(function(){
       if(window.__monthlySubTab==="dorm"){
         renderDormMonthlyVertical();
+      }
+    },700);
+  });
+})();
+</script>
+
+
+<script>
+(function(){
+  /*
+    Ver96:
+    寮月間表を画像イメージに合わせて変更。
+    左：日付・曜日
+    上：大きな寮グループ
+    その下：部屋番号
+    中身：日付×部屋の表
+    横スクロールを減らすため、1部屋の列幅をコンパクト化。
+  */
+
+  function v96Esc(s){
+    if(typeof esc==="function")return esc(s);
+    return String(s||"").replace(/[&<>"']/g,function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  function v96End(r){
+    return (r&&r.moveOut)||((r&&r.moveIn)||"");
+  }
+
+  function v96IsDone(r){
+    var st=String(r&&r.cleanStatus||"").trim();
+    return st==="清掃済み" || st==="済" || !!(r&&r.cleanDoneDate);
+  }
+
+  function v96MoveDate(r){
+    var m=String(r&&r.note||"").match(/寮移動：(\d{4}-\d{2}-\d{2})から/);
+    return m?m[1]:"";
+  }
+
+  function v96PlanDate(r){
+    return v96MoveDate(r) || r.cleanDate || r.moveOut || "";
+  }
+
+  function v96DateLabel(d){
+    var w=(typeof wds!=="undefined" && wds[d.getDay()]) ? wds[d.getDay()] : ["日","月","火","水","木","金","土"][d.getDay()];
+    return (d.getMonth()+1)+"/"+d.getDate()+"("+w+")";
+  }
+
+  function v96DateCls(d){
+    if(d.getDay()===0)return "sun";
+    if(d.getDay()===6)return "sat";
+    return "";
+  }
+
+  function v96SplitDormTitle(name){
+    name=String(name||"");
+    var m=name.match(/^(.+?)([（(].+[）)])$/);
+    if(m)return {main:m[1].trim(),sub:m[2].trim()};
+    return {main:name,sub:""};
+  }
+
+  function v96Groups(){
+    var map={};
+
+    function add(dormName,roomNo){
+      dormName=String(dormName||"").trim();
+      roomNo=String(roomNo||"").trim();
+      if(!dormName && !roomNo)return;
+      if(!map[dormName])map[dormName]={dormName:dormName,rooms:{}};
+      if(!map[dormName].rooms[roomNo])map[dormName].rooms[roomNo]={dormName:dormName,roomNo:roomNo};
+    }
+
+    if(Array.isArray(dormMaster)){
+      dormMaster.forEach(function(m){add(m.dormName,m.roomNo);});
+    }
+
+    if(Array.isArray(dorms)){
+      dorms.forEach(function(r){add(r.dormName,r.roomNo);});
+    }
+
+    return Object.keys(map).sort(function(a,b){return a.localeCompare(b,"ja");}).map(function(dn){
+      var rooms=Object.keys(map[dn].rooms).sort(function(a,b){
+        return String(a).localeCompare(String(b),"ja",{numeric:true});
+      }).map(function(rn){return map[dn].rooms[rn];});
+      return {dormName:dn,rooms:rooms};
+    });
+  }
+
+  function v96Active(room,ds){
+    var hits=(Array.isArray(dorms)?dorms:[]).filter(function(r){
+      if(String(r.dormName||"")!==String(room.dormName||""))return false;
+      if(String(r.roomNo||"")!==String(room.roomNo||""))return false;
+      if(!r.moveIn)return false;
+      return ds>=r.moveIn && ds<=v96End(r);
+    });
+
+    if(!hits.length)return null;
+
+    hits.sort(function(a,b){
+      return String(b.moveIn||"").localeCompare(String(a.moveIn||""));
+    });
+
+    return hits[0];
+  }
+
+  function v96Events(room,ds){
+    var ev=[];
+    (Array.isArray(dorms)?dorms:[]).forEach(function(r){
+      if(String(r.dormName||"")!==String(room.dormName||""))return;
+      if(String(r.roomNo||"")!==String(room.roomNo||""))return;
+
+      var nm=r.residentName||"";
+
+      if(r.moveOut===ds){
+        ev.push({type:"out",label:"退",name:nm});
+      }
+
+      var plan=v96PlanDate(r);
+      if(plan===ds && !v96IsDone(r)){
+        ev.push({type:"clean",label:"清",name:nm});
+      }
+
+      if((r.cleanDoneDate===ds || r.cleanDate===ds) && v96IsDone(r)){
+        ev.push({type:"done",label:"済",name:nm});
+      }
+
+      if(r.moveIn===ds){
+        ev.push({type:"in",label:"入",name:nm});
+      }
+    });
+
+    var seen={};
+    ev=ev.filter(function(e){
+      var k=e.type+"|"+e.name;
+      if(seen[k])return false;
+      seen[k]=true;
+      return true;
+    });
+
+    var order={out:1,clean:2,done:3,in:4};
+    ev.sort(function(a,b){return (order[a.type]||9)-(order[b.type]||9);});
+    return ev;
+  }
+
+  function v96Tag(e){
+    var cls=e.type==="in" ? "dmIn" :
+            e.type==="done" ? "dmDone" :
+            e.type==="clean" ? "dmClean" : "dmOut";
+    return '<span class="dmTag '+cls+'">'+e.label+'</span>';
+  }
+
+  function v96Cell(room,ds){
+    var active=v96Active(room,ds);
+    var ev=v96Events(room,ds);
+
+    var hasIn=ev.some(function(e){return e.type==="in";});
+    var hasOrange=ev.some(function(e){return e.type==="out"||e.type==="clean";});
+    var hasDone=ev.some(function(e){return e.type==="done";});
+    var colors=(hasIn?1:0)+(hasOrange?1:0)+(hasDone?1:0);
+
+    var cls=["dormMatrixCell"];
+    if(colors>=2)cls.push("multiEvent");
+    else if(hasIn)cls.push("hasIn");
+    else if(hasOrange)cls.push("hasOrange");
+    else if(hasDone)cls.push("hasDone");
+    else if(!active)cls.push("empty");
+
+    var html="";
+    if(ev.length){
+      html+='<span class="dmTags">'+ev.map(v96Tag).join("")+'</span>';
+    }
+
+    if(active && active.residentName){
+      if(!ev.length)html+='<span class="dmTags"><span class="dmTag dmStay">中</span></span>';
+      html+='<span class="dmName">'+v96Esc(active.residentName)+'</span>';
+    }else if(ev.length){
+      var nm=(ev.find(function(e){return e.name;})||{}).name||"";
+      if(nm)html+='<span class="dmName">'+v96Esc(nm)+'</span>';
+    }else{
+      html="";
+    }
+
+    return {
+      cls:cls.join(" "),
+      html:html
+    };
+  }
+
+  window.renderDormMonthlyMatrix=function(){
+    try{
+      if(typeof repairDormMoveBackAndClean==="function"){
+        try{repairDormMoveBackAndClean();}catch(e){}
+      }
+      if(typeof normalizeDormCleanAutoRule==="function"){
+        try{normalizeDormCleanAutoRule();}catch(e){}
+      }
+
+      var base=parseDate((document.getElementById("monthBase")&&document.getElementById("monthBase").value)||today());
+      var days=Number((document.getElementById("daysCount")&&document.getElementById("daysCount").value)||31);
+      var box=document.getElementById("dormMonthlyTable");
+      if(!box)return;
+
+      var groups=v96Groups();
+      var rooms=[];
+      groups.forEach(function(g){
+        g.rooms.forEach(function(r){rooms.push(r);});
+      });
+
+      var h='<table class="dormMatrixTable">';
+      h+='<thead><tr>';
+      h+='<th class="dormMatrixDateHead" rowspan="2">日付</th>';
+
+      groups.forEach(function(g){
+        var title=v96SplitDormTitle(g.dormName);
+        h+='<th class="dormMatrixGroup" colspan="'+g.rooms.length+'">'+v96Esc(title.main||"寮未設定")+
+          (title.sub?'<small>'+v96Esc(title.sub)+'</small>':'')+
+          '</th>';
+      });
+
+      h+='</tr><tr>';
+
+      groups.forEach(function(g){
+        g.rooms.forEach(function(r){
+          h+='<th class="dormMatrixRoom">'+v96Esc(r.roomNo)+'</th>';
+        });
+      });
+
+      h+='</tr></thead><tbody>';
+
+      for(var i=0;i<days;i++){
+        var d=new Date(base);
+        d.setDate(base.getDate()+i);
+        var ds=ymd(d);
+        var dcls=v96DateCls(d);
+
+        h+='<tr>';
+        h+='<th class="dormMatrixDate '+dcls+'">'+v96Esc(v96DateLabel(d))+'</th>';
+
+        rooms.forEach(function(room){
+          var cell=v96Cell(room,ds);
+          h+='<td class="'+cell.cls+'" data-date="'+ds+'" data-dorm="'+v96Esc(room.dormName)+'" data-room="'+v96Esc(room.roomNo)+'">'+cell.html+'</td>';
+        });
+
+        h+='</tr>';
+      }
+
+      h+='</tbody></table>';
+      box.innerHTML=h;
+
+      box.querySelectorAll("td.dormMatrixCell").forEach(function(td){
+        td.addEventListener("click",function(){
+          var dn=td.getAttribute("data-dorm")||"";
+          var rn=td.getAttribute("data-room")||"";
+          var ds=td.getAttribute("data-date")||today();
+
+          if(typeof openDormModalByText==="function"){
+            openDormModalByText(dn,rn,ds);
+          }
+        });
+      });
+    }catch(err){
+      var box=document.getElementById("dormMonthlyTable");
+      if(box)box.innerHTML='<div style="padding:14px;color:#b91c1c;font-weight:bold">寮表の表示エラー：'+v96Esc(err.message||err)+'</div>';
+    }
+  };
+
+  // 寮月間表のみこの形式へ上書き
+  window.renderDormMonthly=function(){
+    return renderDormMonthlyMatrix();
+  };
+
+  var oldShowMonthlySubTab=window.showMonthlySubTab;
+  if(typeof oldShowMonthlySubTab==="function" && !oldShowMonthlySubTab.__v96Matrix){
+    var wrapped=function(type){
+      var r=oldShowMonthlySubTab.apply(this,arguments);
+      if(type==="dorm"){
+        setTimeout(renderDormMonthlyMatrix,0);
+      }
+      return r;
+    };
+    wrapped.__v96Matrix=true;
+    window.showMonthlySubTab=wrapped;
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(function(){
+      if(window.__monthlySubTab==="dorm"){
+        renderDormMonthlyMatrix();
       }
     },700);
   });
