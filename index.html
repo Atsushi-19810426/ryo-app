@@ -544,6 +544,36 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   .dormEventName{font-size:9px}
 }
 
+
+/* Ver91: 月間表を出勤/寮タブで分離 */
+.monthlyTabs{
+  display:flex;
+  gap:8px;
+  margin:10px 0 12px;
+}
+.monthlyTab{
+  flex:1;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  background:#f8fafc;
+  color:#334155;
+  font-weight:900;
+  padding:11px 10px;
+}
+.monthlyTab.active{
+  background:#111827;
+  color:#fff;
+  border-color:#111827;
+}
+.monthlyPanel.hidden{display:none!important}
+.monthlyTopCard{
+  margin-bottom:10px;
+}
+@media(max-width:760px){
+  .monthlyTabs{gap:6px}
+  .monthlyTab{font-size:13px;padding:10px 6px}
+}
+
 </style>
 </head>
 <body>
@@ -560,7 +590,7 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 <button id="tab_home" class="active" onclick="showPage('home')">ホーム</button>
 <button id="tab_staff" onclick="showPage('staff')">出勤</button>
 <button id="tab_dormHub" onclick="showPage('dormHub')">寮</button>
-<button id="tab_monthlyHub" onclick="showPage('monthlyHub')">月間表</button>
+<button id="tab_monthly" onclick="showPage('monthly')">月間表</button>
 <button id="tab_ai" onclick="showPage('ai')">AI書き出し</button>
 </div>
 <section id="home" class="page">
@@ -601,7 +631,7 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   <div class="card">
     <h2>月間表</h2>
     <div class="grid2">
-      <button class="primary" onclick="showPage('monthly')">月間表を見る</button>
+      <button class="primary" onclick="showPage('monthly')">出勤月間表を見る</button>
       
       <button onclick="showPage('home')">ホームへ戻る</button>
     </div>
@@ -656,11 +686,30 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 </section>
 
 <section id="monthly" class="page hidden">
- <div class="card"><h2 id="monthTitle">月間出勤</h2>
-  <div class="row"><div><label>表示開始日</label><input id="monthBase" type="date" onchange="renderMonthly();renderDormMonthly();"></div><div><label>表示日数</label><select id="daysCount" onchange="renderMonthly();renderDormMonthly();"><option>31</option><option>30</option><option>14</option><option>7</option></select></div></div>
-  <p class="note">月間表のセルをタップすると編集できます。</p><p class="note">表示順：次回出勤が近い順 → 期間終了が近い順 → 出勤時間が早い順</p><p class="note">月間表のセルをタップすると編集できます。</p><div class="tableWrap" id="monthlyTable"></div>
+ <div class="card monthlyTopCard">
+  <h2 id="monthTitle">月間表</h2>
+  <div class="monthlyTabs">
+    <button id="monthlyTabStaff" class="monthlyTab active" onclick="showMonthlySubTab('staff')">出勤 月間表</button>
+    <button id="monthlyTabDorm" class="monthlyTab" onclick="showMonthlySubTab('dorm')">寮 月間表</button>
+  </div>
+  <div class="row">
+    <div><label>表示開始日</label><input id="monthBase" type="date" onchange="renderMonthly();renderDormMonthly();"></div>
+    <div><label>表示日数</label><select id="daysCount" onchange="renderMonthly();renderDormMonthly();"><option>31</option><option>30</option><option>14</option><option>7</option></select></div>
+  </div>
  </div>
- <div class="card"><h2>寮 月間表</h2><div class="tableWrap" id="dormMonthlyTable"></div></div>
+
+ <div class="card monthlyPanel" id="monthlyStaffPanel">
+  <h2>出勤 月間表</h2>
+  <p class="note">出勤の月間表です。セルをタップすると編集できます。</p>
+  <p class="note">表示順：次回出勤が近い順 → 同じ出勤日の中で終了が近い順 → 出勤時間が早い順</p>
+  <div class="tableWrap" id="monthlyTable"></div>
+ </div>
+
+ <div class="card monthlyPanel hidden" id="monthlyDormPanel">
+  <h2>寮 月間表</h2>
+  <p class="note">寮の月間表です。入寮は緑、退寮・清掃予定はオレンジ、清掃完了は青で表示します。</p>
+  <div class="tableWrap" id="dormMonthlyTable"></div>
+ </div>
 </section>
 
 <section id="ai" class="page hidden">
