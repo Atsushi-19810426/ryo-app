@@ -3394,5 +3394,137 @@ init();
 })();
 </script>
 
+
+<script>
+(function(){
+  function v80DateList(start,end){
+    var list=[];
+    if(!start)return list;
+    var s=parseDate(start);
+    var e=parseDate(end||start);
+    if(!s || !e)return list;
+    if(e<s)e=s;
+    for(var d=new Date(s); d<=e; d.setDate(d.getDate()+1)){
+      list.push(ymd(d));
+      if(list.length>370)break;
+    }
+    return list;
+  }
+
+  function v80Name(r){
+    return String(r.residentName||"").trim();
+  }
+
+  function v80RecordDates(r){
+    // 入寮日〜退寮日を同一日付判定の対象にする
+    return v80DateList(r.moveIn,r.moveOut||r.moveIn);
+  }
+
+  window.dedupeDormSameNameSameDate=function(){
+    if(!Array.isArray(dorms))return 0;
+
+    var seen={};
+    var result=[];
+    var removed=0;
+
+    // 後に入力されたものを優先するため、後ろから確認
+    for(var i=dorms.length-1;i>=0;i--){
+      var r=dorms[i];
+      var name=v80Name(r);
+
+      // 名前なし・入寮日なしは重複判定しない
+      if(!name || !r.moveIn){
+        result.unshift(r);
+        continue;
+      }
+
+      var dates=v80RecordDates(r);
+      var duplicate=dates.some(function(ds){
+        return !!seen[name+"|"+ds];
+      });
+
+      if(duplicate){
+        removed++;
+        continue;
+      }
+
+      dates.forEach(function(ds){
+        seen[name+"|"+ds]=true;
+      });
+      result.unshift(r);
+    }
+
+    if(removed>0){
+      dorms=result;
+    }
+
+    return removed;
+  };
+
+  window.saveDormsWithDuplicateFix=function(){
+    var removed=dedupeDormSameNameSameDate();
+    save();
+
+    if(typeof renderDorms==="function")renderDorms();
+    if(typeof renderDormMonthly==="function")renderDormMonthly();
+    if(typeof renderStats==="function")renderStats();
+    if(typeof generateText==="function" && document.getElementById("output") && document.getElementById("output").value){
+      generateText();
+    }
+
+    if(removed>0){
+      console.log("同じ名前・同じ日付の古い寮データを削除:",removed);
+    }
+  };
+
+  // 通常保存の前にも寮重複を整理
+  var oldSave=window.save;
+  if(typeof oldSave==="function" && !oldSave.__v80DormDuplicateFix){
+    var wrappedSave=function(){
+      if(Array.isArray(window.dorms || dorms)){
+        try{dedupeDormSameNameSameDate();}catch(e){}
+      }
+      return oldSave.apply(this,arguments);
+    };
+    wrappedSave.__v80DormDuplicateFix=true;
+    window.save=wrappedSave;
+  }
+
+  // 寮ポップアップ保存後にも必ず整理
+  ["saveDormEditPopup","saveDormPopup","saveDormModal"].forEach(function(fn){
+    var old=window[fn];
+    if(typeof old==="function" && !old.__v80DormDuplicateFix){
+      var wrapped=function(){
+        var r=old.apply(this,arguments);
+        try{
+          var removed=dedupeDormSameNameSameDate();
+          if(removed>0){
+            save();
+            if(typeof renderDorms==="function")renderDorms();
+            if(typeof renderDormMonthly==="function")renderDormMonthly();
+          }
+        }catch(e){}
+        return r;
+      };
+      wrapped.__v80DormDuplicateFix=true;
+      window[fn]=wrapped;
+    }
+  });
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(function(){
+      try{
+        var removed=dedupeDormSameNameSameDate();
+        if(removed>0){
+          save();
+          if(typeof renderDorms==="function")renderDorms();
+          if(typeof renderDormMonthly==="function")renderDormMonthly();
+        }
+      }catch(e){}
+    },500);
+  });
+})();
+</script>
+
 </body>
 </html>
