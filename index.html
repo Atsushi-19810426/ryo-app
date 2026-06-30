@@ -4339,5 +4339,193 @@ init();
 })();
 </script>
 
+
+<script>
+(function(){
+  function v85AddDays(ds,add){
+    var d=parseDate(ds);
+    d.setDate(d.getDate()+add);
+    return ymd(d);
+  }
+
+  function v85SameName(a,b){
+    return String(a.residentName||"").trim() &&
+      String(a.residentName||"").trim()===String(b.residentName||"").trim();
+  }
+
+  function v85SameRoom(a,b){
+    return String(a.dormName||"")===String(b.dormName||"") &&
+      String(a.roomNo||"")===String(b.roomNo||"");
+  }
+
+  function v85CanMerge(a,b){
+    if(!v85SameName(a,b) || !v85SameRoom(a,b))return false;
+    if(!a.moveIn || !b.moveIn)return false;
+    var aEnd=a.moveOut||a.moveIn;
+    return b.moveIn<=v85AddDays(aEnd,1);
+  }
+
+  function v85ClearBridgeClean(last,next,oldEnd){
+    var bridgeDates=[
+      oldEnd,
+      v85AddDays(oldEnd,1),
+      next.moveIn,
+      v85AddDays(next.moveIn,-1)
+    ];
+
+    // つなぎ目の清掃は必ず消す
+    if(last.cleanDate && bridgeDates.indexOf(last.cleanDate)>=0){
+      last.cleanDate="";
+      last.cleanStatus="未清掃";
+      last.cleanDoneDate="";
+    }
+
+    // 次データ側の入寮日に清掃が入っている場合も消す
+    if(next.cleanDate && bridgeDates.indexOf(next.cleanDate)>=0){
+      next.cleanDate="";
+      next.cleanStatus="未清掃";
+      next.cleanDoneDate="";
+    }
+  }
+
+  window.mergeDormContinuityBySameRoom=function(){
+    if(!Array.isArray(dorms))return 0;
+
+    var list=dorms.slice().sort(function(a,b){
+      var na=String(a.residentName||"");
+      var nb=String(b.residentName||"");
+      if(na!==nb)return na.localeCompare(nb,"ja");
+      var ra=String(a.dormName||"")+"-"+String(a.roomNo||"");
+      var rb=String(b.dormName||"")+"-"+String(b.roomNo||"");
+      if(ra!==rb)return ra.localeCompare(rb,"ja");
+      return String(a.moveIn||"").localeCompare(String(b.moveIn||""));
+    });
+
+    var merged=[];
+    var removed=0;
+
+    list.forEach(function(r){
+      var last=merged[merged.length-1];
+
+      if(last && v85CanMerge(last,r)){
+        var oldLastEnd=last.moveOut||last.moveIn;
+        var rEnd=r.moveOut||r.moveIn;
+
+        v85ClearBridgeClean(last,r,oldLastEnd);
+
+        if(!last.moveOut || (rEnd && rEnd>oldLastEnd)){
+          last.moveOut=rEnd;
+        }
+
+        // 最終退寮後の清掃だけ引き継ぐ
+        if(r.cleanDate && last.moveOut && r.cleanDate>last.moveOut){
+          last.cleanDate=r.cleanDate;
+          last.cleanStatus=r.cleanStatus||"未清掃";
+          last.cleanDoneDate=r.cleanDoneDate||"";
+        }
+
+        if(r.note && String(last.note||"").indexOf(r.note)<0){
+          last.note=(last.note?last.note+" / ":"")+r.note;
+        }
+
+        removed++;
+      }else{
+        merged.push(Object.assign({},r));
+      }
+    });
+
+    if(removed>0)dorms=merged;
+    return removed;
+  };
+
+  window.removeBridgeCleanForResident=function(name){
+    name=String(name||"").trim();
+    if(!name)return 0;
+
+    var target=(dorms||[]).filter(function(r){
+      return String(r.residentName||"").trim()===name;
+    }).sort(function(a,b){
+      return String(a.moveIn||"").localeCompare(String(b.moveIn||""));
+    });
+
+    var changed=0;
+
+    for(var i=0;i<target.length-1;i++){
+      var a=target[i], b=target[i+1];
+      if(!v85SameRoom(a,b))continue;
+      var aEnd=a.moveOut||a.moveIn;
+      if(b.moveIn && b.moveIn<=v85AddDays(aEnd,1)){
+        var bridge=[aEnd,v85AddDays(aEnd,1),b.moveIn,v85AddDays(b.moveIn,-1)];
+        [a,b].forEach(function(r){
+          if(r.cleanDate && bridge.indexOf(r.cleanDate)>=0){
+            r.cleanDate="";
+            r.cleanStatus="未清掃";
+            r.cleanDoneDate="";
+            changed++;
+          }
+        });
+      }
+    }
+
+    return changed;
+  };
+
+  window.cancelDormMoveAndContinue=function(){
+    var removed=mergeDormContinuityBySameRoom();
+
+    // 念のため全CASTのつなぎ目清掃も消す
+    var names=[...new Set((dorms||[]).map(function(r){return String(r.residentName||"").trim();}).filter(Boolean))];
+    var cleaned=0;
+    names.forEach(function(n){cleaned+=removeBridgeCleanForResident(n);});
+
+    if(removed<=0 && cleaned<=0){
+      alert("つなげられる寮移動データ、または削除対象の途中清掃はありませんでした");
+      return false;
+    }
+
+    save();
+
+    var moveBox=document.getElementById("dormMoveOnlyPopup");
+    if(moveBox)moveBox.style.display="none";
+    if(typeof closeDormEditPopup==="function")closeDormEditPopup();
+
+    if(typeof renderDorm==="function")renderDorm();
+    if(typeof renderDorms==="function")renderDorms();
+    if(typeof renderDormMonthly==="function")renderDormMonthly();
+    if(typeof renderVacancy==="function")renderVacancy();
+    if(typeof renderStats==="function")renderStats();
+    if(typeof generateText==="function" && document.getElementById("output") && document.getElementById("output").value){generateText();}
+
+    alert("移動をつなげて、途中の清掃予定を削除しました");
+    return false;
+  };
+
+  // 保存・移動後にも自動で結合と途中清掃削除を実行
+  var oldSaveDormMoveOnly=window.saveDormMoveOnly;
+  if(typeof oldSaveDormMoveOnly==="function" && !oldSaveDormMoveOnly.__v85MergeClean){
+    var wrapped=function(){
+      var r=oldSaveDormMoveOnly.apply(this,arguments);
+      try{
+        var removed=mergeDormContinuityBySameRoom();
+        var names=[...new Set((dorms||[]).map(function(x){return String(x.residentName||"").trim();}).filter(Boolean))];
+        var cleaned=0;
+        names.forEach(function(n){cleaned+=removeBridgeCleanForResident(n);});
+        if(removed>0 || cleaned>0){
+          save();
+          if(typeof renderDorm==="function")renderDorm();
+          if(typeof renderDorms==="function")renderDorms();
+          if(typeof renderDormMonthly==="function")renderDormMonthly();
+          if(typeof renderVacancy==="function")renderVacancy();
+          if(typeof renderStats==="function")renderStats();
+        }
+      }catch(e){}
+      return r;
+    };
+    wrapped.__v85MergeClean=true;
+    window.saveDormMoveOnly=wrapped;
+  }
+})();
+</script>
+
 </body>
 </html>
