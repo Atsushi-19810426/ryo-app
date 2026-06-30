@@ -3564,5 +3564,254 @@ init();
   </div>
 </div>
 
+
+<script>
+(function(){
+  function v82Val(id){
+    var el=document.getElementById(id);
+    return el ? (el.value||"").trim() : "";
+  }
+
+  function v82Text(id){
+    var el=document.getElementById(id);
+    return el ? (el.textContent||"").trim() : "";
+  }
+
+  function v82AddDays(ds,add){
+    var d=parseDate(ds);
+    d.setDate(d.getDate()+add);
+    return ymd(d);
+  }
+
+  function v82DormNames(){
+    return [...new Set((dormMaster||[]).map(function(m){return m.dormName;}))].filter(Boolean).sort();
+  }
+
+  function v82RoomsOf(dn){
+    return (dormMaster||[]).filter(function(m){return m.dormName===dn;})
+      .map(function(m){return m.roomNo;})
+      .filter(Boolean)
+      .sort(function(a,b){return String(a).localeCompare(String(b),'ja');});
+  }
+
+  function v82DateInRecord(r,ds){
+    if(!r || !ds || !r.moveIn)return false;
+    var end=r.moveOut||r.moveIn;
+    return ds>=r.moveIn && ds<=end;
+  }
+
+  function v82FindRecordFromPopup(){
+    // 1) 既存IDが取れている場合
+    var ids=[window.__dormMoveOnlyRecordId,window.__dormEditRecordId,window.__dormPopupRecordId,window.__dormModalRecordId].filter(Boolean);
+    for(var i=0;i<ids.length;i++){
+      var byId=(dorms||[]).find(function(r){return String(r.id)===String(ids[i]);});
+      if(byId)return byId;
+    }
+
+    // 2) ポップアップ内の値から再検索
+    var dn=v82Val("dormEditDorm") || v82Val("dormEditDormName") || v82Val("dormName") || v82Val("dormMoveOnlyDorm");
+    var rn=v82Val("dormEditRoom") || v82Val("dormEditRoomNo") || v82Val("roomNo") || v82Val("dormMoveOnlyRoom");
+    var name=v82Val("dormEditResident") || v82Val("dormEditResidentName") || v82Val("residentName") || v82Val("dormResidentName");
+    var ds=v82Val("dormEditDate") || v82Val("dormMoveOnlyDate") || today();
+
+    // title/current の文字から名前推定
+    if(!name){
+      var cur=v82Text("dormMoveOnlyCurrent") || v82Text("dormEditTitle") || v82Text("dormEditPopupTitle");
+      // "名前 / 現在..." 形式などを想定
+      if(cur.indexOf("/")>=0)name=cur.split("/")[0].replace("寮編集","").replace("寮のみ移動","").trim();
+    }
+
+    var list=(dorms||[]).slice();
+
+    // まず名前+日付を優先
+    if(name){
+      var byNameDate=list.find(function(r){
+        return String(r.residentName||"").trim()===String(name).trim() && v82DateInRecord(r,ds);
+      });
+      if(byNameDate)return byNameDate;
+    }
+
+    // 次に部屋+日付
+    if(dn && rn){
+      var byRoomDate=list.find(function(r){
+        return String(r.dormName||"")===String(dn) && String(r.roomNo||"")===String(rn) && v82DateInRecord(r,ds);
+      });
+      if(byRoomDate)return byRoomDate;
+    }
+
+    // 名前だけ
+    if(name){
+      var byName=list.find(function(r){
+        return String(r.residentName||"").trim()===String(name).trim();
+      });
+      if(byName)return byName;
+    }
+
+    // 部屋だけ
+    if(dn && rn){
+      var byRoom=list.find(function(r){
+        return String(r.dormName||"")===String(dn) && String(r.roomNo||"")===String(rn);
+      });
+      if(byRoom)return byRoom;
+    }
+
+    return null;
+  }
+
+  window.updateDormMoveOnlyRooms=function(){
+    var dnEl=document.getElementById("dormMoveOnlyDorm");
+    var rnEl=document.getElementById("dormMoveOnlyRoom");
+    if(!dnEl||!rnEl)return;
+    var rooms=v82RoomsOf(dnEl.value);
+    rnEl.innerHTML="";
+    rooms.forEach(function(r){
+      var o=document.createElement("option");
+      o.value=r;
+      o.textContent=r+"号室";
+      rnEl.appendChild(o);
+    });
+  };
+
+  function v82FillMoveSelect(rec){
+    var dnEl=document.getElementById("dormMoveOnlyDorm");
+    if(!dnEl)return;
+    var names=v82DormNames();
+    dnEl.innerHTML="";
+    names.forEach(function(n){
+      var o=document.createElement("option");
+      o.value=n;
+      o.textContent=n;
+      dnEl.appendChild(o);
+    });
+
+    var firstOther=names.find(function(n){return n!==rec.dormName;});
+    dnEl.value=firstOther||rec.dormName||names[0]||"";
+    updateDormMoveOnlyRooms();
+
+    var rnEl=document.getElementById("dormMoveOnlyRoom");
+    if(rnEl && dnEl.value===rec.dormName && rec.roomNo){
+      var otherRoom=[...rnEl.options].map(function(o){return o.value;}).find(function(r){return r!==rec.roomNo;});
+      if(otherRoom)rnEl.value=otherRoom;
+    }
+  }
+
+  window.openDormMoveOnlyPopup=function(){
+    var rec=v82FindRecordFromPopup();
+    if(!rec){
+      alert("移動元の寮データが見つかりません。対象の入寮データを開いてから操作してください。");
+      return false;
+    }
+
+    window.__dormMoveOnlyRecordId=rec.id;
+
+    var baseDate=v82Val("dormEditDate") || rec.moveIn || today();
+    if(baseDate<rec.moveIn)baseDate=rec.moveIn;
+    if(rec.moveOut && baseDate>rec.moveOut)baseDate=rec.moveOut;
+
+    var dateEl=document.getElementById("dormMoveOnlyDate");
+    if(dateEl)dateEl.value=baseDate;
+
+    var cur=document.getElementById("dormMoveOnlyCurrent");
+    if(cur){
+      cur.textContent=(rec.residentName||"-")+" / 現在："+(rec.dormName||"-")+"-"+(rec.roomNo||"-")+" / 入:"+ (rec.moveIn||"-")+" / 退:"+(rec.moveOut||"-");
+    }
+
+    var title=document.getElementById("dormMoveOnlyTitle");
+    if(title)title.textContent="寮のみ移動 / "+(rec.residentName||"");
+
+    v82FillMoveSelect(rec);
+
+    var box=document.getElementById("dormMoveOnlyPopup");
+    if(box)box.style.display="flex";
+    return false;
+  };
+
+  window.closeDormMoveOnlyPopup=function(){
+    var box=document.getElementById("dormMoveOnlyPopup");
+    if(box)box.style.display="none";
+  };
+
+  window.saveDormMoveOnly=function(){
+    var rec=(dorms||[]).find(function(r){return String(r.id)===String(window.__dormMoveOnlyRecordId);}) || v82FindRecordFromPopup();
+
+    if(!rec){
+      alert("移動元の寮データが見つかりません");
+      return false;
+    }
+
+    var moveDate=v82Val("dormMoveOnlyDate");
+    var newDorm=v82Val("dormMoveOnlyDorm");
+    var newRoom=v82Val("dormMoveOnlyRoom");
+
+    if(!moveDate){alert("移動日を入力してください");return false;}
+    if(!newDorm||!newRoom){alert("移動先の寮・部屋を選択してください");return false;}
+
+    var oldMoveIn=rec.moveIn||moveDate;
+    var oldMoveOut=rec.moveOut||moveDate;
+    var oldCleanDate=rec.cleanDate||"";
+    var oldCleanStatus=rec.cleanStatus||"未清掃";
+    var oldCleanDoneDate=rec.cleanDoneDate||"";
+    var oldNote=rec.note||"";
+    var oldDorm=rec.dormName||"";
+    var oldRoom=rec.roomNo||"";
+
+    // 移動日が入寮日以前なら単純に寮・部屋だけ変更
+    if(moveDate<=oldMoveIn){
+      rec.dormName=newDorm;
+      rec.roomNo=newRoom;
+      rec.moveIn=moveDate;
+      rec.status=rec.residentName?"入寮中":"空室";
+      rec.note=(oldNote?oldNote+" / ":"")+"寮変更："+newDorm+"-"+newRoom;
+    }else{
+      var beforeMove=v82AddDays(moveDate,-1);
+
+      // 元データは移動日前日まで
+      rec.moveOut=beforeMove;
+      rec.cleanDate=moveDate;
+      if(rec.cleanStatus!=="清掃済み" && rec.cleanStatus!=="済"){
+        rec.cleanStatus="清掃予定";
+        rec.cleanDoneDate="";
+      }
+      rec.note=(oldNote?oldNote+" / ":"")+"寮移動："+moveDate+"から"+newDorm+"-"+newRoom;
+
+      // 移動先データ
+      var newRec={
+        id:Date.now()+Math.floor(Math.random()*10000),
+        dormName:newDorm,
+        roomNo:newRoom,
+        residentName:rec.residentName||"",
+        status:rec.residentName?"入寮中":"空室",
+        moveIn:moveDate,
+        moveOut:(oldMoveOut && oldMoveOut>=moveDate)?oldMoveOut:"",
+        cleanDate:(oldCleanDate && oldCleanDate>=moveDate)?oldCleanDate:"",
+        cleanStatus:(oldCleanDate && oldCleanDate>=moveDate)?oldCleanStatus:"未清掃",
+        cleanDoneDate:(oldCleanDate && oldCleanDate>=moveDate)?oldCleanDoneDate:"",
+        note:"寮移動："+oldDorm+"-"+oldRoom+"から移動"
+      };
+      dorms.push(newRec);
+    }
+
+    // 重複整理。ただし移動で作った前後データが消えないよう、同日重複だけ整理する既存関数に任せる
+    if(typeof dedupeDormSameNameSameDate==="function"){
+      try{dedupeDormSameNameSameDate();}catch(e){}
+    }
+
+    save();
+
+    closeDormMoveOnlyPopup();
+    if(typeof closeDormEditPopup==="function")closeDormEditPopup();
+
+    if(typeof renderDorm==="function")renderDorm();
+    if(typeof renderDorms==="function")renderDorms();
+    if(typeof renderDormMonthly==="function")renderDormMonthly();
+    if(typeof renderVacancy==="function")renderVacancy();
+    if(typeof renderStats==="function")renderStats();
+    if(typeof generateText==="function" && document.getElementById("output") && document.getElementById("output").value){generateText();}
+
+    return false;
+  };
+})();
+</script>
+
 </body>
 </html>
