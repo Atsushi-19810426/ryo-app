@@ -3506,6 +3506,78 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   min-height:32px!important;
 }
 
+
+/* Ver116: 左右スライドボタン → 固定ヘッダー の順番を強制固定 */
+#monthlyStaffPanel .v112StickyHead,
+#monthlyDormPanel .v112StickyHead,
+#monthlyStaffPanel .v113StickyHead,
+#monthlyDormPanel .v113StickyHead,
+#monthlyStaffPanel .v114StickyHead,
+#monthlyDormPanel .v114StickyHead,
+#monthlyStaffPanel .v115StickyHead,
+#monthlyDormPanel .v115StickyHead,
+#monthlyStaffPanel .v116StickyHead,
+#monthlyDormPanel .v116StickyHead{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+}
+
+/* 表示順を固定：タイトル → 説明 → 左右スライド → 月日/曜日/寮名/部屋番 */
+#monthlyStaffPanel .v116StickyHead h2,
+#monthlyDormPanel .v116StickyHead h2,
+#monthlyStaffPanel .v114StickyHead h2,
+#monthlyDormPanel .v114StickyHead h2,
+#monthlyStaffPanel .v112StickyHead h2,
+#monthlyDormPanel .v112StickyHead h2{
+  order:1!important;
+}
+
+#monthlyStaffPanel .v116StickyHead .note,
+#monthlyDormPanel .v116StickyHead .note,
+#monthlyStaffPanel .v114StickyHead .note,
+#monthlyDormPanel .v114StickyHead .note,
+#monthlyStaffPanel .v112StickyHead .note,
+#monthlyDormPanel .v112StickyHead .note{
+  order:2!important;
+}
+
+#monthlyStaffPanel .slideGuide,
+#monthlyDormPanel .slideGuide{
+  order:3!important;
+  position:relative!important;
+  z-index:80!important;
+  margin:6px 0 8px!important;
+}
+
+#monthlyHeaderMirror,
+#dormHeaderMirror,
+.v112HeaderMirror,
+.v113HeaderMirror,
+.v114HeaderMirror,
+.v115HeaderMirror,
+.v116HeaderMirror{
+  order:4!important;
+  position:relative!important;
+  z-index:60!important;
+  margin-top:0!important;
+  clear:both!important;
+}
+
+/* 固定ヘッダーが左右スライドボタンの下に見える余白 */
+#monthlyHeaderMirror,
+#dormHeaderMirror{
+  margin-top:2px!important;
+}
+
+/* 古い処理で位置が戻っても、ボタンより上に出ないようにする */
+#monthlyStaffPanel .v116StickyHead > .v114HeaderMirror,
+#monthlyDormPanel .v116StickyHead > .v114HeaderMirror,
+#monthlyStaffPanel .v116StickyHead > .v112HeaderMirror,
+#monthlyDormPanel .v116StickyHead > .v112HeaderMirror{
+  order:4!important;
+}
+
 </style>
 </head>
 <body>
@@ -12660,6 +12732,145 @@ init();
 
   window.addEventListener("resize",function(){
     setTimeout(forceHeaderBelowButtons115,150);
+  });
+})();
+</script>
+
+
+<script id="ver116-header-order-lock">
+(function(){
+  function q(s,r){return (r||document).querySelector(s)}
+  function qa(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+
+  function enforceHeaderOrder116(){
+    [
+      {panel:"monthlyStaffPanel", guide:"monthlySlideGuide", mirror:"monthlyHeaderMirror"},
+      {panel:"monthlyDormPanel", guide:"dormSlideGuide", mirror:"dormHeaderMirror"}
+    ].forEach(function(x){
+      var panel=document.getElementById(x.panel);
+      if(!panel)return;
+
+      var head=q(".v116StickyHead",panel)||q(".v115StickyHead",panel)||q(".v114StickyHead",panel)||q(".v113StickyHead",panel)||q(".v112StickyHead",panel);
+      if(!head){
+        head=document.createElement("div");
+        panel.insertBefore(head,panel.firstChild);
+      }
+
+      head.classList.add("v116StickyHead");
+      head.style.display="flex";
+      head.style.flexDirection="column";
+      head.style.alignItems="stretch";
+
+      var h2=q("h2",panel);
+      var note=q(".note",panel);
+      var guide=document.getElementById(x.guide);
+      var mirror=document.getElementById(x.mirror);
+
+      // 必ずこの順番に並べ直す
+      [h2,note,guide,mirror].forEach(function(el){
+        if(el && el.parentElement!==head){
+          head.appendChild(el);
+        }
+      });
+
+      if(h2)h2.style.order="1";
+      if(note)note.style.order="2";
+
+      if(guide){
+        guide.style.order="3";
+        guide.style.position="relative";
+        guide.style.zIndex="80";
+        guide.style.margin="6px 0 8px";
+      }
+
+      if(mirror){
+        mirror.classList.add("v116HeaderMirror");
+        mirror.style.order="4";
+        mirror.style.position="relative";
+        mirror.style.zIndex="60";
+        mirror.style.marginTop="2px";
+        mirror.style.clear="both";
+      }
+    });
+  }
+
+  window.enforceHeaderOrder116=enforceHeaderOrder116;
+
+  // Ver114本体の固定ヘッダー生成後に、順番を必ず補正
+  var oldApply114=window.applyTrueFixedHeaderLayer114;
+  if(typeof oldApply114==="function" && !oldApply114.__v116OrderLock){
+    var wrap114=function(){
+      var r=oldApply114.apply(this,arguments);
+      setTimeout(enforceHeaderOrder116,0);
+      setTimeout(enforceHeaderOrder116,120);
+      setTimeout(enforceHeaderOrder116,400);
+      return r;
+    };
+    wrap114.__v116OrderLock=true;
+    window.applyTrueFixedHeaderLayer114=wrap114;
+  }
+
+  var oldApply115=window.forceHeaderBelowButtons115;
+  if(typeof oldApply115==="function" && !oldApply115.__v116OrderLock){
+    var wrap115=function(){
+      var r=oldApply115.apply(this,arguments);
+      setTimeout(enforceHeaderOrder116,0);
+      setTimeout(enforceHeaderOrder116,120);
+      return r;
+    };
+    wrap115.__v116OrderLock=true;
+    window.forceHeaderBelowButtons115=wrap115;
+  }
+
+  ["renderMonthly","renderDormMonthly","renderDormMonthlyMatrix"].forEach(function(name){
+    var old=window[name];
+    if(typeof old==="function" && !old.__v116OrderLock){
+      var w=function(){
+        var r=old.apply(this,arguments);
+        setTimeout(enforceHeaderOrder116,0);
+        setTimeout(enforceHeaderOrder116,250);
+        setTimeout(enforceHeaderOrder116,800);
+        return r;
+      };
+      w.__v116OrderLock=true;
+      window[name]=w;
+    }
+  });
+
+  var oldTab=window.showMonthlySubTab;
+  if(typeof oldTab==="function" && !oldTab.__v116OrderLock){
+    var tw=function(){
+      var r=oldTab.apply(this,arguments);
+      setTimeout(enforceHeaderOrder116,50);
+      setTimeout(enforceHeaderOrder116,300);
+      setTimeout(enforceHeaderOrder116,900);
+      return r;
+    };
+    tw.__v116OrderLock=true;
+    window.showMonthlySubTab=tw;
+  }
+
+  // 古いVer112〜115の遅延処理で順番が戻っても、監視して戻す
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(enforceHeaderOrder116,500);
+    setTimeout(enforceHeaderOrder116,1200);
+    setTimeout(enforceHeaderOrder116,2400);
+    setInterval(enforceHeaderOrder116,1500);
+
+    var monthly=document.getElementById("monthly");
+    if(monthly && window.MutationObserver){
+      var obs=new MutationObserver(function(){enforceHeaderOrder116();});
+      obs.observe(monthly,{childList:true,subtree:true});
+    }
+  });
+
+  window.addEventListener("load",function(){
+    setTimeout(enforceHeaderOrder116,500);
+    setTimeout(enforceHeaderOrder116,1600);
+  });
+
+  window.addEventListener("resize",function(){
+    setTimeout(enforceHeaderOrder116,150);
   });
 })();
 </script>
