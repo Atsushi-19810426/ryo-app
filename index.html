@@ -1495,6 +1495,126 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   }
 }
 
+
+/* Ver100: 寮表を横表仕様のまま縦表示・入寮期間を緑で全面反映 */
+#monthlyDormPanel #dormMonthlyTable{
+  max-height:calc(100vh - 238px)!important;
+  overflow:auto!important;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+}
+
+/* 寮名と部屋番号の間の空きを詰める */
+.dormMatrixTable thead tr:first-child th{
+  height:26px!important;
+  min-height:26px!important;
+  padding:2px 3px!important;
+  line-height:1.0!important;
+  vertical-align:middle!important;
+}
+.dormMatrixTable thead tr:nth-child(2) th{
+  top:26px!important;
+  height:22px!important;
+  min-height:22px!important;
+  padding:1px 2px!important;
+  line-height:1.0!important;
+  vertical-align:middle!important;
+}
+.dormMatrixDateHead{
+  height:48px!important;
+  min-height:48px!important;
+  padding:2px!important;
+  line-height:1.0!important;
+}
+
+/* 寮名フォントを小さくして全体を見やすく */
+.dormMatrixGroup{
+  font-size:9px!important;
+  line-height:1.0!important;
+}
+.dormMatrixGroup small{
+  font-size:7px!important;
+  line-height:1.0!important;
+  margin-top:0!important;
+}
+.dormMatrixRoom{
+  font-size:9px!important;
+}
+
+/* 入寮期間中は横表と同じく緑 */
+.dormMatrixCell.hasStay,
+.dormMatrixCell.hasIn{
+  background:#dcfce7!important;
+  color:#166534!important;
+  font-weight:900!important;
+}
+.dormMatrixCell.hasOrange{
+  background:#ffedd5!important;
+  color:#9a3412!important;
+  font-weight:900!important;
+}
+.dormMatrixCell.hasDone{
+  background:#dbeafe!important;
+  color:#1d4ed8!important;
+  font-weight:900!important;
+}
+.dormMatrixCell.multiEvent{
+  background:linear-gradient(90deg,#ffedd5 0%,#ffedd5 34%,#dbeafe 34%,#dbeafe 67%,#dcfce7 67%,#dcfce7 100%)!important;
+  color:#111827!important;
+  font-weight:900!important;
+}
+
+/* セル内の名前を見えるように */
+.dmName{
+  display:block!important;
+  max-width:42px!important;
+  margin:0 auto!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  font-size:8px!important;
+  line-height:1.0!important;
+  font-weight:900!important;
+}
+.dmTags{
+  margin:0!important;
+  gap:1px!important;
+}
+.dmTag{
+  font-size:7px!important;
+  padding:1px 2px!important;
+  line-height:1!important;
+}
+
+@media(max-width:760px){
+  #monthlyDormPanel #dormMonthlyTable{
+    max-height:calc(100vh - 218px)!important;
+  }
+  .dormMatrixTable thead tr:first-child th{
+    height:24px!important;
+    min-height:24px!important;
+  }
+  .dormMatrixTable thead tr:nth-child(2) th{
+    top:24px!important;
+    height:20px!important;
+    min-height:20px!important;
+  }
+  .dormMatrixDateHead{
+    height:44px!important;
+    min-height:44px!important;
+  }
+  .dormMatrixGroup{
+    font-size:8px!important;
+  }
+  .dormMatrixGroup small{
+    font-size:6px!important;
+  }
+  .dmName{
+    max-width:38px!important;
+    font-size:7px!important;
+  }
+}
+
 </style>
 </head>
 <body>
