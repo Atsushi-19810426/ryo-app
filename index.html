@@ -2798,6 +2798,222 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   }
 }
 
+
+/* Ver112: 全体スクロール時も月間ヘッダーを固定・源氏名セルはみ出し修正 */
+:root{
+  --v112-menu-top:0px;
+  --v112-sub-head-top:148px;
+}
+
+/* 月間全体はページスクロール、表は横スクロール中心にする */
+#monthly,
+#monthly .card,
+#monthlyStaffPanel,
+#monthlyDormPanel{
+  overflow:visible!important;
+}
+#monthlyTable,
+#dormMonthlyTable{
+  position:relative!important;
+  max-height:none!important;
+  overflow-x:auto!important;
+  overflow-y:visible!important;
+  -webkit-overflow-scrolling:touch!important;
+  touch-action:pan-x pan-y!important;
+  overscroll-behavior-x:contain!important;
+}
+
+/* 上の操作エリア固定 */
+#monthly .monthlyTopCard{
+  position:sticky!important;
+  top:var(--v112-menu-top)!important;
+  z-index:7000!important;
+  background:rgba(255,255,255,.985)!important;
+  backdrop-filter:blur(10px)!important;
+  box-shadow:0 8px 22px rgba(15,23,42,.12)!important;
+}
+
+/* 出勤/寮の見出し・説明・スライド・固定ヘッダー */
+#monthlyStaffPanel .v112StickyHead,
+#monthlyDormPanel .v112StickyHead{
+  position:sticky!important;
+  top:var(--v112-sub-head-top)!important;
+  z-index:6500!important;
+  background:rgba(255,255,255,.985)!important;
+  backdrop-filter:blur(10px)!important;
+  padding:0 0 8px!important;
+  margin:0 0 6px!important;
+  border-radius:0 0 14px 14px!important;
+  box-shadow:0 8px 18px rgba(15,23,42,.10)!important;
+}
+#monthlyStaffPanel .v112StickyHead h2,
+#monthlyDormPanel .v112StickyHead h2{
+  margin:0 0 3px!important;
+  font-size:18px!important;
+  line-height:1.15!important;
+}
+#monthlyStaffPanel .v112StickyHead .note,
+#monthlyDormPanel .v112StickyHead .note{
+  margin:0 0 7px!important;
+  font-size:11px!important;
+  line-height:1.25!important;
+}
+#monthlyStaffPanel .v112StickyHead .slideGuide,
+#monthlyDormPanel .v112StickyHead .slideGuide{
+  position:relative!important;
+  top:auto!important;
+  margin:5px 0 6px!important;
+}
+
+/* 固定用に複製したヘッダー */
+.v112HeaderMirror{
+  width:100%!important;
+  overflow:hidden!important;
+  border:1px solid #e5e7eb!important;
+  border-radius:12px 12px 0 0!important;
+  background:#fff!important;
+  box-shadow:0 4px 12px rgba(15,23,42,.08)!important;
+}
+.v112HeaderMirror table{
+  border-collapse:separate!important;
+  border-spacing:0!important;
+  width:max-content!important;
+  min-width:100%!important;
+  margin:0!important;
+}
+.v112HeaderMirror th{
+  height:16px!important;
+  min-height:16px!important;
+  max-height:16px!important;
+  padding:0 3px!important;
+  line-height:16px!important;
+  background:#fff!important;
+  box-sizing:border-box!important;
+  white-space:nowrap!important;
+  vertical-align:middle!important;
+}
+.v112HeaderMirror .name,
+.v112HeaderMirror .dormMatrixDateHead{
+  position:sticky!important;
+  left:0!important;
+  z-index:50!important;
+  height:32px!important;
+  min-height:32px!important;
+  max-height:32px!important;
+  line-height:32px!important;
+}
+.v112HeaderMirror .dormMatrixDateHead{
+  background:#111827!important;
+  color:#fff!important;
+}
+.v112HeaderMirror .dormMatrixGroup{
+  font-size:7px!important;
+  line-height:16px!important;
+}
+.v112HeaderMirror .dormMatrixGroup small{
+  display:none!important;
+}
+.v112HeaderMirror .dormMatrixRoom{
+  font-size:8px!important;
+  line-height:16px!important;
+}
+
+/* 元の表ヘッダーは複製ヘッダーがあるので非表示にして二重表示を防ぐ */
+#monthlyTable table.v112HideOriginalThead > thead,
+#dormMonthlyTable table.v112HideOriginalThead > thead{
+  display:none!important;
+}
+
+/* 表内の左列固定 */
+#monthlyTable tbody .name,
+#dormMonthlyTable tbody .dormMatrixDate{
+  position:sticky!important;
+  left:0!important;
+  background:#fff!important;
+  z-index:160!important;
+  box-shadow:2px 0 0 rgba(15,23,42,.10)!important;
+}
+
+/* 3番：源氏名＋出勤場所がセルから出ないように左列を広げて、バッジは下に逃がす */
+#monthlyTable .name,
+.v112HeaderMirror .name{
+  min-width:166px!important;
+  width:166px!important;
+  max-width:166px!important;
+  box-sizing:border-box!important;
+}
+#monthlyTable tbody .name{
+  padding:5px 7px!important;
+  line-height:1.15!important;
+  white-space:normal!important;
+  overflow:hidden!important;
+  word-break:keep-all!important;
+  font-size:13px!important;
+}
+#monthlyTable tbody .name .badge,
+#monthlyTable tbody .name .placeBadge,
+#monthlyTable tbody .name .workPlaceBadge,
+#monthlyTable tbody .name .newBadge,
+#monthlyTable tbody .name [class*="badge" i],
+#monthlyTable tbody .name [class*="place" i]{
+  max-width:100%!important;
+  font-size:9px!important;
+  line-height:1.1!important;
+  padding:1px 5px!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  vertical-align:middle!important;
+}
+
+/* スライドボタン */
+.slideGuide{
+  pointer-events:auto!important;
+  user-select:none!important;
+}
+.slideGuide .slideText{
+  pointer-events:none!important;
+}
+.slideBtn{
+  pointer-events:auto!important;
+  border:0!important;
+  border-radius:999px!important;
+  padding:5px 12px!important;
+  margin:0 6px!important;
+  background:#fff!important;
+  color:#111827!important;
+  font-weight:900!important;
+  font-size:14px!important;
+  line-height:1!important;
+  box-shadow:0 2px 8px rgba(0,0,0,.18)!important;
+}
+.slideBtn:active{
+  transform:scale(.96);
+  background:#e5e7eb!important;
+}
+
+@media(max-width:760px){
+  #monthlyStaffPanel .v112StickyHead h2,
+  #monthlyDormPanel .v112StickyHead h2{
+    font-size:16px!important;
+  }
+  #monthlyStaffPanel .v112StickyHead .note,
+  #monthlyDormPanel .v112StickyHead .note{
+    font-size:10px!important;
+  }
+  #monthlyTable .name,
+  .v112HeaderMirror .name{
+    min-width:150px!important;
+    width:150px!important;
+    max-width:150px!important;
+  }
+  #monthlyTable tbody .name{
+    padding:5px 6px!important;
+    font-size:12px!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -11185,6 +11401,192 @@ init();
   window.addEventListener("load",function(){setTimeout(apply,500);setTimeout(apply,1500)});
   window.addEventListener("resize",function(){setTimeout(apply,100)});
   document.addEventListener("scroll",function(){apply()},true);
+})();
+</script>
+
+
+<script id="ver112-fixed-monthly-headers">
+(function(){
+  function q(s,r){return (r||document).querySelector(s)}
+  function qa(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+  function mobile(){return window.matchMedia&&window.matchMedia("(max-width:760px)").matches}
+
+  function setOffsets(){
+    var menu=q(".menu"), mh=menu?Math.ceil(menu.getBoundingClientRect().height):0;
+    document.documentElement.style.setProperty("--v112-menu-top",mh+"px");
+    var card=q("#monthly .monthlyTopCard"), ch=card?Math.ceil(card.getBoundingClientRect().height):136;
+    document.documentElement.style.setProperty("--v112-sub-head-top",(mh+ch+8)+"px");
+  }
+
+  function ensureButtons(){
+    [{id:"monthlyTable",guide:"monthlySlideGuide"},{id:"dormMonthlyTable",guide:"dormSlideGuide"}].forEach(function(t){
+      var box=document.getElementById(t.id); if(!box)return;
+      var g=document.getElementById(t.guide);
+      var inner='<button type="button" class="slideBtn" data-target="'+t.id+'" data-dir="-1">←</button><span class="slideText">左右にスライド</span><button type="button" class="slideBtn" data-target="'+t.id+'" data-dir="1">→</button>';
+      if(!g)box.insertAdjacentHTML("beforebegin",'<div id="'+t.guide+'" class="slideGuide">'+inner+'</div>');
+      else if(!g.querySelector(".slideBtn"))g.innerHTML=inner;
+    });
+
+    qa(".slideBtn").forEach(function(btn){
+      if(btn.__v112Bound)return; btn.__v112Bound=true;
+      function run(e){
+        e.preventDefault(); e.stopPropagation();
+        var box=document.getElementById(btn.getAttribute("data-target")); if(!box)return false;
+        var dir=Number(btn.getAttribute("data-dir")||1), amount=Math.max(180,Math.floor(box.clientWidth*.74));
+        if(box.scrollBy)box.scrollBy({left:amount*dir,behavior:"smooth"}); else box.scrollLeft+=amount*dir;
+        syncMirrors();
+        return false;
+      }
+      btn.addEventListener("click",run,true);
+      btn.addEventListener("touchend",run,true);
+      btn.addEventListener("pointerup",run,true);
+    });
+  }
+
+  function wrapHead(panelId,guideId,mirrorId){
+    var panel=document.getElementById(panelId); if(!panel)return null;
+    var head=q(".v112StickyHead",panel);
+    if(!head){head=document.createElement("div"); head.className="v112StickyHead"; panel.insertBefore(head,panel.firstChild)}
+    [q("h2",panel),q(".note",panel),document.getElementById(guideId)].forEach(function(el){
+      if(el&&el.parentElement!==head)head.appendChild(el);
+    });
+    var mirror=document.getElementById(mirrorId);
+    if(!mirror){
+      mirror=document.createElement("div"); mirror.id=mirrorId; mirror.className="v112HeaderMirror";
+      head.appendChild(mirror);
+    }else if(mirror.parentElement!==head){
+      head.appendChild(mirror);
+    }
+    return mirror;
+  }
+
+  function copyWidths(srcHeads, cloneHeads){
+    srcHeads.forEach(function(th,i){
+      var c=cloneHeads[i]; if(!c)return;
+      var w=Math.ceil(th.getBoundingClientRect().width||th.offsetWidth||60);
+      c.style.minWidth=w+"px";
+      c.style.width=w+"px";
+      c.style.maxWidth=w+"px";
+      c.style.boxSizing="border-box";
+    });
+  }
+
+  function buildMirror(boxId, tableSelector, panelId, guideId, mirrorId){
+    var box=document.getElementById(boxId), table=q(tableSelector);
+    if(!box||!table||!q("thead",table))return;
+
+    var mirror=wrapHead(panelId,guideId,mirrorId);
+    if(!mirror)return;
+
+    table.classList.remove("v112HideOriginalThead");
+
+    var clone=table.cloneNode(false);
+    clone.className=table.className;
+    var thead=q("thead",table).cloneNode(true);
+    clone.appendChild(thead);
+    mirror.innerHTML="";
+    mirror.appendChild(clone);
+
+    copyWidths(qa("thead th",table),qa("thead th",clone));
+
+    table.classList.add("v112HideOriginalThead");
+    mirror.scrollLeft=box.scrollLeft;
+
+    if(!box.__v112MirrorSync){
+      box.__v112MirrorSync=true;
+      box.addEventListener("scroll",syncMirrors,{passive:true});
+    }
+  }
+
+  function syncMirrors(){
+    var mt=document.getElementById("monthlyTable"), mm=document.getElementById("monthlyHeaderMirror");
+    if(mt&&mm)mm.scrollLeft=mt.scrollLeft;
+    var dt=document.getElementById("dormMonthlyTable"), dm=document.getElementById("dormHeaderMirror");
+    if(dt&&dm)dm.scrollLeft=dt.scrollLeft;
+  }
+
+  function fixNameCells(){
+    var w=mobile()?150:166;
+    qa("#monthlyTable .name").forEach(function(c){
+      c.style.minWidth=w+"px"; c.style.width=w+"px"; c.style.maxWidth=w+"px";
+      c.style.boxSizing="border-box"; c.style.overflow="hidden"; c.style.whiteSpace="normal";
+    });
+    qa("#monthlyTable tbody .name").forEach(function(td){
+      td.style.position="sticky"; td.style.left="0"; td.style.zIndex="160"; td.style.background="#fff";
+      td.style.padding=mobile()?"5px 6px":"5px 7px"; td.style.lineHeight="1.15"; td.style.fontSize=mobile()?"12px":"13px";
+      qa("span",td).forEach(function(sp){
+        var txt=(sp.textContent||"").trim();
+        if(/G-?SPOT|別邸|NEW/i.test(txt)){
+          sp.style.display=/NEW/i.test(txt)?"inline-block":"block";
+          sp.style.maxWidth="100%";
+          sp.style.width="fit-content";
+          sp.style.fontSize=/NEW/i.test(txt)?"8px":"9px";
+          sp.style.lineHeight="1.1";
+          sp.style.padding="1px 5px";
+          sp.style.marginTop=/NEW/i.test(txt)?"0":"2px";
+          sp.style.boxSizing="border-box";
+          sp.style.overflow="hidden";
+          sp.style.textOverflow="ellipsis";
+          sp.style.whiteSpace="nowrap";
+        }
+      });
+    });
+  }
+
+  function drag(box){
+    if(!box||box.__v112Drag)return; box.__v112Drag=true;
+    var down=false,sx=0,sy=0,sl=0,moved=false;
+    box.addEventListener("pointerdown",function(e){
+      if(e.target.closest&&e.target.closest("button,input,select,textarea"))return;
+      down=true;moved=false;sx=e.clientX;sy=e.clientY;sl=box.scrollLeft;
+    },true);
+    box.addEventListener("pointermove",function(e){
+      if(!down)return;
+      var dx=e.clientX-sx,dy=e.clientY-sy;
+      if(Math.abs(dx)>4||Math.abs(dy)>8){
+        moved=true; window.__v112SlidingUntil=Date.now()+650;
+        box.scrollLeft=sl-dx; syncMirrors();
+        if(Math.abs(dx)>Math.abs(dy)){e.preventDefault();e.stopPropagation()}
+      }
+    },true);
+    function up(e){
+      if(!down)return; down=false;
+      if(moved){window.__v112SlidingUntil=Date.now()+750;if(e){e.stopPropagation()}}
+    }
+    box.addEventListener("pointerup",up,true); box.addEventListener("pointercancel",up,true); box.addEventListener("pointerleave",up,true);
+  }
+
+  function apply(){
+    setOffsets();
+    ensureButtons();
+    buildMirror("monthlyTable","#monthlyTable table","monthlyStaffPanel","monthlySlideGuide","monthlyHeaderMirror");
+    buildMirror("dormMonthlyTable","#dormMonthlyTable .dormMatrixTable","monthlyDormPanel","dormSlideGuide","dormHeaderMirror");
+    fixNameCells();
+    drag(document.getElementById("monthlyTable"));
+    drag(document.getElementById("dormMonthlyTable"));
+    syncMirrors();
+  }
+
+  window.applyFixedMonthlyHeaders112=apply;
+
+  ["renderMonthly","renderDormMonthly","renderDormMonthlyMatrix"].forEach(function(name){
+    var old=window[name];
+    if(typeof old==="function"&&!old.__v112FixedHeader){
+      var w=function(){var r=old.apply(this,arguments);setTimeout(apply,0);setTimeout(apply,300);setTimeout(apply,900);return r};
+      w.__v112FixedHeader=true; window[name]=w;
+    }
+  });
+
+  var oldTab=window.showMonthlySubTab;
+  if(typeof oldTab==="function"&&!oldTab.__v112FixedHeader){
+    var tw=function(){var r=oldTab.apply(this,arguments);setTimeout(apply,50);setTimeout(apply,350);setTimeout(apply,1000);return r};
+    tw.__v112FixedHeader=true; window.showMonthlySubTab=tw;
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){setTimeout(apply,500);setTimeout(apply,1300);setTimeout(apply,2400)});
+  window.addEventListener("load",function(){setTimeout(apply,500);setTimeout(apply,1600)});
+  window.addEventListener("resize",function(){setTimeout(apply,150)});
+  document.addEventListener("scroll",function(){setOffsets();syncMirrors()},true);
 })();
 </script>
 
