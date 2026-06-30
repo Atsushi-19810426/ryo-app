@@ -5988,5 +5988,133 @@ init();
 })();
 </script>
 
+
+<script>
+(function(){
+  /*
+    Ver93: 寮月間表タブが開けない問題の修正
+    - 出勤/寮タブの切替を完全に上書き
+    - onclickだけでなく、クリックイベントでも確実に切替
+    - renderDormMonthlyでエラーが出ても寮パネル自体は開く
+  */
+
+  window.showMonthlySubTab=function(type){
+    type = type === "dorm" ? "dorm" : "staff";
+    window.__monthlySubTab = type;
+
+    var staffPanel=document.getElementById("monthlyStaffPanel");
+    var dormPanel=document.getElementById("monthlyDormPanel");
+    var staffBtn=document.getElementById("monthlyTabStaff");
+    var dormBtn=document.getElementById("monthlyTabDorm");
+    var title=document.getElementById("monthTitle");
+
+    if(staffPanel){
+      if(type==="staff")staffPanel.classList.remove("hidden");
+      else staffPanel.classList.add("hidden");
+    }
+
+    if(dormPanel){
+      if(type==="dorm")dormPanel.classList.remove("hidden");
+      else dormPanel.classList.add("hidden");
+    }
+
+    if(staffBtn){
+      staffBtn.classList.toggle("active",type==="staff");
+      staffBtn.setAttribute("aria-selected",type==="staff" ? "true" : "false");
+    }
+
+    if(dormBtn){
+      dormBtn.classList.toggle("active",type==="dorm");
+      dormBtn.setAttribute("aria-selected",type==="dorm" ? "true" : "false");
+    }
+
+    if(title){
+      title.textContent = type==="dorm" ? "寮 月間表" : "出勤 月間表";
+    }
+
+    try{
+      if(type==="staff" && typeof renderMonthly==="function"){
+        renderMonthly();
+      }
+      if(type==="dorm" && typeof renderDormMonthly==="function"){
+        renderDormMonthly();
+      }
+    }catch(e){
+      console.warn("月間表タブ表示エラー:",e);
+    }
+
+    if(typeof setMonthlyStickyTop==="function"){
+      try{setMonthlyStickyTop();}catch(e){}
+    }
+
+    return false;
+  };
+
+  function bindMonthlyTabButtons(){
+    var staffBtn=document.getElementById("monthlyTabStaff");
+    var dormBtn=document.getElementById("monthlyTabDorm");
+
+    if(staffBtn && !staffBtn.__v93Bound){
+      staffBtn.__v93Bound=true;
+      staffBtn.setAttribute("type","button");
+      staffBtn.onclick=function(e){
+        if(e){e.preventDefault();e.stopPropagation();}
+        return showMonthlySubTab("staff");
+      };
+      staffBtn.addEventListener("click",function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        showMonthlySubTab("staff");
+      },true);
+    }
+
+    if(dormBtn && !dormBtn.__v93Bound){
+      dormBtn.__v93Bound=true;
+      dormBtn.setAttribute("type","button");
+      dormBtn.onclick=function(e){
+        if(e){e.preventDefault();e.stopPropagation();}
+        return showMonthlySubTab("dorm");
+      };
+      dormBtn.addEventListener("click",function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        showMonthlySubTab("dorm");
+      },true);
+    }
+  }
+
+  var oldShowPage=window.showPage;
+  if(typeof oldShowPage==="function" && !oldShowPage.__v93DormTabFix){
+    var wrappedShowPage=function(id){
+      if(id==="monthlyHub")id="monthly";
+      var r=oldShowPage.apply(this,[id]);
+      setTimeout(function(){
+        bindMonthlyTabButtons();
+        if(id==="monthly"){
+          showMonthlySubTab(window.__monthlySubTab || "staff");
+        }
+      },50);
+      return r;
+    };
+    wrappedShowPage.__v93DormTabFix=true;
+    window.showPage=wrappedShowPage;
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(function(){
+      bindMonthlyTabButtons();
+      if(document.getElementById("monthly") && !document.getElementById("monthly").classList.contains("hidden")){
+        showMonthlySubTab(window.__monthlySubTab || "staff");
+      }
+    },300);
+    setTimeout(bindMonthlyTabButtons,1000);
+  });
+
+  window.addEventListener("load",function(){
+    setTimeout(bindMonthlyTabButtons,300);
+  });
+})();
+</script>
+
 </body>
 </html>
