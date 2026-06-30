@@ -253,6 +253,55 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   box-shadow:inset 0 0 0 2px #60a5fa!important;
 }
 
+
+/* Ver78: 月間表 出勤・寮 別々スクロール */
+#monthlyTable,
+#dormMonthlyTable{
+  display:block;
+  width:100%;
+  max-height:46vh;
+  overflow:auto!important;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  border-radius:14px;
+  border:1px solid #e5e7eb;
+  background:#fff;
+}
+
+#monthlyTable table,
+#dormMonthlyTable table{
+  margin:0;
+  min-width:max-content;
+}
+
+#monthlyTable thead th,
+#dormMonthlyTable thead th{
+  position:sticky;
+  top:0;
+  z-index:5;
+}
+
+#monthlyTable .name,
+#dormMonthlyTable .name{
+  position:sticky;
+  left:0;
+  z-index:6;
+  background:#fff;
+  box-shadow:1px 0 0 #e5e7eb;
+}
+
+#monthlyTable thead .name,
+#dormMonthlyTable thead .name{
+  z-index:8;
+}
+
+@media(max-width:760px){
+  #monthlyTable,
+  #dormMonthlyTable{
+    max-height:42vh;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -3182,6 +3231,48 @@ init();
   });
   window.addEventListener("load",function(){
     setTimeout(applyCleanPlanColors,500);
+  });
+})();
+</script>
+
+
+<script>
+(function(){
+  function applySeparateScroll(){
+    ["monthlyTable","dormMonthlyTable"].forEach(function(id){
+      var box=document.getElementById(id);
+      if(!box)return;
+      box.classList.add("separateScrollBox");
+    });
+  }
+
+  var oldRenderMonthly=window.renderMonthly;
+  if(typeof oldRenderMonthly==="function" && !oldRenderMonthly.__v78SeparateScroll){
+    var wrappedMonthly=function(){
+      var r=oldRenderMonthly.apply(this,arguments);
+      setTimeout(applySeparateScroll,0);
+      return r;
+    };
+    wrappedMonthly.__v78SeparateScroll=true;
+    window.renderMonthly=wrappedMonthly;
+  }
+
+  var oldRenderDormMonthly=window.renderDormMonthly;
+  if(typeof oldRenderDormMonthly==="function" && !oldRenderDormMonthly.__v78SeparateScroll){
+    var wrappedDorm=function(){
+      var r=oldRenderDormMonthly.apply(this,arguments);
+      setTimeout(applySeparateScroll,0);
+      return r;
+    };
+    wrappedDorm.__v78SeparateScroll=true;
+    window.renderDormMonthly=wrappedDorm;
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(applySeparateScroll,300);
+  });
+  window.addEventListener("load",function(){
+    setTimeout(applySeparateScroll,500);
   });
 })();
 </script>
