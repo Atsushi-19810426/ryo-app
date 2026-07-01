@@ -2248,561 +2248,13 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 @media(max-width:760px){#dormMonthlyTable .dormMatrixTable thead tr:first-child th,#dormMonthlyTable .dormMatrixTable thead tr:nth-child(2) th{height:17px!important;min-height:17px!important;max-height:17px!important;line-height:17px!important;}#dormMonthlyTable .dormMatrixDateHead{height:34px!important;min-height:34px!important;max-height:34px!important;line-height:34px!important;}#dormMonthlyTable .dormMatrixGroup{font-size:7px!important;line-height:17px!important;}#dormMonthlyTable .dormMatrixRoom{font-size:8px!important;line-height:17px!important;}.slideBtn{padding:5px 10px!important;font-size:13px!important;}}
 
 
-/* Ver108: 月間表の上部操作・見出し・スライドを下スクロールでも固定 */
-:root{
-  --v108-menu-top:0px;
-  --v108-sub-head-top:150px;
-}
-
-/* 月間表のタブ・日付指定エリア */
-#monthly .monthlyTopCard{
-  position:sticky!important;
-  top:var(--v108-menu-top)!important;
-  z-index:3000!important;
-  background:rgba(255,255,255,.98)!important;
-  backdrop-filter:blur(10px)!important;
-  box-shadow:0 8px 22px rgba(15,23,42,.12)!important;
-}
-
-/* 寮・出勤それぞれの見出し＋説明＋スライドバー */
-#monthlyDormPanel .v108DormStickyHead,
-#monthlyStaffPanel .v108StaffStickyHead{
-  position:sticky!important;
-  top:var(--v108-sub-head-top)!important;
-  z-index:2700!important;
-  background:rgba(255,255,255,.98)!important;
-  backdrop-filter:blur(10px)!important;
-  padding:0 0 8px!important;
-  margin:0 0 6px!important;
-  border-radius:0 0 14px 14px!important;
-  box-shadow:0 8px 18px rgba(15,23,42,.08)!important;
-}
-
-#monthlyDormPanel .v108DormStickyHead h2,
-#monthlyStaffPanel .v108StaffStickyHead h2{
-  margin:0 0 4px!important;
-  font-size:18px!important;
-  line-height:1.2!important;
-}
-
-#monthlyDormPanel .v108DormStickyHead .note,
-#monthlyStaffPanel .v108StaffStickyHead .note{
-  margin:0 0 8px!important;
-  font-size:11px!important;
-  line-height:1.3!important;
-}
-
-#monthlyDormPanel .v108DormStickyHead .slideGuide,
-#monthlyStaffPanel .v108StaffStickyHead .slideGuide{
-  position:relative!important;
-  top:auto!important;
-  z-index:1!important;
-  margin:6px 0 0!important;
-}
-
-/* スライドボタンを押せるようにする */
-.slideGuide{
-  pointer-events:auto!important;
-  user-select:none!important;
-}
-.slideGuide .slideText{
-  pointer-events:none!important;
-}
-.slideBtn{
-  pointer-events:auto!important;
-  border:0!important;
-  border-radius:999px!important;
-  padding:5px 12px!important;
-  margin:0 6px!important;
-  background:#fff!important;
-  color:#111827!important;
-  font-weight:900!important;
-  font-size:14px!important;
-  line-height:1!important;
-  box-shadow:0 2px 8px rgba(0,0,0,.18)!important;
-}
-.slideBtn:active{
-  transform:scale(.96);
-  background:#e5e7eb!important;
-}
-
-/* 寮名・部屋番号行を表の中でも固定 */
-#dormMonthlyTable .dormMatrixTable thead{
-  position:sticky!important;
-  top:0!important;
-  z-index:190!important;
-  background:#fff!important;
-}
-
-#dormMonthlyTable .dormMatrixDateHead{
-  position:sticky!important;
-  left:0!important;
-  z-index:240!important;
-  background:#111827!important;
-  color:#fff!important;
-}
-
-#dormMonthlyTable tbody .dormMatrixDate{
-  position:sticky!important;
-  left:0!important;
-  z-index:95!important;
-  background:#fff!important;
-}
-
-/* 表はスライド可能のまま */
-#monthlyTable,
-#dormMonthlyTable{
-  overflow:auto!important;
-  -webkit-overflow-scrolling:touch!important;
-  touch-action:pan-x pan-y!important;
-  overscroll-behavior:contain!important;
-}
-
-#monthlyDormPanel,
-#monthlyStaffPanel{
-  overflow:visible!important;
-}
-
-@media(max-width:760px){
-  #monthly .monthlyTopCard{
-    padding:10px 12px!important;
-    border-radius:14px!important;
-  }
-  #monthlyDormPanel .v108DormStickyHead,
-  #monthlyStaffPanel .v108StaffStickyHead{
-    top:var(--v108-sub-head-top)!important;
-  }
-  #monthlyDormPanel .v108DormStickyHead h2,
-  #monthlyStaffPanel .v108StaffStickyHead h2{
-    font-size:16px!important;
-  }
-  #monthlyDormPanel .v108DormStickyHead .note,
-  #monthlyStaffPanel .v108StaffStickyHead .note{
-    font-size:10px!important;
-  }
-  .slideBtn{
-    padding:5px 10px!important;
-    font-size:13px!important;
-  }
-}
-
-
-/* Ver109: 寮は部屋番号まで固定・出勤は日付と曜日をくっつける */
-
-/* 出勤月間表：日付行と曜日行を1つの見出しブロックとして固定 */
-#monthlyTable table{
-  border-collapse:separate!important;
-  border-spacing:0!important;
-}
-#monthlyTable table thead{
-  position:sticky!important;
-  top:0!important;
-  z-index:210!important;
-  background:#fff!important;
-}
-#monthlyTable table thead tr:first-child th,
-#monthlyTable table thead tr:nth-child(2) th{
-  position:static!important;
-  top:auto!important;
-  height:18px!important;
-  min-height:18px!important;
-  max-height:18px!important;
-  padding:0 3px!important;
-  line-height:18px!important;
-  vertical-align:middle!important;
-  box-sizing:border-box!important;
-}
-#monthlyTable table thead .name{
-  position:sticky!important;
-  left:0!important;
-  z-index:260!important;
-  height:36px!important;
-  min-height:36px!important;
-  max-height:36px!important;
-  padding:0 5px!important;
-  line-height:36px!important;
-  background:#fff!important;
-  box-shadow:2px 0 0 rgba(15,23,42,.10)!important;
-}
-#monthlyTable tbody .name{
-  position:sticky!important;
-  left:0!important;
-  z-index:80!important;
-  background:#fff!important;
-}
-
-/* 寮月間表：寮名＋部屋番号までを1つの見出しブロックとして固定 */
-#dormMonthlyTable .dormMatrixTable{
-  border-collapse:separate!important;
-  border-spacing:0!important;
-}
-#dormMonthlyTable .dormMatrixTable thead{
-  position:sticky!important;
-  top:0!important;
-  z-index:230!important;
-  background:#fff!important;
-}
-#dormMonthlyTable .dormMatrixTable thead tr:first-child th,
-#dormMonthlyTable .dormMatrixTable thead tr:nth-child(2) th{
-  position:static!important;
-  top:auto!important;
-  height:18px!important;
-  min-height:18px!important;
-  max-height:18px!important;
-  padding:0 2px!important;
-  line-height:18px!important;
-  vertical-align:middle!important;
-  box-sizing:border-box!important;
-}
-#dormMonthlyTable .dormMatrixDateHead{
-  position:sticky!important;
-  left:0!important;
-  z-index:300!important;
-  height:36px!important;
-  min-height:36px!important;
-  max-height:36px!important;
-  padding:0 2px!important;
-  line-height:36px!important;
-  background:#111827!important;
-  color:#fff!important;
-  box-sizing:border-box!important;
-}
-#dormMonthlyTable tbody .dormMatrixDate{
-  position:sticky!important;
-  left:0!important;
-  z-index:90!important;
-  background:#fff!important;
-  box-shadow:2px 0 0 rgba(15,23,42,.10)!important;
-}
-
-/* 寮名と部屋番の間をさらに詰める */
-#dormMonthlyTable .dormMatrixGroup{
-  font-size:8px!important;
-  line-height:18px!important;
-  padding:0 2px!important;
-  white-space:nowrap!important;
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
-}
-#dormMonthlyTable .dormMatrixGroup small{
-  display:none!important;
-}
-#dormMonthlyTable .dormMatrixRoom{
-  font-size:9px!important;
-  line-height:18px!important;
-  padding:0 2px!important;
-  white-space:nowrap!important;
-}
-
-/* 表内の縦スクロールでも見出しが残る */
-#monthlyTable,
-#dormMonthlyTable{
-  overflow:auto!important;
-  -webkit-overflow-scrolling:touch!important;
-  touch-action:pan-x pan-y!important;
-}
-
-@media(max-width:760px){
-  #monthlyTable table thead tr:first-child th,
-  #monthlyTable table thead tr:nth-child(2) th,
-  #dormMonthlyTable .dormMatrixTable thead tr:first-child th,
-  #dormMonthlyTable .dormMatrixTable thead tr:nth-child(2) th{
-    height:17px!important;
-    min-height:17px!important;
-    max-height:17px!important;
-    line-height:17px!important;
-  }
-  #monthlyTable table thead .name,
-  #dormMonthlyTable .dormMatrixDateHead{
-    height:34px!important;
-    min-height:34px!important;
-    max-height:34px!important;
-    line-height:34px!important;
-  }
-  #dormMonthlyTable .dormMatrixGroup{
-    font-size:7px!important;
-    line-height:17px!important;
-  }
-  #dormMonthlyTable .dormMatrixRoom{
-    font-size:8px!important;
-    line-height:17px!important;
-  }
-}
-
-
-/* Ver110: 全体スライド中も見出しを隠さない */
-/* 出勤月間表：日付＋曜日を2段固定 */
-#monthlyTable{
-  position:relative!important;
-  overflow:auto!important;
-  -webkit-overflow-scrolling:touch!important;
-  touch-action:pan-x pan-y!important;
-}
-#monthlyTable table{
-  border-collapse:separate!important;
-  border-spacing:0!important;
-}
-#monthlyTable table thead th{
-  background:#fff!important;
-  background-clip:padding-box!important;
-}
-#monthlyTable table thead tr:first-child th{
-  position:sticky!important;
-  top:0!important;
-  z-index:520!important;
-  height:18px!important;
-  min-height:18px!important;
-  max-height:18px!important;
-  padding:0 3px!important;
-  line-height:18px!important;
-  box-sizing:border-box!important;
-}
-#monthlyTable table thead tr:nth-child(2) th{
-  position:sticky!important;
-  top:18px!important;
-  z-index:510!important;
-  height:18px!important;
-  min-height:18px!important;
-  max-height:18px!important;
-  padding:0 3px!important;
-  line-height:18px!important;
-  box-sizing:border-box!important;
-}
-#monthlyTable table thead .name{
-  position:sticky!important;
-  left:0!important;
-  top:0!important;
-  z-index:700!important;
-  height:36px!important;
-  min-height:36px!important;
-  max-height:36px!important;
-  padding:0 5px!important;
-  line-height:36px!important;
-  background:#fff!important;
-  box-shadow:2px 0 0 rgba(15,23,42,.12),0 2px 0 rgba(15,23,42,.08)!important;
-}
-#monthlyTable tbody .name{
-  position:sticky!important;
-  left:0!important;
-  z-index:150!important;
-  background:#fff!important;
-  box-shadow:2px 0 0 rgba(15,23,42,.08)!important;
-}
-
-/* 寮月間表：寮名＋部屋番号を2段固定 */
-#dormMonthlyTable{
-  position:relative!important;
-  overflow:auto!important;
-  -webkit-overflow-scrolling:touch!important;
-  touch-action:pan-x pan-y!important;
-}
-#dormMonthlyTable .dormMatrixTable{
-  border-collapse:separate!important;
-  border-spacing:0!important;
-}
-#dormMonthlyTable .dormMatrixTable thead th{
-  background:#fff!important;
-  background-clip:padding-box!important;
-}
-#dormMonthlyTable .dormMatrixTable thead tr:first-child th{
-  position:sticky!important;
-  top:0!important;
-  z-index:620!important;
-  height:18px!important;
-  min-height:18px!important;
-  max-height:18px!important;
-  padding:0 2px!important;
-  line-height:18px!important;
-  box-sizing:border-box!important;
-}
-#dormMonthlyTable .dormMatrixTable thead tr:nth-child(2) th{
-  position:sticky!important;
-  top:18px!important;
-  z-index:610!important;
-  height:18px!important;
-  min-height:18px!important;
-  max-height:18px!important;
-  padding:0 2px!important;
-  line-height:18px!important;
-  box-sizing:border-box!important;
-}
-#dormMonthlyTable .dormMatrixDateHead{
-  position:sticky!important;
-  left:0!important;
-  top:0!important;
-  z-index:800!important;
-  height:36px!important;
-  min-height:36px!important;
-  max-height:36px!important;
-  padding:0 2px!important;
-  line-height:36px!important;
-  background:#111827!important;
-  color:#fff!important;
-  box-shadow:2px 0 0 rgba(15,23,42,.16),0 2px 0 rgba(15,23,42,.12)!important;
-  box-sizing:border-box!important;
-}
-#dormMonthlyTable tbody .dormMatrixDate{
-  position:sticky!important;
-  left:0!important;
-  z-index:180!important;
-  background:#fff!important;
-  box-shadow:2px 0 0 rgba(15,23,42,.10)!important;
-}
-#dormMonthlyTable .dormMatrixGroup{
-  font-size:8px!important;
-  line-height:18px!important;
-  padding:0 2px!important;
-  white-space:nowrap!important;
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
-}
-#dormMonthlyTable .dormMatrixGroup small{
-  display:none!important;
-}
-#dormMonthlyTable .dormMatrixRoom{
-  font-size:9px!important;
-  line-height:18px!important;
-  padding:0 2px!important;
-  white-space:nowrap!important;
-}
-
-/* 固定見出しよりデータが上にかぶらないように */
-#monthlyTable td,
-#monthlyTable th,
-#dormMonthlyTable td,
-#dormMonthlyTable th{
-  background-clip:padding-box!important;
-}
-
-@media(max-width:760px){
-  #monthlyTable table thead tr:first-child th,
-  #dormMonthlyTable .dormMatrixTable thead tr:first-child th{
-    height:17px!important;
-    min-height:17px!important;
-    max-height:17px!important;
-    line-height:17px!important;
-  }
-  #monthlyTable table thead tr:nth-child(2) th,
-  #dormMonthlyTable .dormMatrixTable thead tr:nth-child(2) th{
-    top:17px!important;
-    height:17px!important;
-    min-height:17px!important;
-    max-height:17px!important;
-    line-height:17px!important;
-  }
-  #monthlyTable table thead .name,
-  #dormMonthlyTable .dormMatrixDateHead{
-    height:34px!important;
-    min-height:34px!important;
-    max-height:34px!important;
-    line-height:34px!important;
-  }
-  #dormMonthlyTable .dormMatrixGroup{
-    font-size:7px!important;
-    line-height:17px!important;
-  }
-  #dormMonthlyTable .dormMatrixRoom{
-    font-size:8px!important;
-    line-height:17px!important;
-  }
-}
-
-
-/* Ver111: 月間固定・日付曜日密着・源氏名セル調整 */
-:root{--v111-menu-top:0px;--v111-sub-head-top:148px}
-
-/* 上部操作部分を固定 */
-#monthly,#monthly .card,#monthlyStaffPanel,#monthlyDormPanel{overflow:visible!important}
-#monthly .monthlyTopCard{
-  position:sticky!important;top:var(--v111-menu-top)!important;z-index:6000!important;
-  background:rgba(255,255,255,.985)!important;backdrop-filter:blur(10px)!important;
-  box-shadow:0 8px 22px rgba(15,23,42,.12)!important;
-}
-#monthlyStaffPanel .v111StickyHead,#monthlyDormPanel .v111StickyHead{
-  position:sticky!important;top:var(--v111-sub-head-top)!important;z-index:5600!important;
-  background:rgba(255,255,255,.985)!important;backdrop-filter:blur(10px)!important;
-  padding:0 0 8px!important;margin:0 0 6px!important;border-radius:0 0 14px 14px!important;
-  box-shadow:0 8px 18px rgba(15,23,42,.10)!important;
-}
-#monthlyStaffPanel .v111StickyHead h2,#monthlyDormPanel .v111StickyHead h2{margin:0 0 3px!important;font-size:18px!important;line-height:1.15!important}
-#monthlyStaffPanel .v111StickyHead .note,#monthlyDormPanel .v111StickyHead .note{margin:0 0 7px!important;font-size:11px!important;line-height:1.25!important}
-#monthlyStaffPanel .v111StickyHead .slideGuide,#monthlyDormPanel .v111StickyHead .slideGuide{position:relative!important;top:auto!important;margin:5px 0 0!important}
-
-/* スライドボタン */
-.slideGuide{pointer-events:auto!important;user-select:none!important}
-.slideGuide .slideText{pointer-events:none!important}
-.slideBtn{
-  pointer-events:auto!important;border:0!important;border-radius:999px!important;padding:5px 12px!important;margin:0 6px!important;
-  background:#fff!important;color:#111827!important;font-weight:900!important;font-size:14px!important;line-height:1!important;
-  box-shadow:0 2px 8px rgba(0,0,0,.18)!important;
-}
-.slideBtn:active{transform:scale(.96);background:#e5e7eb!important}
-
-/* 表本体 */
-#monthlyTable,#dormMonthlyTable{
-  position:relative!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important;
-  touch-action:pan-x pan-y!important;overscroll-behavior:contain!important;
-}
-#monthlyTable table,#dormMonthlyTable .dormMatrixTable{border-collapse:separate!important;border-spacing:0!important}
-
-/* 寮：寮名＋部屋番号まで固定。隙間を詰める */
-#dormMonthlyTable .dormMatrixTable thead tr:first-child th{
-  position:sticky!important;top:0!important;z-index:720!important;height:16px!important;min-height:16px!important;max-height:16px!important;
-  padding:0 2px!important;line-height:16px!important;background:#fff!important;box-sizing:border-box!important;
-}
-#dormMonthlyTable .dormMatrixTable thead tr:nth-child(2) th{
-  position:sticky!important;top:16px!important;z-index:710!important;height:16px!important;min-height:16px!important;max-height:16px!important;
-  padding:0 2px!important;line-height:16px!important;background:#fff!important;box-sizing:border-box!important;
-}
-#dormMonthlyTable .dormMatrixDateHead{
-  position:sticky!important;left:0!important;top:0!important;z-index:900!important;height:32px!important;min-height:32px!important;max-height:32px!important;
-  padding:0 2px!important;line-height:32px!important;background:#111827!important;color:#fff!important;box-sizing:border-box!important;
-  box-shadow:2px 0 0 rgba(15,23,42,.16),0 2px 0 rgba(15,23,42,.12)!important;
-}
-#dormMonthlyTable tbody .dormMatrixDate{position:sticky!important;left:0!important;z-index:190!important;background:#fff!important;box-shadow:2px 0 0 rgba(15,23,42,.10)!important}
-#dormMonthlyTable .dormMatrixGroup{font-size:7px!important;line-height:16px!important;padding:0 2px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-#dormMonthlyTable .dormMatrixGroup small{display:none!important}
-#dormMonthlyTable .dormMatrixRoom{font-size:8px!important;line-height:16px!important;padding:0 2px!important;white-space:nowrap!important}
-
-/* 出勤：日付＋曜日をくっつけて固定 */
-#monthlyTable table thead tr:first-child th{
-  position:sticky!important;top:0!important;z-index:620!important;height:16px!important;min-height:16px!important;max-height:16px!important;
-  padding:0 3px!important;line-height:16px!important;background:#fff!important;box-sizing:border-box!important;
-}
-#monthlyTable table thead tr:nth-child(2) th{
-  position:sticky!important;top:16px!important;z-index:610!important;height:16px!important;min-height:16px!important;max-height:16px!important;
-  padding:0 3px!important;line-height:16px!important;background:#fff!important;box-sizing:border-box!important;
-}
-#monthlyTable table thead .name{
-  position:sticky!important;left:0!important;top:0!important;z-index:850!important;height:32px!important;min-height:32px!important;max-height:32px!important;
-  padding:0 6px!important;line-height:32px!important;background:#fff!important;box-sizing:border-box!important;
-  box-shadow:2px 0 0 rgba(15,23,42,.12),0 2px 0 rgba(15,23,42,.08)!important;
-}
-
-/* 源氏名＋出勤場所がセルからはみ出ないよう調整 */
-#monthlyTable .name{min-width:132px!important;width:132px!important;max-width:132px!important;box-sizing:border-box!important;overflow:hidden!important;white-space:normal!important}
-#monthlyTable tbody .name{position:sticky!important;left:0!important;z-index:160!important;background:#fff!important;padding:4px 6px!important;line-height:1.15!important}
-#monthlyTable tbody .name span,#monthlyTable tbody .name .badge,#monthlyTable tbody .name .placeBadge,#monthlyTable tbody .name .workPlaceBadge,#monthlyTable tbody .name .newBadge{
-  max-width:62px!important;font-size:10px!important;line-height:1.1!important;padding:1px 5px!important;vertical-align:middle!important;
-  box-sizing:border-box!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;
-}
-#monthlyTable th,#monthlyTable td,#dormMonthlyTable th,#dormMonthlyTable td{background-clip:padding-box!important}
-
-@media(max-width:760px){
-  #monthlyStaffPanel .v111StickyHead h2,#monthlyDormPanel .v111StickyHead h2{font-size:16px!important}
-  #monthlyStaffPanel .v111StickyHead .note,#monthlyDormPanel .v111StickyHead .note{font-size:10px!important}
-  #monthlyTable .name{min-width:118px!important;width:118px!important;max-width:118px!important}
-  #monthlyTable tbody .name{font-size:12px!important;padding:4px 5px!important}
-  #monthlyTable tbody .name span,#monthlyTable tbody .name .badge,#monthlyTable tbody .name .placeBadge,#monthlyTable tbody .name .workPlaceBadge,#monthlyTable tbody .name .newBadge{
-    max-width:54px!important;font-size:9px!important;padding:1px 4px!important;
-  }
-}
-
-
-/* Ver120: Ver111クリーンベース・空白行増加対策 */
-/* 複製ヘッダー系は完全に使わない */
+/* Ver121: Ver107クリーンベース・空白行完全回避 */
+/* Ver108以降の固定ブロック/複製ヘッダー/内部縦スクロールは使わない */
 #monthlyHeaderMirror,
 #dormHeaderMirror,
+.v108StaffStickyHead,
+.v108DormStickyHead,
+.v111StickyHead,
 .v112HeaderMirror,
 .v113HeaderMirror,
 .v114HeaderMirror,
@@ -2810,25 +2262,31 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
 .v116HeaderMirror,
 .v117HeaderMirror,
 .v118HeaderMirror,
-.v119HeaderMirror{
+.v119HeaderMirror,
+.v120HeaderMirror{
   display:none!important;
 }
 
-/* 複製ヘッダー用に隠されたtheadが万一あっても復活 */
+/* 複製ヘッダー処理で隠れた可能性のあるtheadは復活 */
 #monthlyTable table > thead,
 #dormMonthlyTable table > thead,
 #dormMonthlyTable .dormMatrixTable > thead{
   display:table-header-group!important;
 }
 
-/* Ver118のような巨大な空白を作らない */
+/* 空白行の原因になる強制高さを解除 */
+#monthlyStaffPanel,
+#monthlyDormPanel{
+  overflow:visible!important;
+}
+
 #monthlyTable,
 #dormMonthlyTable{
   min-height:0!important;
   background:#fff!important;
 }
 
-/* 出勤表の見やすさと源氏名セルのはみ出し対策のみ最小限 */
+/* 月間表の源氏名＋出勤場所だけ最小限で調整 */
 #monthlyTable .name{
   min-width:170px!important;
   width:170px!important;
@@ -2837,12 +2295,14 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   overflow:hidden!important;
   white-space:normal!important;
 }
+
 #monthlyTable tbody .name{
   padding:5px 8px!important;
   line-height:1.16!important;
   font-size:13px!important;
   word-break:keep-all!important;
 }
+
 #monthlyTable tbody .name span,
 #monthlyTable tbody .name .badge,
 #monthlyTable tbody .name .placeBadge,
@@ -2857,7 +2317,7 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   white-space:nowrap!important;
 }
 
-/* 左右スライドボタンは残す */
+/* 左右スライドボタンは維持 */
 .slideGuide{
   pointer-events:auto!important;
   user-select:none!important;
@@ -10369,921 +9829,26 @@ init();
 </script>
 
 
-<script id="ver108-monthly-sticky-control-fix">
-(function(){
-  function qs(sel,root){return (root||document).querySelector(sel);}
-
-  function setStickyOffsets108(){
-    var menu=document.querySelector(".menu");
-    var menuH=menu ? Math.ceil(menu.getBoundingClientRect().height) : 0;
-    document.documentElement.style.setProperty("--v108-menu-top", menuH+"px");
-
-    var card=document.querySelector("#monthly .monthlyTopCard");
-    var cardH=card ? Math.ceil(card.getBoundingClientRect().height) : 140;
-    document.documentElement.style.setProperty("--v108-sub-head-top", (menuH+cardH+8)+"px");
-  }
-
-  function scrollBox108(id,dir){
-    var box=document.getElementById(id);
-    if(!box)return false;
-    var amount=Math.max(180, Math.floor(box.clientWidth*0.74));
-    if(typeof box.scrollBy==="function"){
-      box.scrollBy({left:amount*dir,behavior:"smooth"});
-    }else{
-      box.scrollLeft += amount*dir;
-    }
-    return false;
-  }
-
-  function ensureSlideButtons108(){
-    [
-      {id:"monthlyTable", guide:"monthlySlideGuide"},
-      {id:"dormMonthlyTable", guide:"dormSlideGuide"}
-    ].forEach(function(t){
-      var box=document.getElementById(t.id);
-      if(!box)return;
-
-      var g=document.getElementById(t.guide);
-      var inner='<button type="button" class="slideBtn" data-target="'+t.id+'" data-dir="-1">←</button><span class="slideText">左右にスライド</span><button type="button" class="slideBtn" data-target="'+t.id+'" data-dir="1">→</button>';
-
-      if(!g){
-        box.insertAdjacentHTML("beforebegin",'<div id="'+t.guide+'" class="slideGuide">'+inner+'</div>');
-      }else if(!g.querySelector(".slideBtn")){
-        g.innerHTML=inner;
-      }
-    });
-
-    document.querySelectorAll(".slideBtn").forEach(function(btn){
-      if(btn.__v108Bound)return;
-      btn.__v108Bound=true;
-
-      function run(e){
-        e.preventDefault();
-        e.stopPropagation();
-        return scrollBox108(btn.getAttribute("data-target"), Number(btn.getAttribute("data-dir")||1));
-      }
-
-      btn.addEventListener("click",run,true);
-      btn.addEventListener("touchend",run,true);
-      btn.addEventListener("pointerup",run,true);
-    });
-  }
-
-  function wrapStickyHead108(panelId, className, guideId){
-    var panel=document.getElementById(panelId);
-    if(!panel)return;
-
-    var head=qs("."+className,panel);
-    if(!head){
-      head=document.createElement("div");
-      head.className=className;
-      panel.insertBefore(head,panel.firstChild);
-    }
-
-    var h2=qs("h2",panel);
-    var note=qs(".note",panel);
-    var guide=document.getElementById(guideId);
-
-    [h2,note,guide].forEach(function(el){
-      if(el && el.parentElement!==head){
-        head.appendChild(el);
-      }
-    });
-  }
-
-  function fixDormHeaderSticky108(){
-    var table=document.querySelector("#dormMonthlyTable .dormMatrixTable");
-    if(!table)return;
-
-    var thead=table.querySelector("thead");
-    if(thead){
-      thead.style.position="sticky";
-      thead.style.top="0";
-      thead.style.zIndex="190";
-      thead.style.background="#fff";
-    }
-
-    var dateHead=table.querySelector(".dormMatrixDateHead");
-    if(dateHead){
-      dateHead.style.position="sticky";
-      dateHead.style.left="0";
-      dateHead.style.zIndex="240";
-      dateHead.style.background="#111827";
-      dateHead.style.color="#fff";
-    }
-
-    table.querySelectorAll("tbody .dormMatrixDate").forEach(function(th){
-      th.style.position="sticky";
-      th.style.left="0";
-      th.style.zIndex="95";
-      th.style.background="#fff";
-    });
-  }
-
-  function enableDragScroll108(box){
-    if(!box || box.__v108Drag)return;
-    box.__v108Drag=true;
-
-    var down=false, sx=0, sy=0, sl=0, st=0, moved=false;
-
-    box.addEventListener("pointerdown",function(e){
-      if(e.target && e.target.closest && e.target.closest("button,input,select,textarea"))return;
-      down=true;
-      moved=false;
-      sx=e.clientX;
-      sy=e.clientY;
-      sl=box.scrollLeft;
-      st=box.scrollTop;
-    },true);
-
-    box.addEventListener("pointermove",function(e){
-      if(!down)return;
-      var dx=e.clientX-sx;
-      var dy=e.clientY-sy;
-      if(Math.abs(dx)>4 || Math.abs(dy)>4){
-        moved=true;
-        window.__v108SlidingUntil=Date.now()+600;
-        box.scrollLeft=sl-dx;
-        box.scrollTop=st-dy;
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    },true);
-
-    function up(e){
-      if(!down)return;
-      down=false;
-      if(moved){
-        window.__v108SlidingUntil=Date.now()+700;
-        if(e){
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      }
-    }
-
-    box.addEventListener("pointerup",up,true);
-    box.addEventListener("pointercancel",up,true);
-    box.addEventListener("pointerleave",up,true);
-
-    box.addEventListener("click",function(e){
-      if(Date.now()<(window.__v108SlidingUntil||0)){
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        return false;
-      }
-    },true);
-  }
-
-  function applyMonthlySticky108(){
-    ensureSlideButtons108();
-
-    wrapStickyHead108("monthlyDormPanel","v108DormStickyHead","dormSlideGuide");
-    wrapStickyHead108("monthlyStaffPanel","v108StaffStickyHead","monthlySlideGuide");
-
-    setStickyOffsets108();
-    fixDormHeaderSticky108();
-
-    enableDragScroll108(document.getElementById("monthlyTable"));
-    enableDragScroll108(document.getElementById("dormMonthlyTable"));
-  }
-
-  window.applyMonthlySticky108=applyMonthlySticky108;
-
-  var oldRenderMonthly108=window.renderMonthly;
-  if(typeof oldRenderMonthly108==="function" && !oldRenderMonthly108.__v108Sticky){
-    var mw=function(){
-      var r=oldRenderMonthly108.apply(this,arguments);
-      setTimeout(applyMonthlySticky108,0);
-      setTimeout(applyMonthlySticky108,250);
-      setTimeout(applyMonthlySticky108,800);
-      return r;
-    };
-    mw.__v108Sticky=true;
-    window.renderMonthly=mw;
-  }
-
-  var oldRenderDormMonthly108=window.renderDormMonthly;
-  if(typeof oldRenderDormMonthly108==="function" && !oldRenderDormMonthly108.__v108Sticky){
-    var dw=function(){
-      var r=oldRenderDormMonthly108.apply(this,arguments);
-      setTimeout(applyMonthlySticky108,0);
-      setTimeout(applyMonthlySticky108,250);
-      setTimeout(applyMonthlySticky108,800);
-      return r;
-    };
-    dw.__v108Sticky=true;
-    window.renderDormMonthly=dw;
-  }
-
-  var oldRenderDormMonthlyMatrix108=window.renderDormMonthlyMatrix;
-  if(typeof oldRenderDormMonthlyMatrix108==="function" && !oldRenderDormMonthlyMatrix108.__v108Sticky){
-    var dmw=function(){
-      var r=oldRenderDormMonthlyMatrix108.apply(this,arguments);
-      setTimeout(applyMonthlySticky108,0);
-      setTimeout(applyMonthlySticky108,250);
-      setTimeout(applyMonthlySticky108,800);
-      return r;
-    };
-    dmw.__v108Sticky=true;
-    window.renderDormMonthlyMatrix=dmw;
-  }
-
-  var oldShowMonthlySubTab108=window.showMonthlySubTab;
-  if(typeof oldShowMonthlySubTab108==="function" && !oldShowMonthlySubTab108.__v108Sticky){
-    var sw=function(){
-      var r=oldShowMonthlySubTab108.apply(this,arguments);
-      setTimeout(applyMonthlySticky108,50);
-      setTimeout(applyMonthlySticky108,300);
-      setTimeout(applyMonthlySticky108,900);
-      return r;
-    };
-    sw.__v108Sticky=true;
-    window.showMonthlySubTab=sw;
-  }
-
-  document.addEventListener("DOMContentLoaded",function(){
-    setTimeout(applyMonthlySticky108,500);
-    setTimeout(applyMonthlySticky108,1200);
-    setTimeout(applyMonthlySticky108,2200);
-  });
-
-  window.addEventListener("load",function(){
-    setTimeout(applyMonthlySticky108,500);
-    setTimeout(applyMonthlySticky108,1500);
-  });
-
-  window.addEventListener("resize",function(){
-    setTimeout(applyMonthlySticky108,100);
-  });
-
-  window.addEventListener("scroll",function(){
-    setStickyOffsets108();
-  },{passive:true});
-})();
-</script>
-
-
-<script id="ver109-table-header-unify-fix">
-(function(){
-  function isMobile109(){
-    return window.matchMedia && window.matchMedia("(max-width:760px)").matches;
-  }
-
-  function applyMonthlyHeader109(){
-    var table=document.querySelector("#monthlyTable table");
-    if(!table)return;
-
-    var h=isMobile109()?17:18;
-    table.style.borderCollapse="separate";
-    table.style.borderSpacing="0";
-
-    var thead=table.querySelector("thead");
-    if(thead){
-      thead.style.position="sticky";
-      thead.style.top="0";
-      thead.style.zIndex="210";
-      thead.style.background="#fff";
-    }
-
-    table.querySelectorAll("thead tr:first-child th, thead tr:nth-child(2) th").forEach(function(th){
-      th.style.position="static";
-      th.style.top="auto";
-      th.style.height=h+"px";
-      th.style.minHeight=h+"px";
-      th.style.maxHeight=h+"px";
-      th.style.padding="0 3px";
-      th.style.lineHeight=h+"px";
-      th.style.verticalAlign="middle";
-      th.style.boxSizing="border-box";
-    });
-
-    var nameHead=table.querySelector("thead .name");
-    if(nameHead){
-      nameHead.style.position="sticky";
-      nameHead.style.left="0";
-      nameHead.style.zIndex="260";
-      nameHead.style.height=(h*2)+"px";
-      nameHead.style.minHeight=(h*2)+"px";
-      nameHead.style.maxHeight=(h*2)+"px";
-      nameHead.style.padding="0 5px";
-      nameHead.style.lineHeight=(h*2)+"px";
-      nameHead.style.background="#fff";
-      nameHead.style.boxSizing="border-box";
-    }
-
-    table.querySelectorAll("tbody .name").forEach(function(td){
-      td.style.position="sticky";
-      td.style.left="0";
-      td.style.zIndex="80";
-      td.style.background="#fff";
-    });
-  }
-
-  function applyDormHeader109(){
-    var table=document.querySelector("#dormMonthlyTable .dormMatrixTable");
-    if(!table)return;
-
-    var h=isMobile109()?17:18;
-    table.style.borderCollapse="separate";
-    table.style.borderSpacing="0";
-
-    var thead=table.querySelector("thead");
-    if(thead){
-      thead.style.position="sticky";
-      thead.style.top="0";
-      thead.style.zIndex="230";
-      thead.style.background="#fff";
-    }
-
-    table.querySelectorAll("thead tr:first-child th, thead tr:nth-child(2) th").forEach(function(th){
-      th.style.position="static";
-      th.style.top="auto";
-      th.style.height=h+"px";
-      th.style.minHeight=h+"px";
-      th.style.maxHeight=h+"px";
-      th.style.padding="0 2px";
-      th.style.lineHeight=h+"px";
-      th.style.verticalAlign="middle";
-      th.style.boxSizing="border-box";
-      th.style.margin="0";
-    });
-
-    table.querySelectorAll(".dormMatrixGroup small").forEach(function(s){
-      s.style.display="none";
-    });
-
-    table.querySelectorAll(".dormMatrixGroup").forEach(function(th){
-      th.style.fontSize=(isMobile109()?7:8)+"px";
-      th.style.lineHeight=h+"px";
-      th.style.padding="0 2px";
-      th.style.whiteSpace="nowrap";
-      th.style.overflow="hidden";
-      th.style.textOverflow="ellipsis";
-    });
-
-    table.querySelectorAll(".dormMatrixRoom").forEach(function(th){
-      th.style.fontSize=(isMobile109()?8:9)+"px";
-      th.style.lineHeight=h+"px";
-      th.style.padding="0 2px";
-      th.style.whiteSpace="nowrap";
-    });
-
-    var dateHead=table.querySelector(".dormMatrixDateHead");
-    if(dateHead){
-      dateHead.style.position="sticky";
-      dateHead.style.left="0";
-      dateHead.style.zIndex="300";
-      dateHead.style.height=(h*2)+"px";
-      dateHead.style.minHeight=(h*2)+"px";
-      dateHead.style.maxHeight=(h*2)+"px";
-      dateHead.style.padding="0 2px";
-      dateHead.style.lineHeight=(h*2)+"px";
-      dateHead.style.background="#111827";
-      dateHead.style.color="#fff";
-      dateHead.style.boxSizing="border-box";
-    }
-
-    table.querySelectorAll("tbody .dormMatrixDate").forEach(function(th){
-      th.style.position="sticky";
-      th.style.left="0";
-      th.style.zIndex="90";
-      th.style.background="#fff";
-    });
-  }
-
-  function bindSlideButtons109(){
-    document.querySelectorAll(".slideBtn").forEach(function(btn){
-      if(btn.__v109Bound)return;
-      btn.__v109Bound=true;
-
-      function run(e){
-        e.preventDefault();
-        e.stopPropagation();
-
-        var id=btn.getAttribute("data-target");
-        var dir=Number(btn.getAttribute("data-dir")||1);
-        var box=document.getElementById(id);
-        if(!box)return false;
-
-        var amount=Math.max(180,Math.floor(box.clientWidth*0.74));
-        if(typeof box.scrollBy==="function"){
-          box.scrollBy({left:amount*dir,behavior:"smooth"});
-        }else{
-          box.scrollLeft+=amount*dir;
-        }
-        return false;
-      }
-
-      btn.addEventListener("click",run,true);
-      btn.addEventListener("touchend",run,true);
-      btn.addEventListener("pointerup",run,true);
-    });
-  }
-
-  function applyHeaderUnify109(){
-    applyMonthlyHeader109();
-    applyDormHeader109();
-    bindSlideButtons109();
-  }
-
-  window.applyHeaderUnify109=applyHeaderUnify109;
-
-  var oldRenderMonthly109=window.renderMonthly;
-  if(typeof oldRenderMonthly109==="function" && !oldRenderMonthly109.__v109HeaderUnify){
-    var mw=function(){
-      var r=oldRenderMonthly109.apply(this,arguments);
-      setTimeout(applyHeaderUnify109,0);
-      setTimeout(applyHeaderUnify109,250);
-      setTimeout(applyHeaderUnify109,800);
-      return r;
-    };
-    mw.__v109HeaderUnify=true;
-    window.renderMonthly=mw;
-  }
-
-  var oldRenderDormMonthly109=window.renderDormMonthly;
-  if(typeof oldRenderDormMonthly109==="function" && !oldRenderDormMonthly109.__v109HeaderUnify){
-    var dw=function(){
-      var r=oldRenderDormMonthly109.apply(this,arguments);
-      setTimeout(applyHeaderUnify109,0);
-      setTimeout(applyHeaderUnify109,250);
-      setTimeout(applyHeaderUnify109,800);
-      return r;
-    };
-    dw.__v109HeaderUnify=true;
-    window.renderDormMonthly=dw;
-  }
-
-  var oldRenderDormMonthlyMatrix109=window.renderDormMonthlyMatrix;
-  if(typeof oldRenderDormMonthlyMatrix109==="function" && !oldRenderDormMonthlyMatrix109.__v109HeaderUnify){
-    var dmw=function(){
-      var r=oldRenderDormMonthlyMatrix109.apply(this,arguments);
-      setTimeout(applyHeaderUnify109,0);
-      setTimeout(applyHeaderUnify109,250);
-      setTimeout(applyHeaderUnify109,800);
-      return r;
-    };
-    dmw.__v109HeaderUnify=true;
-    window.renderDormMonthlyMatrix=dmw;
-  }
-
-  var oldShowMonthlySubTab109=window.showMonthlySubTab;
-  if(typeof oldShowMonthlySubTab109==="function" && !oldShowMonthlySubTab109.__v109HeaderUnify){
-    var sw=function(){
-      var r=oldShowMonthlySubTab109.apply(this,arguments);
-      setTimeout(applyHeaderUnify109,50);
-      setTimeout(applyHeaderUnify109,300);
-      setTimeout(applyHeaderUnify109,900);
-      return r;
-    };
-    sw.__v109HeaderUnify=true;
-    window.showMonthlySubTab=sw;
-  }
-
-  document.addEventListener("DOMContentLoaded",function(){
-    setTimeout(applyHeaderUnify109,500);
-    setTimeout(applyHeaderUnify109,1200);
-    setTimeout(applyHeaderUnify109,2200);
-  });
-
-  window.addEventListener("load",function(){
-    setTimeout(applyHeaderUnify109,500);
-    setTimeout(applyHeaderUnify109,1500);
-  });
-
-  window.addEventListener("resize",function(){
-    setTimeout(applyHeaderUnify109,100);
-  });
-})();
-</script>
-
-
-<script id="ver110-scroll-header-lock-fix">
+<script id="ver121-rebase107-no-blank-clean">
 (function(){
   /*
-    Ver110:
-    横・縦に全体をスライドしても、
-    出勤月間表の日付＋曜日、寮月間表の寮名＋部屋番号が隠れないよう、
-    thead全体ではなく各ヘッダーセルを2段stickyで固定する。
+    Ver121:
+    空白行の原因になっていたVer108以降の固定ブロック/複製ヘッダー/内部縦スクロールを使わず、
+    Ver107クリーンベースで復旧。
+    追加は源氏名セル調整と、古いミラー要素削除のみ。
   */
-
-  function mobile110(){
+  function mobile121(){
     return window.matchMedia && window.matchMedia("(max-width:760px)").matches;
   }
 
-  function lockMonthlyHeader110(){
-    var table=document.querySelector("#monthlyTable table");
-    if(!table)return;
-
-    var h=mobile110()?17:18;
-    table.style.borderCollapse="separate";
-    table.style.borderSpacing="0";
-
-    table.querySelectorAll("thead tr:first-child th").forEach(function(th){
-      th.style.position="sticky";
-      th.style.top="0px";
-      th.style.zIndex="520";
-      th.style.height=h+"px";
-      th.style.minHeight=h+"px";
-      th.style.maxHeight=h+"px";
-      th.style.padding="0 3px";
-      th.style.lineHeight=h+"px";
-      th.style.background="#fff";
-      th.style.boxSizing="border-box";
-    });
-
-    table.querySelectorAll("thead tr:nth-child(2) th").forEach(function(th){
-      th.style.position="sticky";
-      th.style.top=h+"px";
-      th.style.zIndex="510";
-      th.style.height=h+"px";
-      th.style.minHeight=h+"px";
-      th.style.maxHeight=h+"px";
-      th.style.padding="0 3px";
-      th.style.lineHeight=h+"px";
-      th.style.background="#fff";
-      th.style.boxSizing="border-box";
-    });
-
-    var nameHead=table.querySelector("thead .name");
-    if(nameHead){
-      nameHead.style.position="sticky";
-      nameHead.style.left="0px";
-      nameHead.style.top="0px";
-      nameHead.style.zIndex="700";
-      nameHead.style.height=(h*2)+"px";
-      nameHead.style.minHeight=(h*2)+"px";
-      nameHead.style.maxHeight=(h*2)+"px";
-      nameHead.style.padding="0 5px";
-      nameHead.style.lineHeight=(h*2)+"px";
-      nameHead.style.background="#fff";
-      nameHead.style.boxSizing="border-box";
-    }
-
-    table.querySelectorAll("tbody .name").forEach(function(td){
-      td.style.position="sticky";
-      td.style.left="0px";
-      td.style.zIndex="150";
-      td.style.background="#fff";
-    });
-  }
-
-  function lockDormHeader110(){
-    var table=document.querySelector("#dormMonthlyTable .dormMatrixTable");
-    if(!table)return;
-
-    var h=mobile110()?17:18;
-    table.style.borderCollapse="separate";
-    table.style.borderSpacing="0";
-
-    table.querySelectorAll("thead tr:first-child th").forEach(function(th){
-      th.style.position="sticky";
-      th.style.top="0px";
-      th.style.zIndex="620";
-      th.style.height=h+"px";
-      th.style.minHeight=h+"px";
-      th.style.maxHeight=h+"px";
-      th.style.padding="0 2px";
-      th.style.lineHeight=h+"px";
-      th.style.background="#fff";
-      th.style.boxSizing="border-box";
-    });
-
-    table.querySelectorAll("thead tr:nth-child(2) th").forEach(function(th){
-      th.style.position="sticky";
-      th.style.top=h+"px";
-      th.style.zIndex="610";
-      th.style.height=h+"px";
-      th.style.minHeight=h+"px";
-      th.style.maxHeight=h+"px";
-      th.style.padding="0 2px";
-      th.style.lineHeight=h+"px";
-      th.style.background="#fff";
-      th.style.boxSizing="border-box";
-    });
-
-    table.querySelectorAll(".dormMatrixGroup small").forEach(function(s){
-      s.style.display="none";
-    });
-
-    table.querySelectorAll(".dormMatrixGroup").forEach(function(th){
-      th.style.fontSize=(mobile110()?7:8)+"px";
-      th.style.lineHeight=h+"px";
-      th.style.padding="0 2px";
-      th.style.whiteSpace="nowrap";
-      th.style.overflow="hidden";
-      th.style.textOverflow="ellipsis";
-    });
-
-    table.querySelectorAll(".dormMatrixRoom").forEach(function(th){
-      th.style.fontSize=(mobile110()?8:9)+"px";
-      th.style.lineHeight=h+"px";
-      th.style.padding="0 2px";
-      th.style.whiteSpace="nowrap";
-    });
-
-    var dateHead=table.querySelector(".dormMatrixDateHead");
-    if(dateHead){
-      dateHead.style.position="sticky";
-      dateHead.style.left="0px";
-      dateHead.style.top="0px";
-      dateHead.style.zIndex="800";
-      dateHead.style.height=(h*2)+"px";
-      dateHead.style.minHeight=(h*2)+"px";
-      dateHead.style.maxHeight=(h*2)+"px";
-      dateHead.style.padding="0 2px";
-      dateHead.style.lineHeight=(h*2)+"px";
-      dateHead.style.background="#111827";
-      dateHead.style.color="#fff";
-      dateHead.style.boxSizing="border-box";
-    }
-
-    table.querySelectorAll("tbody .dormMatrixDate").forEach(function(th){
-      th.style.position="sticky";
-      th.style.left="0px";
-      th.style.zIndex="180";
-      th.style.background="#fff";
-    });
-  }
-
-  function bindSlideButtons110(){
-    document.querySelectorAll(".slideBtn").forEach(function(btn){
-      if(btn.__v110Bound)return;
-      btn.__v110Bound=true;
-
-      function run(e){
-        e.preventDefault();
-        e.stopPropagation();
-
-        var id=btn.getAttribute("data-target");
-        var dir=Number(btn.getAttribute("data-dir")||1);
-        var box=document.getElementById(id);
-        if(!box)return false;
-
-        var amount=Math.max(180,Math.floor(box.clientWidth*0.74));
-        if(typeof box.scrollBy==="function"){
-          box.scrollBy({left:amount*dir,behavior:"smooth"});
-        }else{
-          box.scrollLeft += amount*dir;
-        }
-        return false;
-      }
-
-      btn.addEventListener("click",run,true);
-      btn.addEventListener("touchend",run,true);
-      btn.addEventListener("pointerup",run,true);
-    });
-  }
-
-  function enableDragScroll110(box){
-    if(!box || box.__v110Drag)return;
-    box.__v110Drag=true;
-
-    var down=false, sx=0, sy=0, sl=0, st=0, moved=false;
-
-    box.addEventListener("pointerdown",function(e){
-      if(e.target && e.target.closest && e.target.closest("button,input,select,textarea"))return;
-      down=true;
-      moved=false;
-      sx=e.clientX;
-      sy=e.clientY;
-      sl=box.scrollLeft;
-      st=box.scrollTop;
-    },true);
-
-    box.addEventListener("pointermove",function(e){
-      if(!down)return;
-      var dx=e.clientX-sx;
-      var dy=e.clientY-sy;
-      if(Math.abs(dx)>4 || Math.abs(dy)>4){
-        moved=true;
-        window.__v110SlidingUntil=Date.now()+650;
-        box.scrollLeft=sl-dx;
-        box.scrollTop=st-dy;
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    },true);
-
-    function up(e){
-      if(!down)return;
-      down=false;
-      if(moved){
-        window.__v110SlidingUntil=Date.now()+750;
-        if(e){
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      }
-    }
-
-    box.addEventListener("pointerup",up,true);
-    box.addEventListener("pointercancel",up,true);
-    box.addEventListener("pointerleave",up,true);
-
-    box.addEventListener("click",function(e){
-      if(Date.now() < (window.__v110SlidingUntil||0)){
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        return false;
-      }
-    },true);
-  }
-
-  function applyHeaderLock110(){
-    lockMonthlyHeader110();
-    lockDormHeader110();
-    bindSlideButtons110();
-    enableDragScroll110(document.getElementById("monthlyTable"));
-    enableDragScroll110(document.getElementById("dormMonthlyTable"));
-  }
-
-  window.applyHeaderLock110=applyHeaderLock110;
-
-  var oldRenderMonthly110=window.renderMonthly;
-  if(typeof oldRenderMonthly110==="function" && !oldRenderMonthly110.__v110HeaderLock){
-    var mw=function(){
-      var r=oldRenderMonthly110.apply(this,arguments);
-      setTimeout(applyHeaderLock110,0);
-      setTimeout(applyHeaderLock110,250);
-      setTimeout(applyHeaderLock110,800);
-      return r;
-    };
-    mw.__v110HeaderLock=true;
-    window.renderMonthly=mw;
-  }
-
-  var oldRenderDormMonthly110=window.renderDormMonthly;
-  if(typeof oldRenderDormMonthly110==="function" && !oldRenderDormMonthly110.__v110HeaderLock){
-    var dw=function(){
-      var r=oldRenderDormMonthly110.apply(this,arguments);
-      setTimeout(applyHeaderLock110,0);
-      setTimeout(applyHeaderLock110,250);
-      setTimeout(applyHeaderLock110,800);
-      return r;
-    };
-    dw.__v110HeaderLock=true;
-    window.renderDormMonthly=dw;
-  }
-
-  var oldRenderDormMonthlyMatrix110=window.renderDormMonthlyMatrix;
-  if(typeof oldRenderDormMonthlyMatrix110==="function" && !oldRenderDormMonthlyMatrix110.__v110HeaderLock){
-    var dmw=function(){
-      var r=oldRenderDormMonthlyMatrix110.apply(this,arguments);
-      setTimeout(applyHeaderLock110,0);
-      setTimeout(applyHeaderLock110,250);
-      setTimeout(applyHeaderLock110,800);
-      return r;
-    };
-    dmw.__v110HeaderLock=true;
-    window.renderDormMonthlyMatrix=dmw;
-  }
-
-  var oldShowMonthlySubTab110=window.showMonthlySubTab;
-  if(typeof oldShowMonthlySubTab110==="function" && !oldShowMonthlySubTab110.__v110HeaderLock){
-    var sw=function(){
-      var r=oldShowMonthlySubTab110.apply(this,arguments);
-      setTimeout(applyHeaderLock110,50);
-      setTimeout(applyHeaderLock110,300);
-      setTimeout(applyHeaderLock110,900);
-      return r;
-    };
-    sw.__v110HeaderLock=true;
-    window.showMonthlySubTab=sw;
-  }
-
-  document.addEventListener("DOMContentLoaded",function(){
-    setTimeout(applyHeaderLock110,500);
-    setTimeout(applyHeaderLock110,1200);
-    setTimeout(applyHeaderLock110,2200);
-  });
-
-  window.addEventListener("load",function(){
-    setTimeout(applyHeaderLock110,500);
-    setTimeout(applyHeaderLock110,1500);
-  });
-
-  window.addEventListener("resize",function(){
-    setTimeout(applyHeaderLock110,100);
-  });
-
-  document.addEventListener("scroll",function(){
-    applyHeaderLock110();
-  },true);
-})();
-</script>
-
-
-<script id="ver111-monthly-sticky-layout-fix">
-(function(){
-  function mobile(){return window.matchMedia&&window.matchMedia("(max-width:760px)").matches}
-  function setOffsets(){
-    var menu=document.querySelector(".menu"), m=menu?Math.ceil(menu.getBoundingClientRect().height):0;
-    document.documentElement.style.setProperty("--v111-menu-top",m+"px");
-    var card=document.querySelector("#monthly .monthlyTopCard"), c=card?Math.ceil(card.getBoundingClientRect().height):136;
-    document.documentElement.style.setProperty("--v111-sub-head-top",(m+c+8)+"px");
-  }
-  function ensureButtons(){
-    [{id:"monthlyTable",guide:"monthlySlideGuide"},{id:"dormMonthlyTable",guide:"dormSlideGuide"}].forEach(function(t){
-      var box=document.getElementById(t.id); if(!box)return;
-      var g=document.getElementById(t.guide);
-      var inner='<button type="button" class="slideBtn" data-target="'+t.id+'" data-dir="-1">←</button><span class="slideText">左右にスライド</span><button type="button" class="slideBtn" data-target="'+t.id+'" data-dir="1">→</button>';
-      if(!g)box.insertAdjacentHTML("beforebegin",'<div id="'+t.guide+'" class="slideGuide">'+inner+'</div>');
-      else if(!g.querySelector(".slideBtn"))g.innerHTML=inner;
-    });
-    document.querySelectorAll(".slideBtn").forEach(function(btn){
-      if(btn.__v111Bound)return; btn.__v111Bound=true;
-      function run(e){
-        e.preventDefault(); e.stopPropagation();
-        var box=document.getElementById(btn.getAttribute("data-target")); if(!box)return false;
-        var dir=Number(btn.getAttribute("data-dir")||1), amount=Math.max(180,Math.floor(box.clientWidth*.74));
-        if(box.scrollBy)box.scrollBy({left:amount*dir,behavior:"smooth"}); else box.scrollLeft+=amount*dir;
-        return false;
-      }
-      btn.addEventListener("click",run,true); btn.addEventListener("touchend",run,true); btn.addEventListener("pointerup",run,true);
-    });
-  }
-  function wrapHead(panelId,guideId){
-    var panel=document.getElementById(panelId); if(!panel)return;
-    var head=panel.querySelector(".v111StickyHead");
-    if(!head){head=document.createElement("div"); head.className="v111StickyHead"; panel.insertBefore(head,panel.firstChild)}
-    [panel.querySelector("h2"),panel.querySelector(".note"),document.getElementById(guideId)].forEach(function(el){
-      if(el&&el.parentElement!==head)head.appendChild(el);
-    });
-  }
-  function fixDorm(){
-    var table=document.querySelector("#dormMonthlyTable .dormMatrixTable"); if(!table)return;
-    var h=16; table.style.borderCollapse="separate"; table.style.borderSpacing="0";
-    table.querySelectorAll("thead tr:first-child th").forEach(function(th){
-      Object.assign(th.style,{position:"sticky",top:"0px",zIndex:"720",height:h+"px",minHeight:h+"px",maxHeight:h+"px",padding:"0 2px",lineHeight:h+"px",background:"#fff",boxSizing:"border-box"});
-    });
-    table.querySelectorAll("thead tr:nth-child(2) th").forEach(function(th){
-      Object.assign(th.style,{position:"sticky",top:h+"px",zIndex:"710",height:h+"px",minHeight:h+"px",maxHeight:h+"px",padding:"0 2px",lineHeight:h+"px",background:"#fff",boxSizing:"border-box"});
-    });
-    table.querySelectorAll(".dormMatrixGroup small").forEach(function(s){s.style.display="none"});
-    table.querySelectorAll(".dormMatrixGroup").forEach(function(th){Object.assign(th.style,{fontSize:"7px",lineHeight:h+"px",padding:"0 2px",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"})});
-    table.querySelectorAll(".dormMatrixRoom").forEach(function(th){Object.assign(th.style,{fontSize:"8px",lineHeight:h+"px",padding:"0 2px",whiteSpace:"nowrap"})});
-    var dh=table.querySelector(".dormMatrixDateHead");
-    if(dh)Object.assign(dh.style,{position:"sticky",left:"0px",top:"0px",zIndex:"900",height:h*2+"px",minHeight:h*2+"px",maxHeight:h*2+"px",padding:"0 2px",lineHeight:h*2+"px",background:"#111827",color:"#fff",boxSizing:"border-box"});
-    table.querySelectorAll("tbody .dormMatrixDate").forEach(function(th){Object.assign(th.style,{position:"sticky",left:"0px",zIndex:"190",background:"#fff"})});
-  }
-  function fixMonthly(){
-    var table=document.querySelector("#monthlyTable table"); if(!table)return;
-    var h=16, w=mobile()?118:132; table.style.borderCollapse="separate"; table.style.borderSpacing="0";
-    table.querySelectorAll("thead tr:first-child th").forEach(function(th){Object.assign(th.style,{position:"sticky",top:"0px",zIndex:"620",height:h+"px",minHeight:h+"px",maxHeight:h+"px",padding:"0 3px",lineHeight:h+"px",background:"#fff",boxSizing:"border-box"})});
-    table.querySelectorAll("thead tr:nth-child(2) th").forEach(function(th){Object.assign(th.style,{position:"sticky",top:h+"px",zIndex:"610",height:h+"px",minHeight:h+"px",maxHeight:h+"px",padding:"0 3px",lineHeight:h+"px",background:"#fff",boxSizing:"border-box"})});
-    var nh=table.querySelector("thead .name");
-    if(nh)Object.assign(nh.style,{position:"sticky",left:"0px",top:"0px",zIndex:"850",height:h*2+"px",minHeight:h*2+"px",maxHeight:h*2+"px",padding:"0 6px",lineHeight:h*2+"px",background:"#fff",boxSizing:"border-box"});
-    table.querySelectorAll(".name").forEach(function(c){Object.assign(c.style,{minWidth:w+"px",width:w+"px",maxWidth:w+"px",boxSizing:"border-box",overflow:"hidden",whiteSpace:"normal"})});
-    table.querySelectorAll("tbody .name").forEach(function(td){Object.assign(td.style,{position:"sticky",left:"0px",zIndex:"160",background:"#fff",padding:mobile()?"4px 5px":"4px 6px",lineHeight:"1.15"})});
-    table.querySelectorAll("tbody .name span,tbody .name .badge,tbody .name .placeBadge,tbody .name .workPlaceBadge,tbody .name .newBadge").forEach(function(el){
-      Object.assign(el.style,{maxWidth:mobile()?"54px":"62px",fontSize:mobile()?"9px":"10px",lineHeight:"1.1",padding:mobile()?"1px 4px":"1px 5px",boxSizing:"border-box",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",verticalAlign:"middle"});
-    });
-  }
-  function drag(box){
-    if(!box||box.__v111Drag)return; box.__v111Drag=true;
-    var down=false,sx=0,sy=0,sl=0,st=0,moved=false;
-    box.addEventListener("pointerdown",function(e){if(e.target.closest&&e.target.closest("button,input,select,textarea"))return;down=true;moved=false;sx=e.clientX;sy=e.clientY;sl=box.scrollLeft;st=box.scrollTop},true);
-    box.addEventListener("pointermove",function(e){if(!down)return;var dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)>4||Math.abs(dy)>4){moved=true;window.__v111SlidingUntil=Date.now()+650;box.scrollLeft=sl-dx;box.scrollTop=st-dy;e.preventDefault();e.stopPropagation()}},true);
-    function up(e){if(!down)return;down=false;if(moved){window.__v111SlidingUntil=Date.now()+750;if(e){e.preventDefault();e.stopPropagation()}}}
-    box.addEventListener("pointerup",up,true);box.addEventListener("pointercancel",up,true);box.addEventListener("pointerleave",up,true);
-  }
-  function apply(){
-    setOffsets(); ensureButtons(); wrapHead("monthlyStaffPanel","monthlySlideGuide"); wrapHead("monthlyDormPanel","dormSlideGuide");
-    fixDorm(); fixMonthly(); drag(document.getElementById("monthlyTable")); drag(document.getElementById("dormMonthlyTable"));
-  }
-  window.applyMonthlyStickyLayout111=apply;
-  ["renderMonthly","renderDormMonthly","renderDormMonthlyMatrix"].forEach(function(name){
-    var old=window[name]; if(typeof old==="function"&&!old.__v111Layout){var w=function(){var r=old.apply(this,arguments);setTimeout(apply,0);setTimeout(apply,250);setTimeout(apply,800);return r};w.__v111Layout=true;window[name]=w}
-  });
-  var oldTab=window.showMonthlySubTab;
-  if(typeof oldTab==="function"&&!oldTab.__v111Layout){var tw=function(){var r=oldTab.apply(this,arguments);setTimeout(apply,50);setTimeout(apply,300);setTimeout(apply,900);return r};tw.__v111Layout=true;window.showMonthlySubTab=tw}
-  document.addEventListener("DOMContentLoaded",function(){setTimeout(apply,500);setTimeout(apply,1200);setTimeout(apply,2200)});
-  window.addEventListener("load",function(){setTimeout(apply,500);setTimeout(apply,1500)});
-  window.addEventListener("resize",function(){setTimeout(apply,100)});
-  document.addEventListener("scroll",function(){apply()},true);
-})();
-</script>
-
-
-<script id="ver120-rebase111-no-blank">
-(function(){
-  /*
-    Ver120:
-    空白行増加の原因になった複製ヘッダー方式を完全停止。
-    Ver111のクリーンな月間表へ戻し、源氏名セルのはみ出しだけ最小限調整。
-  */
-  function mobile120(){
-    return window.matchMedia && window.matchMedia("(max-width:760px)").matches;
-  }
-
-  function removeOldMirrors120(){
+  function cleanupOldFixedHeaders121(){
     ["monthlyHeaderMirror","dormHeaderMirror"].forEach(function(id){
       var el=document.getElementById(id);
       if(el)el.remove();
+    });
+
+    document.querySelectorAll(".v108StaffStickyHead,.v108DormStickyHead,.v111StickyHead,.v112HeaderMirror,.v113HeaderMirror,.v114HeaderMirror,.v115HeaderMirror,.v116HeaderMirror,.v117HeaderMirror,.v118HeaderMirror,.v119HeaderMirror,.v120HeaderMirror").forEach(function(el){
+      el.remove();
     });
 
     document.querySelectorAll("#monthlyTable table,#dormMonthlyTable table,#dormMonthlyTable .dormMatrixTable").forEach(function(t){
@@ -11295,15 +9860,16 @@ init();
         "v116HideOriginalThead",
         "v117HideOriginalThead",
         "v118HideOriginalThead",
-        "v119HideOriginalThead"
+        "v119HideOriginalThead",
+        "v120HideOriginalThead"
       );
       var thead=t.querySelector("thead");
       if(thead)thead.style.display="table-header-group";
     });
   }
 
-  function fixName120(){
-    var w=mobile120()?155:170;
+  function fixName121(){
+    var w=mobile121()?155:170;
 
     document.querySelectorAll("#monthlyTable .name").forEach(function(c){
       c.style.minWidth=w+"px";
@@ -11315,9 +9881,9 @@ init();
     });
 
     document.querySelectorAll("#monthlyTable tbody .name").forEach(function(td){
-      td.style.padding=mobile120()?"5px 7px":"5px 8px";
+      td.style.padding=mobile121()?"5px 7px":"5px 8px";
       td.style.lineHeight="1.16";
-      td.style.fontSize=mobile120()?"12px":"13px";
+      td.style.fontSize=mobile121()?"12px":"13px";
       td.style.wordBreak="keep-all";
       td.style.overflow="hidden";
 
@@ -11340,10 +9906,10 @@ init();
     });
   }
 
-  function ensureSlideButtons120(){
+  function ensureSlideButtons121(){
     document.querySelectorAll(".slideBtn").forEach(function(btn){
-      if(btn.__v120Bound)return;
-      btn.__v120Bound=true;
+      if(btn.__v121Bound)return;
+      btn.__v121Bound=true;
 
       function run(e){
         e.preventDefault();
@@ -11363,54 +9929,54 @@ init();
     });
   }
 
-  function apply120(){
-    removeOldMirrors120();
-    fixName120();
-    ensureSlideButtons120();
+  function apply121(){
+    cleanupOldFixedHeaders121();
+    fixName121();
+    ensureSlideButtons121();
   }
 
-  window.applyRebase111NoBlank120=apply120;
+  window.applyRebase107NoBlankClean121=apply121;
 
   ["renderMonthly","renderDormMonthly","renderDormMonthlyMatrix"].forEach(function(name){
     var old=window[name];
-    if(typeof old==="function" && !old.__v120NoBlank){
+    if(typeof old==="function" && !old.__v121NoBlankClean){
       var w=function(){
         var r=old.apply(this,arguments);
-        setTimeout(apply120,0);
-        setTimeout(apply120,300);
-        setTimeout(apply120,900);
+        setTimeout(apply121,0);
+        setTimeout(apply121,300);
+        setTimeout(apply121,900);
         return r;
       };
-      w.__v120NoBlank=true;
+      w.__v121NoBlankClean=true;
       window[name]=w;
     }
   });
 
   var oldTab=window.showMonthlySubTab;
-  if(typeof oldTab==="function" && !oldTab.__v120NoBlank){
+  if(typeof oldTab==="function" && !oldTab.__v121NoBlankClean){
     var tw=function(){
       var r=oldTab.apply(this,arguments);
-      setTimeout(apply120,50);
-      setTimeout(apply120,350);
-      setTimeout(apply120,1000);
+      setTimeout(apply121,50);
+      setTimeout(apply121,350);
+      setTimeout(apply121,1000);
       return r;
     };
-    tw.__v120NoBlank=true;
+    tw.__v121NoBlankClean=true;
     window.showMonthlySubTab=tw;
   }
 
   document.addEventListener("DOMContentLoaded",function(){
-    setTimeout(apply120,500);
-    setTimeout(apply120,1300);
+    setTimeout(apply121,500);
+    setTimeout(apply121,1300);
   });
 
   window.addEventListener("load",function(){
-    setTimeout(apply120,500);
-    setTimeout(apply120,1600);
+    setTimeout(apply121,500);
+    setTimeout(apply121,1600);
   });
 
   window.addEventListener("resize",function(){
-    setTimeout(apply120,150);
+    setTimeout(apply121,150);
   });
 })();
 </script>
