@@ -2338,6 +2338,111 @@ th{background:#fafafa;font-weight:900}.name{position:sticky;left:0;z-index:3;bac
   }
 }
 
+
+/* Ver122: 一個ずつ処理① 上下スライド時に元ヘッダーを隠れないように固定 */
+/* 複製ヘッダーは使わない。空白行対策でVer121の方針を維持 */
+#monthlyHeaderMirror,
+#dormHeaderMirror,
+.v112HeaderMirror,
+.v113HeaderMirror,
+.v114HeaderMirror,
+.v115HeaderMirror,
+.v116HeaderMirror,
+.v117HeaderMirror,
+.v118HeaderMirror,
+.v119HeaderMirror,
+.v120HeaderMirror{
+  display:none!important;
+}
+
+/* 出勤月間表：月日・曜日を表の上で固定 */
+#monthlyTable table{
+  border-collapse:separate!important;
+  border-spacing:0!important;
+}
+
+#monthlyTable table > thead{
+  display:table-header-group!important;
+  position:sticky!important;
+  top:0!important;
+  z-index:700!important;
+  background:#f8fafc!important;
+}
+
+/* 以前の2段個別stickyを止め、thead全体を固定する */
+#monthlyTable table > thead th{
+  position:static!important;
+  top:auto!important;
+  z-index:auto!important;
+  background:#f8fafc!important;
+}
+
+/* 左上の源氏名だけ横スライド時に固定 */
+#monthlyTable table > thead .name{
+  position:sticky!important;
+  left:0!important;
+  z-index:760!important;
+  background:#f8fafc!important;
+  box-shadow:2px 0 0 rgba(15,23,42,.12)!important;
+}
+
+/* 左の源氏名列 */
+#monthlyTable tbody .name{
+  position:sticky!important;
+  left:0!important;
+  z-index:520!important;
+  background:#fff!important;
+  box-shadow:2px 0 0 rgba(15,23,42,.10)!important;
+}
+
+/* 寮月間表：寮名・部屋番号を表の上で固定 */
+#dormMonthlyTable .dormMatrixTable{
+  border-collapse:separate!important;
+  border-spacing:0!important;
+}
+
+#dormMonthlyTable .dormMatrixTable > thead{
+  display:table-header-group!important;
+  position:sticky!important;
+  top:0!important;
+  z-index:720!important;
+  background:#fff!important;
+}
+
+/* 寮名・部屋番はthead全体で固定。個別stickyは解除 */
+#dormMonthlyTable .dormMatrixTable > thead th:not(.dormMatrixDateHead){
+  position:static!important;
+  top:auto!important;
+  z-index:auto!important;
+}
+
+/* 左上の日付セルのみ横固定 */
+#dormMonthlyTable .dormMatrixDateHead{
+  position:sticky!important;
+  left:0!important;
+  top:auto!important;
+  z-index:780!important;
+  background:#111827!important;
+  color:#fff!important;
+  box-shadow:2px 0 0 rgba(15,23,42,.16)!important;
+}
+
+/* 左の日付列 */
+#dormMonthlyTable tbody .dormMatrixDate{
+  position:sticky!important;
+  left:0!important;
+  z-index:540!important;
+  background:#fff!important;
+  box-shadow:2px 0 0 rgba(15,23,42,.10)!important;
+}
+
+/* ヘッダーの高さは既存のコンパクト設定を維持 */
+#monthlyTable table > thead th,
+#dormMonthlyTable .dormMatrixTable > thead th{
+  white-space:nowrap!important;
+  box-sizing:border-box!important;
+}
+
 </style>
 </head>
 <body>
@@ -9977,6 +10082,188 @@ init();
 
   window.addEventListener("resize",function(){
     setTimeout(apply121,150);
+  });
+})();
+</script>
+
+
+<script id="ver122-sticky-original-headers">
+(function(){
+  /*
+    Ver122:
+    一個ずつ処理①
+    - 複製ヘッダーは使わない
+    - 元のtheadをそのまま固定
+    - 空白行を増やすmax-height変更や内部構造変更はしない
+  */
+
+  function q(s,r){return (r||document).querySelector(s)}
+  function qa(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+
+  function removeMirrors122(){
+    ["monthlyHeaderMirror","dormHeaderMirror"].forEach(function(id){
+      var el=document.getElementById(id);
+      if(el)el.remove();
+    });
+
+    qa("#monthlyTable table,#dormMonthlyTable table,#dormMonthlyTable .dormMatrixTable").forEach(function(t){
+      t.classList.remove(
+        "v112HideOriginalThead",
+        "v113HideOriginalThead",
+        "v114HideOriginalThead",
+        "v115HideOriginalThead",
+        "v116HideOriginalThead",
+        "v117HideOriginalThead",
+        "v118HideOriginalThead",
+        "v119HideOriginalThead",
+        "v120HideOriginalThead"
+      );
+      var thead=q("thead",t);
+      if(thead)thead.style.setProperty("display","table-header-group","important");
+    });
+  }
+
+  function setImportant(el, prop, val){
+    if(el)el.style.setProperty(prop,val,"important");
+  }
+
+  function fixMonthlyHeader122(){
+    var table=q("#monthlyTable table");
+    if(!table)return;
+
+    setImportant(table,"border-collapse","separate");
+    setImportant(table,"border-spacing","0");
+
+    var thead=q("thead",table);
+    if(thead){
+      setImportant(thead,"display","table-header-group");
+      setImportant(thead,"position","sticky");
+      setImportant(thead,"top","0px");
+      setImportant(thead,"z-index","700");
+      setImportant(thead,"background","#f8fafc");
+    }
+
+    qa("thead th",table).forEach(function(th){
+      setImportant(th,"position","static");
+      setImportant(th,"top","auto");
+      setImportant(th,"z-index","auto");
+      setImportant(th,"background","#f8fafc");
+      setImportant(th,"box-sizing","border-box");
+      setImportant(th,"white-space","nowrap");
+    });
+
+    var name=q("thead .name",table);
+    if(name){
+      setImportant(name,"position","sticky");
+      setImportant(name,"left","0px");
+      setImportant(name,"z-index","760");
+      setImportant(name,"background","#f8fafc");
+      setImportant(name,"box-shadow","2px 0 0 rgba(15,23,42,.12)");
+    }
+
+    qa("tbody .name",table).forEach(function(td){
+      setImportant(td,"position","sticky");
+      setImportant(td,"left","0px");
+      setImportant(td,"z-index","520");
+      setImportant(td,"background","#fff");
+      setImportant(td,"box-shadow","2px 0 0 rgba(15,23,42,.10)");
+    });
+  }
+
+  function fixDormHeader122(){
+    var table=q("#dormMonthlyTable .dormMatrixTable");
+    if(!table)return;
+
+    setImportant(table,"border-collapse","separate");
+    setImportant(table,"border-spacing","0");
+
+    var thead=q("thead",table);
+    if(thead){
+      setImportant(thead,"display","table-header-group");
+      setImportant(thead,"position","sticky");
+      setImportant(thead,"top","0px");
+      setImportant(thead,"z-index","720");
+      setImportant(thead,"background","#fff");
+    }
+
+    qa("thead th",table).forEach(function(th){
+      if(!th.classList.contains("dormMatrixDateHead")){
+        setImportant(th,"position","static");
+        setImportant(th,"top","auto");
+        setImportant(th,"z-index","auto");
+      }
+      setImportant(th,"box-sizing","border-box");
+      setImportant(th,"white-space","nowrap");
+    });
+
+    var dateHead=q(".dormMatrixDateHead",table);
+    if(dateHead){
+      setImportant(dateHead,"position","sticky");
+      setImportant(dateHead,"left","0px");
+      setImportant(dateHead,"top","auto");
+      setImportant(dateHead,"z-index","780");
+      setImportant(dateHead,"background","#111827");
+      setImportant(dateHead,"color","#fff");
+      setImportant(dateHead,"box-shadow","2px 0 0 rgba(15,23,42,.16)");
+    }
+
+    qa("tbody .dormMatrixDate",table).forEach(function(td){
+      setImportant(td,"position","sticky");
+      setImportant(td,"left","0px");
+      setImportant(td,"z-index","540");
+      setImportant(td,"background","#fff");
+      setImportant(td,"box-shadow","2px 0 0 rgba(15,23,42,.10)");
+    });
+  }
+
+  function apply122(){
+    removeMirrors122();
+    fixMonthlyHeader122();
+    fixDormHeader122();
+  }
+
+  window.applyStickyOriginalHeaders122=apply122;
+
+  ["renderMonthly","renderDormMonthly","renderDormMonthlyMatrix"].forEach(function(name){
+    var old=window[name];
+    if(typeof old==="function" && !old.__v122StickyOriginal){
+      var w=function(){
+        var r=old.apply(this,arguments);
+        setTimeout(apply122,0);
+        setTimeout(apply122,250);
+        setTimeout(apply122,800);
+        return r;
+      };
+      w.__v122StickyOriginal=true;
+      window[name]=w;
+    }
+  });
+
+  var oldTab=window.showMonthlySubTab;
+  if(typeof oldTab==="function" && !oldTab.__v122StickyOriginal){
+    var tw=function(){
+      var r=oldTab.apply(this,arguments);
+      setTimeout(apply122,50);
+      setTimeout(apply122,300);
+      setTimeout(apply122,900);
+      return r;
+    };
+    tw.__v122StickyOriginal=true;
+    window.showMonthlySubTab=tw;
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(apply122,500);
+    setTimeout(apply122,1300);
+  });
+
+  window.addEventListener("load",function(){
+    setTimeout(apply122,500);
+    setTimeout(apply122,1600);
+  });
+
+  window.addEventListener("resize",function(){
+    setTimeout(apply122,150);
   });
 })();
 </script>
