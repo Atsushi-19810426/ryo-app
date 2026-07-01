@@ -2652,6 +2652,146 @@ body:not(.v125MonthlyActive) .menu.simpleMenu.v124MonthlyMenu #topMonthlyControl
   display:none!important;
 }
 
+
+/* Ver126: 月間表メニューを一列化・説明テキスト非表示 */
+/* 月間表を開いた時：ホーム / 出勤月間表 / 寮月間表 / 表示開始日 / 表示日数 を一列に並べる */
+body.v126MonthlyActive .menu.simpleMenu.v124MonthlyMenu,
+body.v125MonthlyActive .menu.simpleMenu.v124MonthlyMenu{
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  align-items:center!important;
+  gap:6px!important;
+  grid-template-columns:none!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  white-space:nowrap!important;
+}
+
+body.v126MonthlyActive .menu.simpleMenu.v124MonthlyMenu button,
+body.v125MonthlyActive .menu.simpleMenu.v124MonthlyMenu button{
+  flex:0 0 auto!important;
+  width:auto!important;
+  min-width:62px!important;
+  height:38px!important;
+  padding:8px 10px!important;
+  font-size:12px!important;
+  line-height:1.1!important;
+}
+
+/* 出勤月間表・寮月間表ボタンは少し幅を確保 */
+body.v126MonthlyActive #topMonthlyStaff,
+body.v126MonthlyActive #topMonthlyDorm,
+body.v125MonthlyActive #topMonthlyStaff,
+body.v125MonthlyActive #topMonthlyDorm{
+  min-width:92px!important;
+}
+
+/* 表示開始日・表示日数を横並びコンパクト化 */
+body.v126MonthlyActive #topMonthlyControls,
+body.v125MonthlyActive #topMonthlyControls{
+  flex:0 0 auto!important;
+  display:flex!important;
+  grid-column:auto!important;
+  align-items:center!important;
+  gap:6px!important;
+  width:auto!important;
+  min-width:0!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+
+body.v126MonthlyActive #topMonthlyControls > div,
+body.v125MonthlyActive #topMonthlyControls > div{
+  flex:0 0 auto!important;
+  width:auto!important;
+}
+
+body.v126MonthlyActive #topMonthlyControls label,
+body.v125MonthlyActive #topMonthlyControls label{
+  display:none!important;
+}
+
+body.v126MonthlyActive #topMonthBase,
+body.v125MonthlyActive #topMonthBase{
+  width:128px!important;
+  height:38px!important;
+  padding:0 7px!important;
+  font-size:12px!important;
+  border-radius:12px!important;
+}
+
+body.v126MonthlyActive #topDaysCount,
+body.v125MonthlyActive #topDaysCount{
+  width:68px!important;
+  height:38px!important;
+  padding:0 6px!important;
+  font-size:12px!important;
+  border-radius:12px!important;
+}
+
+/* 月間表内の説明テキストは非表示にして画面をスッキリさせる */
+body.v126MonthlyActive #monthlyStaffPanel h2,
+body.v126MonthlyActive #monthlyStaffPanel .note,
+body.v126MonthlyActive #monthlyDormPanel h2,
+body.v126MonthlyActive #monthlyDormPanel .note,
+body.v125MonthlyActive #monthlyStaffPanel h2,
+body.v125MonthlyActive #monthlyStaffPanel .note,
+body.v125MonthlyActive #monthlyDormPanel h2,
+body.v125MonthlyActive #monthlyDormPanel .note{
+  display:none!important;
+}
+
+/* 説明文を消した分、固定ヘッダー周りの余白を詰める */
+body.v126MonthlyActive #monthlyStaffPanel .v114StickyHead,
+body.v126MonthlyActive #monthlyDormPanel .v114StickyHead,
+body.v125MonthlyActive #monthlyStaffPanel .v114StickyHead,
+body.v125MonthlyActive #monthlyDormPanel .v114StickyHead{
+  padding-top:0!important;
+  margin-top:0!important;
+}
+
+@media(max-width:760px){
+  body.v126MonthlyActive .menu.simpleMenu.v124MonthlyMenu,
+  body.v125MonthlyActive .menu.simpleMenu.v124MonthlyMenu{
+    gap:5px!important;
+    padding-bottom:4px!important;
+  }
+
+  body.v126MonthlyActive .menu.simpleMenu.v124MonthlyMenu button,
+  body.v125MonthlyActive .menu.simpleMenu.v124MonthlyMenu button{
+    min-width:56px!important;
+    height:36px!important;
+    padding:7px 8px!important;
+    font-size:11px!important;
+  }
+
+  body.v126MonthlyActive #topMonthlyStaff,
+  body.v126MonthlyActive #topMonthlyDorm,
+  body.v125MonthlyActive #topMonthlyStaff,
+  body.v125MonthlyActive #topMonthlyDorm{
+    min-width:82px!important;
+  }
+
+  body.v126MonthlyActive #topMonthBase,
+  body.v125MonthlyActive #topMonthBase{
+    width:116px!important;
+    height:36px!important;
+    font-size:11px!important;
+  }
+
+  body.v126MonthlyActive #topDaysCount,
+  body.v125MonthlyActive #topDaysCount{
+    width:60px!important;
+    height:36px!important;
+    font-size:11px!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -11016,6 +11156,112 @@ init();
 
   window.addEventListener("resize",function(){
     setTimeout(syncMonthlyMenu125,100);
+  });
+})();
+</script>
+
+
+<script id="ver126-monthly-menu-one-line">
+(function(){
+  /*
+    Ver126:
+    月間表ページ中の上部メニューを一列にする。
+    月間表内の説明テキストは非表示にする。
+    保存キー・読込キー変更なし。
+  */
+
+  function el(id){return document.getElementById(id)}
+  function q(s,r){return (r||document).querySelector(s)}
+
+  function isMonthlyActive126(){
+    var monthly=el("monthly");
+    return !!(monthly && !monthly.classList.contains("hidden") && monthly.style.display !== "none");
+  }
+
+  function sync126(){
+    var active=isMonthlyActive126();
+
+    document.body.classList.toggle("v126MonthlyActive",active);
+
+    if(typeof window.syncMonthlyMenu125==="function"){
+      try{ window.syncMonthlyMenu125(); }catch(e){}
+      document.body.classList.toggle("v126MonthlyActive",active);
+    }
+
+    var menu=q(".menu.simpleMenu") || q(".menu");
+    if(menu && active){
+      menu.classList.add("v124MonthlyMenu");
+      menu.style.display="flex";
+      menu.style.flexWrap="nowrap";
+      menu.style.alignItems="center";
+      menu.style.overflowX="auto";
+      menu.style.overflowY="hidden";
+      menu.style.whiteSpace="nowrap";
+    }
+
+    var controls=el("topMonthlyControls");
+    if(controls && active){
+      controls.style.display="flex";
+      controls.style.gridColumn="auto";
+      controls.style.alignItems="center";
+      controls.style.gap="6px";
+      controls.style.padding="0";
+      controls.style.margin="0";
+      controls.style.border="0";
+      controls.style.background="transparent";
+      controls.style.boxShadow="none";
+    }
+
+    // 月間表内の説明テキストは不要なので非表示
+    ["monthlyStaffPanel","monthlyDormPanel"].forEach(function(pid){
+      var panel=el(pid);
+      if(!panel)return;
+      panel.querySelectorAll("h2,.note").forEach(function(x){
+        x.style.display=active ? "none" : "";
+      });
+    });
+  }
+
+  window.syncMonthlyMenuOneLine126=sync126;
+
+  var oldShowPage=window.showPage;
+  if(typeof oldShowPage==="function" && !oldShowPage.__v126OneLine){
+    var wrapped=function(){
+      var r=oldShowPage.apply(this,arguments);
+      setTimeout(sync126,0);
+      setTimeout(sync126,120);
+      setTimeout(sync126,500);
+      return r;
+    };
+    wrapped.__v126OneLine=true;
+    window.showPage=wrapped;
+  }
+
+  var oldShowMonthlySubTab=window.showMonthlySubTab;
+  if(typeof oldShowMonthlySubTab==="function" && !oldShowMonthlySubTab.__v126OneLine){
+    var wrappedSub=function(){
+      var r=oldShowMonthlySubTab.apply(this,arguments);
+      setTimeout(sync126,0);
+      setTimeout(sync126,120);
+      setTimeout(sync126,500);
+      return r;
+    };
+    wrappedSub.__v126OneLine=true;
+    window.showMonthlySubTab=wrappedSub;
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(sync126,300);
+    setTimeout(sync126,1000);
+  });
+
+  window.addEventListener("load",function(){
+    setTimeout(sync126,300);
+    setTimeout(sync126,1200);
+  });
+
+  window.addEventListener("resize",function(){
+    setTimeout(sync126,100);
   });
 })();
 </script>
