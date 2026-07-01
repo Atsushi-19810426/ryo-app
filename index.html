@@ -2603,6 +2603,55 @@ body.v124MonthlyActive #tab_home{
   }
 }
 
+
+/* Ver125: 月間表専用メニューの表示条件を修正 */
+/* 通常時は、月間表専用ボタンと日付/日数を必ず隠す */
+body:not(.v125MonthlyActive) #topMonthlyStaff,
+body:not(.v125MonthlyActive) #topMonthlyDorm,
+body:not(.v125MonthlyActive) #topMonthlyControls,
+body:not(.v125MonthlyActive) .v124MonthlyOnly,
+body:not(.v125MonthlyActive) .v125MonthlyOnly{
+  display:none!important;
+}
+
+/* 通常時は通常メニューを必ず表示 */
+body:not(.v125MonthlyActive) #tab_home,
+body:not(.v125MonthlyActive) #tab_staff,
+body:not(.v125MonthlyActive) #tab_dormHub,
+body:not(.v125MonthlyActive) #tab_monthly,
+body:not(.v125MonthlyActive) #tab_ai{
+  display:block!important;
+}
+
+/* 月間表を開いた時だけ通常メニューを畳む */
+body.v125MonthlyActive #tab_staff,
+body.v125MonthlyActive #tab_dormHub,
+body.v125MonthlyActive #tab_monthly,
+body.v125MonthlyActive #tab_ai{
+  display:none!important;
+}
+
+/* 月間表を開いた時：ホーム / 出勤月間表 / 寮月間表 / 表示開始日 / 表示日数 */
+body.v125MonthlyActive #tab_home{
+  display:block!important;
+}
+
+body.v125MonthlyActive #topMonthlyStaff,
+body.v125MonthlyActive #topMonthlyDorm{
+  display:block!important;
+}
+
+body.v125MonthlyActive #topMonthlyControls{
+  display:grid!important;
+}
+
+/* Ver124のクラスが残っていても、body状態を優先する */
+body:not(.v125MonthlyActive) .menu.simpleMenu.v124MonthlyMenu #topMonthlyStaff,
+body:not(.v125MonthlyActive) .menu.simpleMenu.v124MonthlyMenu #topMonthlyDorm,
+body:not(.v125MonthlyActive) .menu.simpleMenu.v124MonthlyMenu #topMonthlyControls{
+  display:none!important;
+}
+
 </style>
 </head>
 <body>
@@ -10726,6 +10775,247 @@ init();
 
   window.addEventListener("resize",function(){
     setTimeout(syncMonthlyTopMenu124,100);
+  });
+})();
+</script>
+
+
+<script id="ver125-monthly-menu-visibility-fix">
+(function(){
+  /*
+    Ver125:
+    通常時に 表示開始日 / 表示日数 が残る問題を修正。
+    body.v125MonthlyActive を唯一の表示条件にして、
+    通常時は必ず ホーム/出勤/寮/月間表/AI書き出し のみに戻す。
+  */
+
+  function q(s,r){return (r||document).querySelector(s)}
+  function el(id){return document.getElementById(id)}
+
+  function isHiddenByClass(node){
+    return !node || node.classList.contains("hidden") || node.style.display==="none";
+  }
+
+  function isMonthlyActive125(){
+    var monthly=el("monthly");
+    if(!monthly)return false;
+
+    // 月間表ページが現在表示中の時のみ true
+    if(monthly.classList.contains("hidden"))return false;
+
+    var rect=monthly.getBoundingClientRect();
+    var hasLayout=rect.width > 0 && rect.height > 0;
+    return hasLayout || monthly.style.display !== "none";
+  }
+
+  function ensureMenuParts125(){
+    var menu=q(".menu.simpleMenu") || q(".menu");
+    if(!menu)return;
+
+    var staff=el("topMonthlyStaff");
+    var dorm=el("topMonthlyDorm");
+    var controls=el("topMonthlyControls");
+
+    // Ver124で作成済みならそれを使う。なければ作成。
+    if(!staff){
+      staff=document.createElement("button");
+      staff.id="topMonthlyStaff";
+      staff.type="button";
+      staff.className="v124MonthlyOnly v125MonthlyOnly v124MonthlyMenuBtn";
+      staff.textContent="出勤月間表";
+      menu.appendChild(staff);
+    }
+
+    if(!dorm){
+      dorm=document.createElement("button");
+      dorm.id="topMonthlyDorm";
+      dorm.type="button";
+      dorm.className="v124MonthlyOnly v125MonthlyOnly v124MonthlyMenuBtn";
+      dorm.textContent="寮月間表";
+      menu.appendChild(dorm);
+    }
+
+    if(!controls){
+      controls=document.createElement("div");
+      controls.id="topMonthlyControls";
+      controls.className="v124MonthlyOnly v125MonthlyOnly v124MonthControls";
+      controls.innerHTML =
+        '<div><label>表示開始日</label><input id="topMonthBase" type="date"></div>' +
+        '<div><label>表示日数</label><select id="topDaysCount"><option>31</option><option>30</option><option>14</option><option>7</option></select></div>';
+      menu.appendChild(controls);
+    }
+
+    staff.classList.add("v125MonthlyOnly");
+    dorm.classList.add("v125MonthlyOnly");
+    controls.classList.add("v125MonthlyOnly");
+
+    if(!staff.__v125Bound){
+      staff.__v125Bound=true;
+      staff.addEventListener("click",function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        if(typeof window.showMonthlySubTab==="function")window.showMonthlySubTab("staff");
+        setTimeout(syncMonthlyMenu125,30);
+        return false;
+      },true);
+    }
+
+    if(!dorm.__v125Bound){
+      dorm.__v125Bound=true;
+      dorm.addEventListener("click",function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        if(typeof window.showMonthlySubTab==="function")window.showMonthlySubTab("dorm");
+        setTimeout(syncMonthlyMenu125,30);
+        return false;
+      },true);
+    }
+
+    var topBase=el("topMonthBase");
+    var topDays=el("topDaysCount");
+
+    if(topBase && !topBase.__v125Bound){
+      topBase.__v125Bound=true;
+      topBase.addEventListener("change",function(){
+        var real=el("monthBase");
+        if(real)real.value=topBase.value;
+        rerender125();
+      });
+    }
+
+    if(topDays && !topDays.__v125Bound){
+      topDays.__v125Bound=true;
+      topDays.addEventListener("change",function(){
+        var real=el("daysCount");
+        if(real)real.value=topDays.value;
+        rerender125();
+      });
+    }
+  }
+
+  function rerender125(){
+    try{ if(typeof window.renderMonthly==="function")window.renderMonthly(); }catch(e){}
+    try{ if(typeof window.renderDormMonthly==="function")window.renderDormMonthly(); }catch(e){}
+    setTimeout(function(){
+      try{ if(typeof window.fixDateWeekGap123==="function")window.fixDateWeekGap123(); }catch(e){}
+      try{ if(typeof window.applyStickyOriginalHeaders122==="function")window.applyStickyOriginalHeaders122(); }catch(e){}
+      syncMonthlyMenu125();
+    },80);
+  }
+
+  function currentSub125(){
+    var dormPanel=el("monthlyDormPanel");
+    if(dormPanel && !dormPanel.classList.contains("hidden"))return "dorm";
+    return "staff";
+  }
+
+  function syncMonthlyMenu125(){
+    ensureMenuParts125();
+
+    var menu=q(".menu.simpleMenu") || q(".menu");
+    var active=isMonthlyActive125();
+
+    document.body.classList.toggle("v125MonthlyActive",active);
+
+    // Ver124のbody状態も合わせる。古いCSSとの競合防止。
+    document.body.classList.toggle("v124MonthlyActive",active);
+    if(menu)menu.classList.toggle("v124MonthlyMenu",active);
+
+    var normalIds=["tab_home","tab_staff","tab_dormHub","tab_monthly","tab_ai"];
+    var monthlyIds=["topMonthlyStaff","topMonthlyDorm","topMonthlyControls"];
+
+    if(active){
+      normalIds.forEach(function(id){
+        var x=el(id);
+        if(!x)return;
+        x.style.display = (id==="tab_home") ? "block" : "none";
+      });
+
+      monthlyIds.forEach(function(id){
+        var x=el(id);
+        if(!x)return;
+        x.style.display = (id==="topMonthlyControls") ? "grid" : "block";
+      });
+
+      var realBase=el("monthBase");
+      var realDays=el("daysCount");
+      var topBase=el("topMonthBase");
+      var topDays=el("topDaysCount");
+
+      if(realBase && topBase && topBase.value!==realBase.value)topBase.value=realBase.value;
+      if(realDays && topDays && topDays.value!==realDays.value)topDays.value=realDays.value;
+
+      var sub=currentSub125();
+      var staff=el("topMonthlyStaff");
+      var dorm=el("topMonthlyDorm");
+      if(staff)staff.classList.toggle("active",sub==="staff");
+      if(dorm)dorm.classList.toggle("active",sub==="dorm");
+    }else{
+      normalIds.forEach(function(id){
+        var x=el(id);
+        if(x)x.style.display="block";
+      });
+
+      monthlyIds.forEach(function(id){
+        var x=el(id);
+        if(x)x.style.display="none";
+      });
+    }
+  }
+
+  window.syncMonthlyMenu125=syncMonthlyMenu125;
+
+  var oldShowPage=window.showPage;
+  if(typeof oldShowPage==="function" && !oldShowPage.__v125MenuVisibility){
+    var wrapped=function(page){
+      var r=oldShowPage.apply(this,arguments);
+      setTimeout(syncMonthlyMenu125,0);
+      setTimeout(syncMonthlyMenu125,120);
+      setTimeout(syncMonthlyMenu125,500);
+      return r;
+    };
+    wrapped.__v125MenuVisibility=true;
+    window.showPage=wrapped;
+  }
+
+  var oldShowMonthlySubTab=window.showMonthlySubTab;
+  if(typeof oldShowMonthlySubTab==="function" && !oldShowMonthlySubTab.__v125MenuVisibility){
+    var wrappedSub=function(type){
+      var r=oldShowMonthlySubTab.apply(this,arguments);
+      setTimeout(syncMonthlyMenu125,0);
+      setTimeout(syncMonthlyMenu125,120);
+      setTimeout(syncMonthlyMenu125,500);
+      return r;
+    };
+    wrappedSub.__v125MenuVisibility=true;
+    window.showMonthlySubTab=wrappedSub;
+  }
+
+  // ホーム等の通常タブを押した時にも確実に通常メニューへ戻す
+  ["tab_home","tab_staff","tab_dormHub","tab_ai"].forEach(function(id){
+    document.addEventListener("click",function(e){
+      var target=e.target && e.target.closest ? e.target.closest("#"+id) : null;
+      if(!target)return;
+      setTimeout(syncMonthlyMenu125,80);
+      setTimeout(syncMonthlyMenu125,350);
+    },true);
+  });
+
+  document.addEventListener("DOMContentLoaded",function(){
+    ensureMenuParts125();
+    setTimeout(syncMonthlyMenu125,300);
+    setTimeout(syncMonthlyMenu125,1000);
+    setTimeout(syncMonthlyMenu125,1800);
+  });
+
+  window.addEventListener("load",function(){
+    ensureMenuParts125();
+    setTimeout(syncMonthlyMenu125,300);
+    setTimeout(syncMonthlyMenu125,1200);
+  });
+
+  window.addEventListener("resize",function(){
+    setTimeout(syncMonthlyMenu125,100);
   });
 })();
 </script>
