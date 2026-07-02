@@ -3099,9 +3099,9 @@ body.v125MonthlyActive #monthlyDormPanel .v114StickyHead{
     </div>
     <label>備考</label><textarea id="modalNote"></textarea>
     <div class="row3">
-      <button class="primary" onclick="saveDormModal()">保存</button>
-      <button class="danger" onclick="deleteDormModal()">削除</button>
-      <button onclick="closeModal()">閉じる</button>
+      <button type="button" class="primary" onclick="saveDormModal()">保存</button>
+      <button type="button" class="danger" onclick="deleteDormModal()">削除</button>
+      <button type="button" onclick="closeModal()">閉じる</button>
     </div>
   </div>
 </div>
@@ -11454,7 +11454,7 @@ init();
   window.occupiedRecord=function(room,ds){
     ds=trim(ds||today134());
     var dn=trim(room&&room.dormName), rn=trim(room&&room.roomNo);
-    return (Array.isArray(window.dorms)?window.dorms:[]).find(function(r){
+    return (Array.isArray(dorms)?dorms:[]).find(function(r){
       if(trim(r.dormName)!==dn || trim(r.roomNo)!==rn)return false;
       if(trim(r.status)==="空室" || !trim(r.residentName))return false;
       var mi=trim(r.moveIn), mo=trim(r.moveOut);
@@ -11478,11 +11478,11 @@ init();
     var ds=today134();
     var occ=0,vac=0;
     try{ if(typeof syncMasterFromDorms==="function")syncMasterFromDorms(false); }catch(e){}
-    (window.dormMaster||[]).forEach(function(room){
+    (dormMaster||[]).forEach(function(room){
       if(window.occupiedRecord(room,ds))occ++; else vac++;
     });
     if(el("statToday"))el("statToday").textContent=(typeof totals==="function"?totals(ds).real:0);
-    if(el("statNewbie"))el("statNewbie").textContent=(window.staff||[]).filter(function(x){return !!x.newbie}).length;
+    if(el("statNewbie"))el("statNewbie").textContent=(staff||[]).filter(function(x){return !!x.newbie}).length;
     if(el("statOccupied"))el("statOccupied").textContent=occ;
     if(el("statVacant"))el("statVacant").textContent=vac;
 
@@ -11538,7 +11538,7 @@ init();
 
   function ensureMoveOutClean134(){
     var changed=0;
-    (window.dorms||[]).forEach(function(r){
+    (dorms||[]).forEach(function(r){
       if(!r)return;
       if(trim(r.moveOut) && !trim(r.cleanDate) && trim(r.cleanStatus)!=="清掃済み" && trim(r.cleanStatus)!=="済"){
         r.cleanDate=trim(r.moveOut);
@@ -11550,8 +11550,8 @@ init();
   }
 
   window.dedupeDormLatest134=function(){
-    if(!Array.isArray(window.dorms))return 0;
-    var removed=0, src=window.dorms.slice();
+    if(!Array.isArray(dorms))return 0;
+    var removed=0, src=dorms.slice();
 
     var keepId={};
     src.forEach(function(r,idx){
@@ -11603,19 +11603,19 @@ init();
       final.push(r);
     });
 
-    window.dorms=final;
+    dorms=final;
     return removed;
   };
 
   function removeById134(id){
-    var before=(window.dorms||[]).length;
-    window.dorms=(window.dorms||[]).filter(function(r){return String(r.id)!==String(id)});
-    return before-window.dorms.length;
+    var before=(dorms||[]).length;
+    dorms=(dorms||[]).filter(function(r){return String(r.id)!==String(id)});
+    return before-dorms.length;
   }
 
   function removeOccupancyForVacant134(dn,rn,exceptId){
     dn=trim(dn); rn=trim(rn); exceptId=trim(exceptId);
-    window.dorms=(window.dorms||[]).filter(function(r){
+    dorms=(dorms||[]).filter(function(r){
       if(exceptId && String(r.id)===String(exceptId))return true;
       if(trim(r.dormName)!==dn || trim(r.roomNo)!==rn)return true;
       if(trim(r.residentName) || trim(r.moveIn) || trim(r.status)==="入寮中" || trim(r.status)==="予約")return false;
@@ -11711,7 +11711,7 @@ init();
 
   function findRecord134(dn,rn,ds,name){
     dn=trim(dn); rn=trim(rn); ds=trim(ds); name=trim(name);
-    var list=Array.isArray(window.dorms)?window.dorms:[];
+    var list=Array.isArray(dorms)?dorms:[];
     var room=list.filter(function(r){return trim(r.dormName)===dn && trim(r.roomNo)===rn});
 
     if(name){
@@ -11793,7 +11793,7 @@ init();
   };
 
   window.openDormModalById=function(id,focusDate){
-    var rec=(window.dorms||[]).find(function(r){return String(r.id)===String(id)});
+    var rec=(dorms||[]).find(function(r){return String(r.id)===String(id)});
     var ctx=rec?{date:focusDate||today134(),dormName:rec.dormName,roomNo:rec.roomNo,name:rec.residentName,record:rec,recordId:rec.id}:null;
     if(typeof origById==="function")origById(id,focusDate);
     if(ctx)setContext134(ctx);
@@ -11818,12 +11818,12 @@ init();
   function currentModalRecord134(){
     var id=el("modalDormId") ? trim(el("modalDormId").value) : "";
     if(id){
-      var r=(window.dorms||[]).find(function(x){return String(x.id)===String(id)});
+      var r=(dorms||[]).find(function(x){return String(x.id)===String(id)});
       if(r)return r;
     }
     var ctx=window.__v134DormContext;
     if(ctx && ctx.recordId){
-      var c=(window.dorms||[]).find(function(x){return String(x.id)===String(ctx.recordId)});
+      var c=(dorms||[]).find(function(x){return String(x.id)===String(ctx.recordId)});
       if(c)return c;
     }
     return null;
@@ -11874,10 +11874,10 @@ init();
   }
 
   function dormNames134(){
-    return [...new Set((window.dormMaster||[]).map(function(m){return trim(m.dormName)}))].filter(Boolean).sort();
+    return [...new Set((dormMaster||[]).map(function(m){return trim(m.dormName)}))].filter(Boolean).sort();
   }
   function roomsOf134(dn){
-    return (window.dormMaster||[]).filter(function(m){return trim(m.dormName)===trim(dn)}).map(function(m){return trim(m.roomNo)}).filter(Boolean).sort(function(a,b){return String(a).localeCompare(String(b),"ja")});
+    return (dormMaster||[]).filter(function(m){return trim(m.dormName)===trim(dn)}).map(function(m){return trim(m.roomNo)}).filter(Boolean).sort(function(a,b){return String(a).localeCompare(String(b),"ja")});
   }
 
   window.updateDormMoveOnlyRooms=function(){
@@ -11937,7 +11937,7 @@ init();
   window.openDormMoveOnlyPopup=function(){return openMoveOnly134();};
 
   window.saveDormMoveOnly=function(){
-    var rec=(window.dorms||[]).find(function(r){return String(r.id)===String(window.__dormMoveOnlyRecordId)}) || currentModalRecord134();
+    var rec=(dorms||[]).find(function(r){return String(r.id)===String(window.__dormMoveOnlyRecordId)}) || currentModalRecord134();
     if(!rec || !trim(rec.residentName))return false;
 
     var moveDate=el("dormMoveOnlyDate") ? trim(el("dormMoveOnlyDate").value) : "";
@@ -11968,7 +11968,7 @@ init();
       }
       rec.note=(oldNote?oldNote+" / ":"")+"寮移動："+moveDate+"から"+newDorm+"-"+newRoom;
 
-      window.dorms.push({
+      dorms.push({
         id:Date.now()+Math.floor(Math.random()*10000),
         dormName:newDorm,
         roomNo:newRoom,
@@ -12000,10 +12000,10 @@ init();
   ------------------------------ */
   window.saveDormModal=function(){
     var id=el("modalDormId") ? trim(el("modalDormId").value) : "";
-    var r=id ? (window.dorms||[]).find(function(x){return String(x.id)===String(id)}) : null;
+    var r=id ? (dorms||[]).find(function(x){return String(x.id)===String(id)}) : null;
     if(!r){
       r={id:Date.now()+Math.floor(Math.random()*10000)};
-      window.dorms.push(r);
+      dorms.push(r);
     }
 
     r.dormName=el("modalDormName") ? trim(el("modalDormName").value) : "";
@@ -12188,6 +12188,87 @@ init();
       setTimeout(fitModal134,50);
     }
   },true);
+})();
+</script>
+
+
+<script id="ver135-popup-save-delete-fix">
+(function(){
+  /*
+    Ver135:
+    ポップアップの保存・削除だけを修正。
+    原因：追加処理側で window.dorms を参照していたため、実データ dorms に反映されなかった。
+    対応：Ver134内の参照を dorms に修正し、保存/削除ボタンも確実に関数へ接続。
+  */
+  function el(id){return document.getElementById(id)}
+
+  function bindPopupButtons135(){
+    var modal=el("modal");
+    if(!modal)return;
+
+    var buttons=modal.querySelectorAll("button");
+    buttons.forEach(function(btn){
+      var text=(btn.textContent||"").trim();
+      if(text==="保存"){
+        btn.type="button";
+        btn.onclick=function(e){
+          if(e){e.preventDefault();e.stopPropagation();}
+          return window.saveDormModal();
+        };
+      }
+      if(text==="削除"){
+        btn.type="button";
+        btn.onclick=function(e){
+          if(e){e.preventDefault();e.stopPropagation();}
+          return window.deleteDormModal();
+        };
+      }
+      if(text==="閉じる"){
+        btn.type="button";
+      }
+    });
+  }
+
+  function selfCheck135(){
+    window.__v135SelfCheck={
+      saveUsesRealDorms:String(window.saveDormModal||"").indexOf("dorms")>=0 && String(window.saveDormModal||"").indexOf("window.dorms")<0,
+      deleteUsesRealDorms:String(window.deleteDormModal||"").indexOf("dorms")>=0 && String(window.deleteDormModal||"").indexOf("window.dorms")<0,
+      safeSaveUsesRealDorms:String(window.saveDormDataSafe134||"").indexOf("window.dorms")<0,
+      buttonsBound:true,
+      cache:"gspot-ver135-popup-save-delete-fix"
+    };
+    return window.__v135SelfCheck;
+  }
+
+  window.applyPopupSaveDeleteFix135=function(){
+    bindPopupButtons135();
+    selfCheck135();
+  };
+  window.runPopupSaveDeleteSelfCheck135=selfCheck135;
+
+  ["openDormModalById","openDormModalNew","openDormModalByText"].forEach(function(name){
+    var old=window[name];
+    if(typeof old==="function" && !old.__v135SaveDelete){
+      var w=function(){
+        var r=old.apply(this,arguments);
+        setTimeout(bindPopupButtons135,0);
+        setTimeout(bindPopupButtons135,80);
+        setTimeout(bindPopupButtons135,250);
+        return r;
+      };
+      w.__v135SaveDelete=true;
+      window[name]=w;
+    }
+  });
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(window.applyPopupSaveDeleteFix135,500);
+    setTimeout(window.applyPopupSaveDeleteFix135,1300);
+  });
+  window.addEventListener("load",function(){
+    setTimeout(window.applyPopupSaveDeleteFix135,500);
+    setTimeout(window.applyPopupSaveDeleteFix135,1600);
+  });
 })();
 </script>
 
