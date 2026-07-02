@@ -121,3 +121,5 @@ Ver136 MoveOut Vacant History Fix: Ver135ベース。退寮日を入力したデ
 Ver137 MoveOut Count History Fix: Ver136ベース。本日退寮を退寮人数/本日の確認/AI書き出しに必ず含める。退寮日当日から部屋は空室扱い、清掃予定は退寮日、清掃状態は清掃予定。ただしresidentName/moveIn/moveOutは履歴として残し、誰が入っていたかを確認できる。Ver134由来の空室正規化で退寮履歴が消えないよう、save/saveDormModal/saveDormDataSafe134を安全版で上書き。保存/削除修正、寮移動ボタン処理は維持。スライドバー・固定ヘッダー・一列メニューは変更なし。保存キー・読込キー変更なし。
 
 Ver138 Dorm Monthly Horizontal: Ver137ベース。寮月間表を横表示へ戻す。行=寮-部屋、列=日付。月間表では入寮日〜退寮日まで名前を常に表示し、退寮日にも名前と退マークを表示。本日退寮はdormEventsで必ず退寮人数/本日の寮予定/AI書き出しに入る。保存/削除修正、退寮履歴保持、寮移動ボタン処理は維持。スライドバー・固定ヘッダー・一列メニューは変更なし。保存キー・読込キー変更なし。
+
+Ver139 Force Horizontal Dorm Monthly: Ver138ベース。縦表示が残る原因は、過去のrenderDormMonthlyMatrix/showMonthlySubTabの遅延処理が後から走り、横表示を上書きしていたこと。renderDormMonthlyとrenderDormMonthlyMatrixの両方を横表示に統一し、showMonthlySubTabは古い縦表示処理を呼ばない形で上書き。寮タブ表示後も複数回横表示を再適用。月間表では入寮日〜退寮日まで名前を常に表示し、本日退寮は退寮人数/本日の確認/AI書き出しに含める。保存/削除、寮移動ボタン処理、履歴保持は維持。スライドバー・固定ヘッダー・一列メニューは変更なし。保存キー・読込キー変更なし。

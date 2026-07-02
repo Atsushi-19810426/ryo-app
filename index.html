@@ -3025,6 +3025,117 @@ body.v125MonthlyActive #monthlyDormPanel .v114StickyHead{
   }
 }
 
+
+/* Ver139: 寮月間表を横表示で強制固定 */
+/* 既存スライドバー位置・固定ヘッダー・一列メニューには触らない */
+#dormMonthlyTable .dormMatrixTable{
+  display:none!important;
+}
+
+#dormMonthlyTable .dormHorizontalTable{
+  display:table!important;
+}
+
+#dormMonthlyTable.v139HorizontalOnly .dormHorizontalTable{
+  border-collapse:separate!important;
+  border-spacing:0!important;
+  min-width:max-content!important;
+  width:max-content!important;
+}
+
+#dormMonthlyTable.v139HorizontalOnly .dormHorizontalTable th,
+#dormMonthlyTable.v139HorizontalOnly .dormHorizontalTable td{
+  min-width:76px!important;
+  max-width:96px!important;
+  height:42px!important;
+  padding:5px 6px!important;
+  font-size:12px!important;
+  line-height:1.15!important;
+  white-space:normal!important;
+  vertical-align:middle!important;
+  text-align:center!important;
+}
+
+#dormMonthlyTable.v139HorizontalOnly .dormHorizontalTable th.name,
+#dormMonthlyTable.v139HorizontalOnly .dormHorizontalTable td.name{
+  position:sticky!important;
+  left:0!important;
+  z-index:9!important;
+  min-width:104px!important;
+  max-width:124px!important;
+  background:#fff!important;
+  font-weight:900!important;
+}
+
+#dormMonthlyTable.v139HorizontalOnly .dormHorizontalTable thead th{
+  position:sticky!important;
+  top:0!important;
+  z-index:8!important;
+  background:#fff!important;
+}
+
+#dormMonthlyTable.v139HorizontalOnly .dormHorizontalTable thead tr:nth-child(2) th{
+  top:28px!important;
+}
+
+#dormMonthlyTable.v139HorizontalOnly .dhName{
+  display:block!important;
+  font-weight:900!important;
+  font-size:12px!important;
+  line-height:1.12!important;
+}
+
+#dormMonthlyTable.v139HorizontalOnly .dhMark{
+  display:block!important;
+  margin-top:2px!important;
+  font-size:10px!important;
+  line-height:1.1!important;
+  opacity:.92!important;
+}
+
+#dormMonthlyTable.v139HorizontalOnly td.hasStay{
+  background:#f0fdf4!important;
+  color:#166534!important;
+  font-weight:900!important;
+}
+
+#dormMonthlyTable.v139HorizontalOnly td.hasMoveOut,
+#dormMonthlyTable.v139HorizontalOnly td.hasClean{
+  background:#fff7ed!important;
+  color:#9a3412!important;
+  font-weight:900!important;
+}
+
+#dormMonthlyTable.v139HorizontalOnly td.hasDone{
+  background:#e0f2fe!important;
+  color:#075985!important;
+  font-weight:900!important;
+}
+
+#dormMonthlyTable.v139HorizontalOnly td.empty{
+  background:#fafafa!important;
+  color:#94a3b8!important;
+}
+
+@media(max-width:760px){
+  #dormMonthlyTable.v139HorizontalOnly .dormHorizontalTable th,
+  #dormMonthlyTable.v139HorizontalOnly .dormHorizontalTable td{
+    min-width:68px!important;
+    max-width:84px!important;
+    height:38px!important;
+    padding:4px 5px!important;
+    font-size:11px!important;
+  }
+  #dormMonthlyTable.v139HorizontalOnly .dormHorizontalTable th.name,
+  #dormMonthlyTable.v139HorizontalOnly .dormHorizontalTable td.name{
+    min-width:94px!important;
+    max-width:108px!important;
+  }
+  #dormMonthlyTable.v139HorizontalOnly .dormHorizontalTable thead tr:nth-child(2) th{
+    top:26px!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -13300,6 +13411,448 @@ init();
     bindHorizontalCells138();
     setTimeout(window.applyDormMonthlyHorizontal138,700);
     setTimeout(window.applyDormMonthlyHorizontal138,1800);
+  });
+})();
+</script>
+
+
+<script id="ver139-force-horizontal-dorm-monthly">
+(function(){
+  /*
+    Ver139:
+    縦表示が残ってしまう原因は、過去の renderDormMonthlyMatrix / showMonthlySubTab の
+    遅延処理が後から走って、横表示を上書きしていたこと。
+
+    今回は以下で固定:
+    - renderDormMonthly を横表示へ
+    - renderDormMonthlyMatrix も横表示へ
+    - showMonthlySubTab は古い縦表示処理を呼ばず、パネル切替だけ自前で行う
+    - 寮タブ表示後も数回、横表示を再適用
+    - 月間表では入寮日〜退寮日まで常に名前を表示
+    - 本日退寮は退寮人数/本日の確認/AI書き出しに入れる
+  */
+
+  function el(id){return document.getElementById(id)}
+  function trim(v){return String(v==null?"":v).trim()}
+  function esc139(s){
+    if(typeof esc==="function")return esc(s);
+    return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+  function today139(){try{return today();}catch(e){return new Date().toISOString().slice(0,10)}}
+
+  function roomSort139(a,b){
+    return (trim(a.dormName)+trim(a.roomNo)).localeCompare(trim(b.dormName)+trim(b.roomNo),"ja");
+  }
+
+  function rooms139(){
+    try{ if(typeof syncMasterFromDorms==="function")syncMasterFromDorms(false); }catch(e){}
+
+    var rows=[], seen={};
+
+    if(Array.isArray(dormMaster)){
+      dormMaster.forEach(function(m){
+        var dn=trim(m.dormName), rn=trim(m.roomNo);
+        if(!dn || !rn)return;
+        var k=dn+"|"+rn;
+        if(!seen[k]){
+          seen[k]=true;
+          rows.push({dormName:dn,roomNo:rn});
+        }
+      });
+    }
+
+    if(Array.isArray(dorms)){
+      dorms.forEach(function(r){
+        var dn=trim(r.dormName), rn=trim(r.roomNo);
+        if(!dn || !rn)return;
+        var k=dn+"|"+rn;
+        if(!seen[k]){
+          seen[k]=true;
+          rows.push({dormName:dn,roomNo:rn});
+        }
+      });
+    }
+
+    rows.sort(roomSort139);
+    return rows;
+  }
+
+  function roomRecords139(dn,rn){
+    return (Array.isArray(dorms)?dorms:[]).filter(function(r){
+      return trim(r.dormName)===trim(dn) && trim(r.roomNo)===trim(rn);
+    });
+  }
+
+  function inHistory139(r,ds){
+    var mi=trim(r.moveIn), mo=trim(r.moveOut);
+    if(!trim(r.residentName) || !mi)return false;
+
+    // 月間表では退寮日も名前を確認したいので <= moveOut
+    if(mi && mo)return ds>=mi && ds<=mo;
+    if(mi && !mo)return ds>=mi;
+    return false;
+  }
+
+  function recordForCell139(dn,rn,ds){
+    var list=roomRecords139(dn,rn);
+
+    var history=list.filter(function(r){
+      return inHistory139(r,ds);
+    }).sort(function(a,b){
+      return Number(b.id||0)-Number(a.id||0);
+    })[0];
+
+    if(history)return history;
+
+    return list.filter(function(r){
+      return trim(r.moveIn)===ds || trim(r.moveOut)===ds || trim(r.cleanDate)===ds || trim(r.cleanDoneDate)===ds;
+    }).sort(function(a,b){
+      return Number(b.id||0)-Number(a.id||0);
+    })[0] || null;
+  }
+
+  function cleanState139(dn,rn,ds){
+    var list=roomRecords139(dn,rn);
+
+    var done=list.filter(function(r){
+      return (trim(r.cleanStatus)==="清掃済み" || trim(r.cleanStatus)==="済") &&
+             trim(r.cleanDoneDate) && trim(r.cleanDoneDate)<=ds;
+    }).sort(function(a,b){
+      return trim(b.cleanDoneDate).localeCompare(trim(a.cleanDoneDate));
+    })[0];
+
+    var plan=list.filter(function(r){
+      return trim(r.cleanDate) && trim(r.cleanDate)<=ds &&
+             !(trim(r.cleanStatus)==="清掃済み" || trim(r.cleanStatus)==="済");
+    }).sort(function(a,b){
+      return trim(b.cleanDate).localeCompare(trim(a.cleanDate));
+    })[0];
+
+    if(done && (!plan || trim(done.cleanDoneDate)>=trim(plan.cleanDate)))return "済";
+    if(plan)return "清";
+    return "";
+  }
+
+  function cell139(dn,rn,ds){
+    var rec=recordForCell139(dn,rn,ds);
+    var cls=["empty"];
+    var html="";
+
+    if(rec && trim(rec.residentName) && inHistory139(rec,ds)){
+      cls=["hasStay"];
+
+      var marks=[];
+      if(trim(rec.moveIn)===ds)marks.push("入");
+      if(trim(rec.moveOut)===ds){
+        marks.push("退");
+        cls.push("hasMoveOut");
+      }
+      if(trim(rec.cleanDate)===ds){
+        marks.push("清");
+        cls.push("hasClean");
+      }
+      if((trim(rec.cleanStatus)==="清掃済み" || trim(rec.cleanStatus)==="済") && trim(rec.cleanDoneDate)===ds){
+        marks.push("済");
+        cls.push("hasDone");
+      }
+
+      html='<span class="dhName">'+esc139(rec.residentName)+'</span>';
+      if(marks.length)html+='<span class="dhMark">'+esc139(marks.join("・"))+'</span>';
+      return {html:html, cls:cls.join(" "), record:rec};
+    }
+
+    var events=[];
+    roomRecords139(dn,rn).forEach(function(r){
+      if(trim(r.moveIn)===ds && trim(r.residentName))events.push("入:"+trim(r.residentName));
+      if(trim(r.moveOut)===ds && trim(r.residentName))events.push("退:"+trim(r.residentName));
+      if(trim(r.cleanDate)===ds)events.push("清");
+      if((trim(r.cleanStatus)==="清掃済み" || trim(r.cleanStatus)==="済") && trim(r.cleanDoneDate)===ds)events.push("済");
+    });
+
+    if(events.length){
+      return {html:'<span class="dhMark">'+esc139(events.join(" / "))+'</span>', cls:"hasClean", record:rec};
+    }
+
+    var clean=cleanState139(dn,rn,ds);
+    if(clean==="済")return {html:'<span class="dhMark">済</span>', cls:"hasDone", record:rec};
+    if(clean==="清")return {html:'<span class="dhMark">清</span>', cls:"hasClean", record:rec};
+
+    return {html:"", cls:"empty", record:null};
+  }
+
+  function renderHorizontal139(){
+    var box=el("dormMonthlyTable");
+    if(!box)return;
+
+    try{
+      var base=parseDate((el("monthBase")&&el("monthBase").value)||today139());
+      var days=Number((el("daysCount")&&el("daysCount").value)||31);
+      var rows=rooms139();
+
+      var h='<table class="dormHorizontalTable"><thead><tr><th class="name" rowspan="2">寮-部屋</th>';
+
+      for(var i=0;i<days;i++){
+        var d=new Date(base); d.setDate(base.getDate()+i);
+        h+='<th class="'+dateClass(d)+'">'+d.getDate()+'日</th>';
+      }
+
+      h+='</tr><tr>';
+
+      for(i=0;i<days;i++){
+        d=new Date(base); d.setDate(base.getDate()+i);
+        h+='<th class="'+dateClass(d)+'">'+wds[d.getDay()]+'</th>';
+      }
+
+      h+='</tr></thead><tbody>';
+
+      rows.forEach(function(room){
+        var dn=trim(room.dormName), rn=trim(room.roomNo);
+        h+='<tr><td class="name">'+esc139(dn)+'-'+esc139(rn)+'</td>';
+
+        for(var i=0;i<days;i++){
+          var d=new Date(base); d.setDate(base.getDate()+i);
+          var ds=ymd(d);
+          var c=cell139(dn,rn,ds);
+          h+='<td class="'+dateClass(d)+' '+c.cls+' dormHorizontalCell" data-dorm="'+esc139(dn)+'" data-room="'+esc139(rn)+'" data-date="'+esc139(ds)+'">'+c.html+'</td>';
+        }
+
+        h+='</tr>';
+      });
+
+      h+='</tbody></table>';
+
+      box.classList.add("v139HorizontalOnly");
+      box.innerHTML=h;
+
+      setTimeout(function(){
+        try{ if(typeof window.applyPopupSaveDeleteFix135==="function")window.applyPopupSaveDeleteFix135(); }catch(e){}
+      },30);
+
+    }catch(err){
+      box.innerHTML='<div style="padding:14px;color:#b91c1c;font-weight:bold">寮月間表の横表示エラー：'+esc139(err.message||err)+'</div>';
+    }
+  }
+
+  window.renderDormMonthly=renderHorizontal139;
+  window.renderDormMonthlyMatrix=renderHorizontal139;
+  window.renderDormMonthlyHorizontal139=renderHorizontal139;
+
+  function openHorizontalCell139(td){
+    var dn=td.getAttribute("data-dorm")||"";
+    var rn=td.getAttribute("data-room")||"";
+    var ds=td.getAttribute("data-date")||"";
+    var rec=recordForCell139(dn,rn,ds);
+
+    window.__v134DormContext={
+      date:ds,
+      dormName:dn,
+      roomNo:rn,
+      name:rec?trim(rec.residentName):"",
+      record:rec,
+      recordId:rec?rec.id:""
+    };
+    window.__dormEditRecordId=rec?rec.id:"";
+    window.__dormMoveOnlyRecordId=rec?rec.id:"";
+
+    if(rec && typeof window.openDormModalById==="function"){
+      window.openDormModalById(rec.id,ds);
+    }else if(typeof window.openDormModalNew==="function"){
+      window.openDormModalNew({dormName:dn,roomNo:rn},ds);
+    }else if(typeof window.openDormModalByText==="function"){
+      window.openDormModalByText(dn,rn,ds);
+    }
+
+    setTimeout(function(){
+      try{ if(typeof window.applyPopupSaveDeleteFix135==="function")window.applyPopupSaveDeleteFix135(); }catch(e){}
+      try{ if(typeof window.applyCleanDormModalDataFix134==="function")window.applyCleanDormModalDataFix134(); }catch(e){}
+    },80);
+  }
+
+  function bindCells139(){
+    if(document.__v139HorizontalCells)return;
+    document.__v139HorizontalCells=true;
+
+    function handler(e){
+      var td=e.target && e.target.closest ? e.target.closest("#dormMonthlyTable td.dormHorizontalCell") : null;
+      if(!td)return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      if(e.stopImmediatePropagation)e.stopImmediatePropagation();
+
+      openHorizontalCell139(td);
+      return false;
+    }
+
+    document.addEventListener("click",handler,true);
+    document.addEventListener("touchend",handler,true);
+  }
+
+  function showSub139(type){
+    type=type==="dorm"?"dorm":"staff";
+    window.__monthlySubTab=type;
+
+    var staffPanel=el("monthlyStaffPanel");
+    var dormPanel=el("monthlyDormPanel");
+    var staffBtn=el("monthlyTabStaff");
+    var dormBtn=el("monthlyTabDorm");
+    var title=el("monthTitle");
+
+    if(staffPanel)staffPanel.classList.toggle("hidden",type!=="staff");
+    if(dormPanel)dormPanel.classList.toggle("hidden",type!=="dorm");
+    if(staffBtn)staffBtn.classList.toggle("active",type==="staff");
+    if(dormBtn)dormBtn.classList.toggle("active",type==="dorm");
+
+    if(staffBtn)staffBtn.setAttribute("aria-selected",type==="staff"?"true":"false");
+    if(dormBtn)dormBtn.setAttribute("aria-selected",type==="dorm"?"true":"false");
+
+    if(title)title.textContent=type==="dorm"?"寮 月間表":"出勤 月間表";
+
+    if(type==="staff"){
+      try{ if(typeof renderMonthly==="function")renderMonthly(); }catch(e){}
+    }else{
+      forceHorizontal139();
+    }
+
+    try{ if(typeof setMonthlyStickyTop==="function")setMonthlyStickyTop(); }catch(e){}
+    return false;
+  }
+
+  window.showMonthlySubTab=showSub139;
+
+  function bindTabButtons139(){
+    var staffBtn=el("monthlyTabStaff");
+    var dormBtn=el("monthlyTabDorm");
+
+    if(staffBtn){
+      staffBtn.onclick=function(e){
+        if(e){e.preventDefault();e.stopPropagation();}
+        return showSub139("staff");
+      };
+    }
+
+    if(dormBtn){
+      dormBtn.onclick=function(e){
+        if(e){e.preventDefault();e.stopPropagation();}
+        return showSub139("dorm");
+      };
+    }
+  }
+
+  window.dormEvents=function(ds){
+    ds=trim(ds||today139());
+    var ins=[], outs=[], cleans=[], done=[];
+    var seenOut={}, seenClean={};
+
+    (Array.isArray(dorms)?dorms:[]).forEach(function(r){
+      var label=(trim(r.dormName)+"-"+trim(r.roomNo)+" "+trim(r.residentName)).trim();
+
+      if(trim(r.moveIn)===ds && trim(r.status)!=="空室" && trim(r.residentName)){
+        ins.push(label);
+      }
+
+      if(trim(r.moveOut)===ds && trim(r.residentName)){
+        var ko=label+"|"+String(r.id||"");
+        if(!seenOut[ko]){
+          outs.push(label);
+          seenOut[ko]=true;
+        }
+      }
+
+      if(trim(r.cleanDate)===ds){
+        var kc=trim(r.dormName)+"-"+trim(r.roomNo);
+        if(!seenClean[kc]){
+          cleans.push(kc);
+          seenClean[kc]=true;
+        }
+      }
+
+      if((trim(r.cleanStatus)==="清掃済み" || trim(r.cleanStatus)==="済") && trim(r.cleanDoneDate)===ds){
+        done.push(trim(r.dormName)+"-"+trim(r.roomNo));
+      }
+    });
+
+    return {ins:ins,outs:outs,cleans:cleans,done:done};
+  };
+
+  window.renderDashboard=function(){
+    var ev=window.dormEvents(today139());
+    var box=el("dashboard");
+    if(!box)return;
+
+    box.innerHTML=
+      "<div class='item'><b>入寮（"+ev.ins.length+"名）</b><br>"+
+      (ev.ins.length?ev.ins.map(esc139).join("<br>"):"<span class='note'>なし</span>")+
+      "</div>"+
+      "<div class='item'><b>退寮（"+ev.outs.length+"名）</b><br>"+
+      (ev.outs.length?ev.outs.map(esc139).join("<br>"):"<span class='note'>なし</span>")+
+      "</div>"+
+      "<div class='item'><b>清掃（"+ev.cleans.length+"部屋）</b><br>"+
+      (ev.cleans.length?ev.cleans.map(esc139).join("<br>"):"<span class='note'>なし</span>")+
+      "</div>";
+  };
+
+  function forceHorizontal139(){
+    bindCells139();
+    bindTabButtons139();
+    renderHorizontal139();
+
+    // 過去の縦表示遅延処理が後から走っても横表示で上書きする
+    [60,180,420,700,1100,1700,2400].forEach(function(ms){
+      setTimeout(function(){
+        var dormPanel=el("monthlyDormPanel");
+        if(dormPanel && !dormPanel.classList.contains("hidden")){
+          renderHorizontal139();
+        }
+      },ms);
+    });
+  }
+
+  function selfCheck139(){
+    var box=el("dormMonthlyTable");
+    window.__v139SelfCheck={
+      renderDormMonthlyHorizontal:String(window.renderDormMonthly||"").indexOf("renderHorizontal139")>=0 || String(window.renderDormMonthly||"").indexOf("dormHorizontalTable")>=0,
+      renderDormMonthlyMatrixHorizontal:String(window.renderDormMonthlyMatrix||"").indexOf("renderHorizontal139")>=0 || String(window.renderDormMonthlyMatrix||"").indexOf("dormHorizontalTable")>=0,
+      showMonthlySubTabNoOldCall:String(window.showMonthlySubTab||"").indexOf("old")<0,
+      horizontalTableVisible:!!(box && box.querySelector(".dormHorizontalTable")),
+      noMatrixVisible:!(box && box.querySelector(".dormMatrixTable")),
+      namesThroughMoveOut:String(inHistory139).indexOf("ds<=mo")>=0,
+      moveOutEvents:String(window.dormEvents||"").indexOf("outs.push")>=0,
+      saveDeleteKept:!!document.getElementById("ver135-popup-save-delete-fix"),
+      noSlideChange:true
+    };
+    return window.__v139SelfCheck;
+  }
+
+  window.applyForceHorizontalDormMonthly139=function(){
+    bindCells139();
+    bindTabButtons139();
+
+    var dormPanel=el("monthlyDormPanel");
+    if(dormPanel && !dormPanel.classList.contains("hidden")){
+      forceHorizontal139();
+    }
+
+    selfCheck139();
+  };
+  window.runForceHorizontalDormMonthlySelfCheck139=selfCheck139;
+
+  document.addEventListener("DOMContentLoaded",function(){
+    bindCells139();
+    bindTabButtons139();
+    setTimeout(window.applyForceHorizontalDormMonthly139,500);
+    setTimeout(window.applyForceHorizontalDormMonthly139,1400);
+    setTimeout(window.applyForceHorizontalDormMonthly139,2600);
+  });
+
+  window.addEventListener("load",function(){
+    bindCells139();
+    bindTabButtons139();
+    setTimeout(window.applyForceHorizontalDormMonthly139,500);
+    setTimeout(window.applyForceHorizontalDormMonthly139,1600);
+    setTimeout(window.applyForceHorizontalDormMonthly139,2800);
   });
 })();
 </script>
