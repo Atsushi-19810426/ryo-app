@@ -12272,5 +12272,195 @@ init();
 })();
 </script>
 
+
+<script id="ver136-moveout-vacant-history-fix">
+(function(){
+  /*
+    Ver136:
+    退寮日を入れたら
+    - 表示/判定は空室
+    - 清掃予定日は退寮日
+    - 清掃ステータスは清掃予定
+    - ただし residentName / moveIn / moveOut は消さない
+    目的：誰が入っていたか履歴として残す。
+  */
+
+  function el(id){return document.getElementById(id)}
+  function trim(v){return String(v==null?"":v).trim()}
+  function today136(){try{return today();}catch(e){return new Date().toISOString().slice(0,10)}}
+
+  function isHistoryMoveOut136(r){
+    return !!(r && trim(r.residentName) && trim(r.moveIn) && trim(r.moveOut));
+  }
+
+  function applyMoveOutVacantHistory136(r){
+    if(!r)return r;
+
+    if(isHistoryMoveOut136(r)){
+      // 退寮日が入っているデータは、履歴を残したまま空室扱いへ
+      r.status="空室";
+
+      if(!trim(r.cleanDate)){
+        r.cleanDate=trim(r.moveOut);
+      }
+
+      if(trim(r.cleanStatus)!=="清掃済み" && trim(r.cleanStatus)!=="済"){
+        if(!trim(r.cleanStatus) || trim(r.cleanStatus)==="未清掃"){
+          r.cleanStatus="清掃予定";
+        }
+      }
+    }
+
+    return r;
+  }
+
+  window.applyMoveOutVacantHistory136=applyMoveOutVacantHistory136;
+
+  window.normalizeMoveOutVacantHistory136=function(){
+    var changed=0;
+    (dorms||[]).forEach(function(r){
+      var before=JSON.stringify([r.status,r.residentName,r.moveIn,r.moveOut,r.cleanDate,r.cleanStatus]);
+      applyMoveOutVacantHistory136(r);
+      var after=JSON.stringify([r.status,r.residentName,r.moveIn,r.moveOut,r.cleanDate,r.cleanStatus]);
+      if(before!==after)changed++;
+    });
+    return changed;
+  };
+
+  // 退寮日当日から占有しない。ただし履歴データは残す。
+  window.occupiedRecord=function(room,ds){
+    ds=trim(ds||today136());
+    var dn=trim(room&&room.dormName), rn=trim(room&&room.roomNo);
+
+    return (Array.isArray(dorms)?dorms:[]).find(function(r){
+      if(trim(r.dormName)!==dn || trim(r.roomNo)!==rn)return false;
+      if(!trim(r.residentName) || !trim(r.moveIn))return false;
+
+      var mi=trim(r.moveIn);
+      var mo=trim(r.moveOut);
+
+      if(mi && mo)return ds>=mi && ds<mo; // 退寮日当日から空室
+      if(trim(r.status)==="空室")return false;
+      if(mi && !mo)return ds>=mi;
+
+      return trim(r.status)==="入寮中";
+    });
+  };
+
+  window.effectiveDormStatus136=function(r,ds){
+    ds=trim(ds||today136());
+    if(!r)return "空室";
+    if(!trim(r.residentName) || !trim(r.moveIn))return "空室";
+    if(trim(r.moveOut) && ds>=trim(r.moveOut))return "空室";
+    if(trim(r.status)==="空室")return "空室";
+    return trim(r.status)||"入寮中";
+  };
+
+  // Ver134/135の空室正規化で「退寮履歴」を消さないよう、保存前に必ず戻す
+  var oldSaveDormDataSafe134=window.saveDormDataSafe134;
+  if(typeof oldSaveDormDataSafe134==="function" && !oldSaveDormDataSafe134.__v136MoveOutHistory){
+    var wrappedSafe=function(){
+      window.normalizeMoveOutVacantHistory136();
+
+      var result=oldSaveDormDataSafe134.apply(this,arguments);
+
+      // 古い処理の後にも再度、退寮履歴を空室・清掃予定へ整える
+      window.normalizeMoveOutVacantHistory136();
+      try{save();}catch(e){}
+
+      try{ if(typeof renderDorm==="function")renderDorm(); }catch(e){}
+      try{ if(typeof renderDormMonthly==="function")renderDormMonthly(); }catch(e){}
+      try{ if(typeof renderVacancy==="function")renderVacancy(); }catch(e){}
+      try{ if(typeof renderStats==="function")renderStats(); }catch(e){}
+      try{ if(typeof renderDashboard==="function")renderDashboard(); }catch(e){}
+
+      return result;
+    };
+    wrappedSafe.__v136MoveOutHistory=true;
+    window.saveDormDataSafe134=wrappedSafe;
+  }
+
+  // ポップアップ保存時：退寮日ありなら履歴を残したまま空室・清掃予定にする
+  var oldSaveDormModal=window.saveDormModal;
+  if(typeof oldSaveDormModal==="function" && !oldSaveDormModal.__v136MoveOutHistory){
+    var wrappedModal=function(){
+      var id=el("modalDormId") ? trim(el("modalDormId").value) : "";
+      var r=id ? (dorms||[]).find(function(x){return String(x.id)===String(id)}) : null;
+
+      // 保存前にモーダルの退寮日がある場合、空室削除処理へ入らないようにステータスを整える
+      if(r){
+        var modalMoveOut=el("modalMoveOut") ? trim(el("modalMoveOut").value) : "";
+        var modalResident=el("modalResident") ? trim(el("modalResident").value) : "";
+        var modalMoveIn=el("modalMoveIn") ? trim(el("modalMoveIn").value) : "";
+
+        if(modalMoveOut && modalResident && modalMoveIn){
+          if(el("modalStatus"))el("modalStatus").value="空室";
+          if(el("modalCleanDate") && !trim(el("modalCleanDate").value))el("modalCleanDate").value=modalMoveOut;
+          if(el("modalCleanStatus") && (trim(el("modalCleanStatus").value)==="" || trim(el("modalCleanStatus").value)==="未清掃")){
+            el("modalCleanStatus").value="清掃予定";
+          }
+        }
+      }
+
+      var result=oldSaveDormModal.apply(this,arguments);
+
+      window.normalizeMoveOutVacantHistory136();
+      try{save();}catch(e){}
+      try{ if(typeof renderDorm==="function")renderDorm(); }catch(e){}
+      try{ if(typeof renderDormMonthly==="function")renderDormMonthly(); }catch(e){}
+      try{ if(typeof renderVacancy==="function")renderVacancy(); }catch(e){}
+      try{ if(typeof renderStats==="function")renderStats(); }catch(e){}
+      try{ if(typeof renderDashboard==="function")renderDashboard(); }catch(e){}
+
+      return result;
+    };
+    wrappedModal.__v136MoveOutHistory=true;
+    window.saveDormModal=wrappedModal;
+  }
+
+  // saveも保険としてラップ
+  var oldSave=window.save;
+  if(typeof oldSave==="function" && !oldSave.__v136MoveOutHistory){
+    var wrappedSave=function(){
+      window.normalizeMoveOutVacantHistory136();
+      return oldSave.apply(this,arguments);
+    };
+    wrappedSave.__v136MoveOutHistory=true;
+    window.save=wrappedSave;
+  }
+
+  function selfCheck136(){
+    window.__v136SelfCheck={
+      baseVer135:!!document.getElementById("ver135-popup-save-delete-fix"),
+      moveOutStatusVacant:String(window.applyMoveOutVacantHistory136||"").indexOf('r.status="空室"')>=0,
+      historyKept:String(window.applyMoveOutVacantHistory136||"").indexOf("residentName")>=0 && String(window.applyMoveOutVacantHistory136||"").indexOf("moveIn")>=0 && String(window.applyMoveOutVacantHistory136||"").indexOf("moveOut")>=0,
+      cleanDateFromMoveOut:String(window.applyMoveOutVacantHistory136||"").indexOf("r.cleanDate=trim(r.moveOut)")>=0,
+      cleanStatusPlan:String(window.applyMoveOutVacantHistory136||"").indexOf('r.cleanStatus="清掃予定"')>=0,
+      occupiedMoveOutDayVacant:String(window.occupiedRecord||"").indexOf("ds<mo")>=0,
+      saveModalWrapped:String(window.saveDormModal||"").indexOf("modalMoveOut")>=0,
+      saveSafeWrapped:String(window.saveDormDataSafe134||"").indexOf("normalizeMoveOutVacantHistory136")>=0,
+      noSlideChange:true
+    };
+    return window.__v136SelfCheck;
+  }
+
+  window.applyMoveOutVacantHistoryFix136=function(){
+    window.normalizeMoveOutVacantHistory136();
+    selfCheck136();
+  };
+  window.runMoveOutVacantHistorySelfCheck136=selfCheck136;
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(window.applyMoveOutVacantHistoryFix136,500);
+    setTimeout(window.applyMoveOutVacantHistoryFix136,1300);
+  });
+
+  window.addEventListener("load",function(){
+    setTimeout(window.applyMoveOutVacantHistoryFix136,500);
+    setTimeout(window.applyMoveOutVacantHistoryFix136,1600);
+  });
+})();
+</script>
+
 </body>
 </html>
