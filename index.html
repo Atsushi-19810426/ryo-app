@@ -2793,8 +2793,13 @@ body.v125MonthlyActive #monthlyDormPanel .v114StickyHead{
 }
 
 
-/* Ver128: 寮月間表の編集・寮移動を復旧 */
-#modal .v128MoveOnlyBtn{
+/* Ver129: 寮月間表セル編集・寮移動の競合完全対策 */
+/* 旧寮編集ポップアップは競合原因のため、通常寮編集モーダルへ統一 */
+#dormEditPopup.v129OldPopupDisabled{
+  display:none!important;
+}
+
+#modal .v129MoveOnlyBtn{
   background:#7c3aed!important;
   color:#fff!important;
   border:0!important;
@@ -2802,13 +2807,157 @@ body.v125MonthlyActive #monthlyDormPanel .v114StickyHead{
   font-weight:900!important;
 }
 
-#modal .v128ModalButtons{
+#modal .v129MoveOnlyBtn.v129Hidden{
+  display:none!important;
+}
+
+#modal .v129ModalButtons{
   grid-template-columns:1fr 1fr 1fr 1fr!important;
 }
 
 @media(max-width:760px){
-  #modal .v128ModalButtons{
+  #modal .v129ModalButtons{
     grid-template-columns:1fr 1fr!important;
+  }
+}
+
+
+/* Ver130: 寮編集モーダルが見切れないように修正 */
+/* 月間表の固定メニュー・スライドバーより必ず前面に出す */
+#modal{
+  position:fixed!important;
+  inset:0!important;
+  z-index:50000!important;
+  display:none;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:10px!important;
+  box-sizing:border-box!important;
+  overflow:auto!important;
+  background:rgba(15,23,42,.45)!important;
+}
+
+#modal:not(.hidden){
+  display:flex!important;
+}
+
+/* モーダル本体を画面内に収める */
+#modal .modalBox{
+  position:relative!important;
+  width:min(94vw,720px)!important;
+  max-width:720px!important;
+  max-height:calc(100dvh - 24px)!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  margin:auto!important;
+  padding:18px!important;
+  box-sizing:border-box!important;
+  border-radius:22px!important;
+  background:#fff!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+
+/* 寮編集は入力欄が多いので少しコンパクトに */
+#modal .modalBox h2,
+#modal .modalBox #modalTitle{
+  margin:0 0 10px!important;
+  font-size:20px!important;
+  line-height:1.2!important;
+}
+
+#modal .modalBox label{
+  margin:6px 0 4px!important;
+  font-size:12px!important;
+  line-height:1.2!important;
+}
+
+#modal .modalBox input,
+#modal .modalBox select{
+  min-height:40px!important;
+  height:40px!important;
+  padding:0 10px!important;
+  font-size:14px!important;
+  box-sizing:border-box!important;
+}
+
+#modal .modalBox textarea{
+  min-height:86px!important;
+  max-height:170px!important;
+  padding:10px!important;
+  font-size:14px!important;
+  box-sizing:border-box!important;
+}
+
+/* 行間を詰める */
+#modal .modalBox .row,
+#modal .modalBox .row2,
+#modal .modalBox .row3{
+  gap:10px!important;
+  margin-bottom:8px!important;
+}
+
+/* ボタンは下に見える高さへ */
+#modal .modalBox button{
+  min-height:42px!important;
+  height:auto!important;
+  padding:11px 10px!important;
+  font-size:14px!important;
+  line-height:1.15!important;
+}
+
+/* 下部ボタンはスクロール末尾で見やすく */
+#modal .modalBox .v129ModalButtons,
+#modal .modalBox .v130ModalButtons{
+  position:sticky!important;
+  bottom:0!important;
+  z-index:5!important;
+  background:linear-gradient(to top,#fff 85%,rgba(255,255,255,.86))!important;
+  padding-top:8px!important;
+  margin-top:8px!important;
+}
+
+/* 旧ポップアップは引き続き無効 */
+#dormEditPopup.v129OldPopupDisabled,
+#dormEditPopup.v130OldPopupDisabled{
+  display:none!important;
+}
+
+@media(max-width:760px){
+  #modal{
+    align-items:flex-start!important;
+    padding:8px!important;
+  }
+
+  #modal .modalBox{
+    width:calc(100vw - 16px)!important;
+    max-height:calc(100dvh - 16px)!important;
+    padding:14px!important;
+    border-radius:18px!important;
+  }
+
+  #modal .modalBox h2,
+  #modal .modalBox #modalTitle{
+    font-size:18px!important;
+    margin-bottom:8px!important;
+  }
+
+  #modal .modalBox input,
+  #modal .modalBox select{
+    min-height:38px!important;
+    height:38px!important;
+    font-size:13px!important;
+  }
+
+  #modal .modalBox textarea{
+    min-height:70px!important;
+    max-height:130px!important;
+  }
+
+  #modal .modalBox .row,
+  #modal .modalBox .row2,
+  #modal .modalBox .row3{
+    gap:8px!important;
+    margin-bottom:7px!important;
   }
 }
 
@@ -11287,22 +11436,133 @@ init();
 </script>
 
 
-<script id="ver128-dorm-edit-move-restore">
+<script id="ver129-dorm-edit-move-final">
 (function(){
   /*
-    Ver128:
-    Ver127は旧寮編集ポップアップと通常モーダルが競合し、寮移動元を見失ったため不採用。
-    今回はVer126ベースで、寮月間表セル → 通常の寮編集モーダル を強制。
-    寮のみ移動も、通常モーダルの現在レコードIDから直接開く。
+    Ver129:
+    - Ver127/128は不採用。Ver126ベース。
+    - 寮月間表セルタップは通常の寮編集モーダルへ統一。
+    - 旧寮編集ポップアップは競合原因なので表示させない。
+    - 寮のみ移動ボタンは「既存レコード + 入寮者あり」の時だけ表示。
+    - 空白セル/新規登録では寮のみ移動ボタンを出さないため、移動元不明アラートが出ない。
   */
 
   function el(id){return document.getElementById(id)}
   function q(s,r){return (r||document).querySelector(s)}
   function qa(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
-
   function trim(v){return String(v==null?"":v).trim()}
 
-  function dateIn128(r,ds){
+  function closeOldPopup129(){
+    var old=el("dormEditPopup");
+    if(old){
+      old.classList.add("v129OldPopupDisabled");
+      old.style.display="none";
+    }
+  }
+
+  function parseBaseDate129(){
+    try{
+      var v=(el("monthBase")&&el("monthBase").value) || (el("topMonthBase")&&el("topMonthBase").value) || today();
+      return parseDate(v);
+    }catch(e){
+      return new Date();
+    }
+  }
+
+  function addDays129(ds,add){
+    var d=parseDate(ds);
+    d.setDate(d.getDate()+add);
+    return ymd(d);
+  }
+
+  function deriveDormRoomFromMatrix129(td){
+    var dn=td.getAttribute("data-dorm")||"";
+    var rn=td.getAttribute("data-room")||"";
+
+    if(dn && rn)return {dormName:dn,roomNo:rn};
+
+    var table=td.closest("table");
+    if(!table)return {dormName:dn,roomNo:rn};
+
+    // matrix形式：左の日付列を除いて cellIndex-1 が部屋列
+    if(table.classList.contains("dormMatrixTable")){
+      var col=Math.max(0,td.cellIndex-1);
+      var headRows=table.tHead ? table.tHead.rows : [];
+      var groupRow=headRows[0];
+      var roomRow=headRows[1];
+
+      var dormMap=[];
+      if(groupRow){
+        qa("th",groupRow).forEach(function(th){
+          if(th.classList.contains("dormMatrixDateHead"))return;
+          var clone=th.cloneNode(true);
+          qa("small",clone).forEach(function(s){s.remove()});
+          var name=trim(clone.textContent);
+          var span=Number(th.getAttribute("colspan")||th.colSpan||1);
+          for(var i=0;i<span;i++)dormMap.push(name);
+        });
+      }
+
+      if(!dn)dn=dormMap[col]||"";
+
+      if(!rn && roomRow && roomRow.cells[col]){
+        rn=trim(roomRow.cells[col].textContent).replace(/号室$/,"");
+      }
+
+      return {dormName:dn,roomNo:rn};
+    }
+
+    // 旧横形式の保険：行の左に 寮-部屋 がある場合
+    var tr=td.closest("tr");
+    var nameCell=tr ? (tr.querySelector("td.name")||tr.querySelector("th.name")) : null;
+    var raw=nameCell ? trim(nameCell.textContent) : "";
+    var idx=raw.lastIndexOf("-");
+    if(idx>=0){
+      dn=dn || trim(raw.slice(0,idx));
+      rn=rn || trim(raw.slice(idx+1));
+    }
+
+    return {dormName:dn,roomNo:rn};
+  }
+
+  function deriveDateFromCell129(td){
+    var ds=td.getAttribute("data-date")||"";
+    if(ds)return ds;
+
+    var tr=td.closest("tr");
+    var dcell=tr ? (tr.querySelector(".dormMatrixDate")||tr.querySelector("[data-date]")) : null;
+    if(dcell && dcell.getAttribute("data-date"))return dcell.getAttribute("data-date");
+
+    var table=td.closest("table");
+    if(table && table.classList.contains("dormMatrixTable") && tr && tr.parentElement){
+      var base=parseBaseDate129();
+      var idx=Array.prototype.indexOf.call(tr.parentElement.children,tr);
+      var d=new Date(base);
+      d.setDate(base.getDate()+Math.max(0,idx));
+      return ymd(d);
+    }
+
+    // 旧横形式：列番号から日付
+    try{
+      var base=parseBaseDate129();
+      var off=Math.max(0,td.cellIndex-1);
+      var d2=new Date(base);
+      d2.setDate(base.getDate()+off);
+      return ymd(d2);
+    }catch(e){
+      return (typeof today==="function")?today():"";
+    }
+  }
+
+  function cellName129(td){
+    var nameEl=td.querySelector(".dmName");
+    if(nameEl)return trim(nameEl.textContent);
+    var txt=trim(td.textContent||"");
+    txt=txt.replace(/^(入|退|清|済|中)+/g,"").trim();
+    return txt;
+  }
+
+  function dateInRecord129(r,ds){
     if(!r || !ds)return false;
     var mi=trim(r.moveIn), mo=trim(r.moveOut);
     if(mi && mo && ds>=mi && ds<=mo)return true;
@@ -11310,86 +11570,134 @@ init();
     return mi===ds || mo===ds || trim(r.cleanDate)===ds || trim(r.cleanDoneDate)===ds;
   }
 
-  function findRecord128(dn,rn,ds,name){
+  function findRecord129(dn,rn,ds,name){
     dn=trim(dn); rn=trim(rn); ds=trim(ds); name=trim(name);
     var list=Array.isArray(window.dorms)?window.dorms:[];
-    var byRoom=list.filter(function(r){
+
+    var room=list.filter(function(r){
       return trim(r.dormName)===dn && trim(r.roomNo)===rn;
     });
 
     if(name){
-      var a=byRoom.find(function(r){return trim(r.residentName)===name && dateIn128(r,ds);});
-      if(a)return a;
+      var byNameRoom=room.find(function(r){return trim(r.residentName)===name && dateInRecord129(r,ds);});
+      if(byNameRoom)return byNameRoom;
     }
 
-    var b=byRoom.find(function(r){return dateIn128(r,ds);});
-    if(b)return b;
+    var active=room.find(function(r){return dateInRecord129(r,ds);});
+    if(active)return active;
 
     if(name){
-      var c=list.find(function(r){return trim(r.residentName)===name && dateIn128(r,ds);});
-      if(c)return c;
+      var byName=list.find(function(r){return trim(r.residentName)===name && dateInRecord129(r,ds);});
+      if(byName)return byName;
     }
 
-    var d=byRoom.find(function(r){
+    var exact=room.find(function(r){
       return trim(r.moveIn)===ds || trim(r.moveOut)===ds || trim(r.cleanDate)===ds || trim(r.cleanDoneDate)===ds;
     });
-    if(d)return d;
+    if(exact)return exact;
 
     return null;
   }
 
-  function tdContext128(td){
-    var ds=td.getAttribute("data-date") || "";
-    var dn=td.getAttribute("data-dorm") || "";
-    var rn=td.getAttribute("data-room") || "";
-    var name="";
+  function contextFromCell129(td){
+    var room=deriveDormRoomFromMatrix129(td);
+    var ds=deriveDateFromCell129(td);
+    var name=cellName129(td);
+    var rec=findRecord129(room.dormName,room.roomNo,ds,name);
 
-    var nameEl=td.querySelector(".dmName");
-    if(nameEl)name=trim(nameEl.textContent);
-
-    // 旧形式の保険
-    if((!dn || !rn) && td.closest){
-      var tr=td.closest("tr");
-      var nameCell=tr ? tr.querySelector("td.name,th.dormMatrixDate") : null;
-      var label=nameCell ? trim(nameCell.textContent) : "";
-      if(label.indexOf("-")>=0){
-        var p=label.split("-");
-        dn=dn||p[0];
-        rn=rn||p.slice(1).join("-");
-      }
-    }
-
-    if(!ds){
-      try{
-        var base=parseDate((el("monthBase")&&el("monthBase").value)||today());
-        var d=new Date(base);
-        d.setDate(base.getDate()+Math.max(0,td.parentElement.rowIndex-1));
-        ds=ymd(d);
-      }catch(e){
-        ds=(typeof today==="function")?today():"";
-      }
-    }
-
-    var rec=findRecord128(dn,rn,ds,name);
-    return {date:ds,dormName:dn,roomNo:rn,name:name,record:rec,recordId:rec?rec.id:""};
+    return {
+      date:ds,
+      dormName:room.dormName,
+      roomNo:room.roomNo,
+      name:name,
+      record:rec,
+      recordId:rec ? rec.id : ""
+    };
   }
 
-  function setContext128(ctx){
-    window.__v128DormContext=ctx||null;
-    window.__dormMoveOnlyRecordId=ctx&&ctx.record ? ctx.record.id : "";
+  function setMoveContext129(ctx){
+    window.__v129DormContext=ctx||null;
     window.__dormEditRecordId=ctx&&ctx.record ? ctx.record.id : "";
-    window.__v83DormActiveRecordId=ctx&&ctx.record ? ctx.record.id : "";
+    window.__dormMoveOnlyRecordId=ctx&&ctx.record ? ctx.record.id : "";
 
+    // 旧処理の保険値も入れるが、旧ポップアップは表示しない
     if(el("dormEditDormName"))el("dormEditDormName").value=ctx?ctx.dormName:"";
     if(el("dormEditRoomNo"))el("dormEditRoomNo").value=ctx?ctx.roomNo:"";
     if(el("dormEditDate"))el("dormEditDate").value=ctx?ctx.date:"";
     if(el("dormEditResident"))el("dormEditResident").value=ctx&&ctx.record ? trim(ctx.record.residentName) : "";
   }
 
-  function openNormalModal128(ctx){
-    if(!ctx || !ctx.dormName || !ctx.roomNo)return false;
+  function forceModalDormRoom129(ctx){
+    if(!ctx)return;
 
-    setContext128(ctx);
+    var dn=ctx.record ? trim(ctx.record.dormName) : trim(ctx.dormName);
+    var rn=ctx.record ? trim(ctx.record.roomNo) : trim(ctx.roomNo);
+
+    if(el("modalDormName")){
+      el("modalDormName").value=dn;
+      if(typeof updateModalRoomSelect==="function"){
+        try{updateModalRoomSelect();}catch(e){}
+      }
+    }
+
+    if(el("modalRoomNo"))el("modalRoomNo").value=rn;
+
+    if(el("modalTitle")){
+      var mode=ctx.record ? "編集" : "新規";
+      el("modalTitle").textContent=(dn||"-")+"-"+(rn||"-")+" "+mode;
+    }
+  }
+
+  function canMoveFromModal129(){
+    var id=el("modalDormId") ? trim(el("modalDormId").value) : "";
+    if(!id)return false;
+
+    var rec=(window.dorms||[]).find(function(r){return String(r.id)===String(id);});
+    return !!(rec && trim(rec.residentName));
+  }
+
+  function addMoveButton129(){
+    var modal=el("modal");
+    if(!modal || modal.classList.contains("hidden"))return;
+
+    var rows=qa(".modalBox .row3",modal);
+    var row=rows[rows.length-1];
+    if(!row)return;
+
+    row.classList.add("v129ModalButtons");
+
+    var btn=el("modalDormMoveOnlyBtn");
+    if(!btn){
+      btn=document.createElement("button");
+      btn.id="modalDormMoveOnlyBtn";
+      btn.type="button";
+      btn.className="v129MoveOnlyBtn";
+      btn.textContent="寮のみ移動";
+      row.insertBefore(btn,row.firstChild);
+    }
+
+    btn.onclick=function(e){
+      if(e){e.preventDefault();e.stopPropagation();}
+      return openMoveFromNormalModal129();
+    };
+
+    // 新規/空室では移動元が存在しないためボタンを出さない
+    if(canMoveFromModal129()){
+      btn.classList.remove("v129Hidden");
+      btn.style.display="";
+    }else{
+      btn.classList.add("v129Hidden");
+      btn.style.display="none";
+    }
+  }
+
+  function openNormalFromContext129(ctx){
+    if(!ctx || !trim(ctx.dormName) || !trim(ctx.roomNo)){
+      return false;
+    }
+
+    closeOldPopup129();
+    setMoveContext129(ctx);
 
     if(ctx.record && typeof window.openDormModalById==="function"){
       window.openDormModalById(ctx.record.id,ctx.date);
@@ -11402,92 +11710,51 @@ init();
     }
 
     setTimeout(function(){
-      addMoveButton128();
-      // 通常モーダル側にも現在文脈を保存
-      var id=el("modalDormId") ? el("modalDormId").value : "";
+      closeOldPopup129();
+      forceModalDormRoom129(ctx);
+
+      // openDormModalNewの後に保存されていない場合は移動ボタンを非表示
+      var id=el("modalDormId") ? trim(el("modalDormId").value) : "";
       if(id){
         var rec=(window.dorms||[]).find(function(r){return String(r.id)===String(id);});
         if(rec){
           ctx.record=rec;
           ctx.recordId=rec.id;
-          setContext128(ctx);
+          setMoveContext129(ctx);
         }
       }
+      addMoveButton129();
     },20);
+
+    setTimeout(function(){
+      closeOldPopup129();
+      addMoveButton129();
+    },120);
 
     return true;
   }
 
-  function openCell128(td){
-    var ctx=tdContext128(td);
-    return openNormalModal128(ctx);
-  }
-
-  // 旧ポップアップを呼ばれても、通常モーダルを開くように上書き
   window.openDormEditPopup=function(td){
-    if(td && td.getAttribute){
-      return openCell128(td);
+    closeOldPopup129();
+    if(td && td.closest){
+      var cell=td.closest("#dormMonthlyTable td");
+      if(cell){
+        return openNormalFromContext129(contextFromCell129(cell));
+      }
     }
 
-    var ctx=window.__v128DormContext;
-    if(ctx)return openNormalModal128(ctx);
+    var ctx=window.__v129DormContext;
+    if(ctx)return openNormalFromContext129(ctx);
 
     return false;
   };
 
-  function addMoveButton128(){
-    var modal=el("modal");
-    if(!modal || modal.classList.contains("hidden"))return;
-
-    var rows=qa(".modalBox .row3",modal);
-    var row=rows[rows.length-1];
-    if(!row)return;
-
-    row.classList.add("v128ModalButtons");
-
-    var btn=el("modalDormMoveOnlyBtn");
-    if(!btn){
-      btn=document.createElement("button");
-      btn.id="modalDormMoveOnlyBtn";
-      btn.type="button";
-      btn.className="v128MoveOnlyBtn";
-      btn.textContent="寮のみ移動";
-      row.insertBefore(btn,row.firstChild);
-    }
-
-    btn.onclick=function(e){
-      if(e){e.preventDefault();e.stopPropagation();}
-      return openMovePopupFromCurrent128();
-    };
-  }
-
-  function currentRecordFromModal128(){
-    var id=el("modalDormId") ? trim(el("modalDormId").value) : "";
-    if(id){
-      var byId=(window.dorms||[]).find(function(r){return String(r.id)===String(id);});
-      if(byId)return byId;
-    }
-
-    var ctx=window.__v128DormContext;
-    if(ctx && ctx.recordId){
-      var byCtx=(window.dorms||[]).find(function(r){return String(r.id)===String(ctx.recordId);});
-      if(byCtx)return byCtx;
-    }
-
-    var dn=el("modalDormName") ? el("modalDormName").value : (ctx?ctx.dormName:"");
-    var rn=el("modalRoomNo") ? el("modalRoomNo").value : (ctx?ctx.roomNo:"");
-    var ds=ctx&&ctx.date ? ctx.date : (el("modalMoveIn") ? el("modalMoveIn").value : "");
-    var name=el("modalResident") ? el("modalResident").value : "";
-
-    return findRecord128(dn,rn,ds,name);
-  }
-
-  function dormNames128(){
+  function dormNames129(){
     return [...new Set((window.dormMaster||[]).map(function(m){return trim(m.dormName)}))]
       .filter(Boolean).sort();
   }
 
-  function roomsOf128(dn){
+  function roomsOf129(dn){
     return (window.dormMaster||[]).filter(function(m){return trim(m.dormName)===trim(dn);})
       .map(function(m){return trim(m.roomNo)})
       .filter(Boolean)
@@ -11499,7 +11766,7 @@ init();
     var rnEl=el("dormMoveOnlyRoom");
     if(!dnEl||!rnEl)return;
 
-    var rooms=roomsOf128(dnEl.value);
+    var rooms=roomsOf129(dnEl.value);
     rnEl.innerHTML="";
     rooms.forEach(function(r){
       var o=document.createElement("option");
@@ -11509,17 +11776,11 @@ init();
     });
   };
 
-  function addDays128(ds,add){
-    var d=parseDate(ds);
-    d.setDate(d.getDate()+add);
-    return ymd(d);
-  }
-
-  function fillMoveSelect128(rec){
+  function fillMoveDestination129(rec){
     var dnEl=el("dormMoveOnlyDorm");
     if(!dnEl)return;
 
-    var names=dormNames128();
+    var names=dormNames129();
     dnEl.innerHTML="";
     names.forEach(function(n){
       var o=document.createElement("option");
@@ -11528,7 +11789,6 @@ init();
       dnEl.appendChild(o);
     });
 
-    // 初期値は現在の寮にして、部屋だけ変更も寮変更も選べるようにする
     dnEl.value=rec.dormName || names[0] || "";
     updateDormMoveOnlyRooms();
 
@@ -11539,34 +11799,50 @@ init();
     }
   }
 
-  function openMovePopupFromCurrent128(){
-    var rec=currentRecordFromModal128();
+  function currentRecord129(){
+    var id=el("modalDormId") ? trim(el("modalDormId").value) : "";
+    if(id){
+      var rec=(window.dorms||[]).find(function(r){return String(r.id)===String(id);});
+      if(rec)return rec;
+    }
 
+    var ctx=window.__v129DormContext;
+    if(ctx && ctx.recordId){
+      var rec2=(window.dorms||[]).find(function(r){return String(r.id)===String(ctx.recordId);});
+      if(rec2)return rec2;
+    }
+
+    return null;
+  }
+
+  function openMoveFromNormalModal129(){
+    var rec=currentRecord129();
+
+    // 本来ここには来ない。ボタンは既存レコード時のみ表示。
     if(!rec || !trim(rec.residentName)){
-      alert("寮移動は、入寮中のCASTが入っているセルを開いてから操作してください。");
+      addMoveButton129();
       return false;
     }
 
     window.__dormMoveOnlyRecordId=rec.id;
     window.__dormEditRecordId=rec.id;
 
-    var ctx=window.__v128DormContext || {};
+    var ctx=window.__v129DormContext || {};
     var baseDate=ctx.date || (el("modalMoveIn")&&el("modalMoveIn").value) || rec.moveIn || today();
-
     if(rec.moveIn && baseDate<rec.moveIn)baseDate=rec.moveIn;
     if(rec.moveOut && baseDate>rec.moveOut)baseDate=rec.moveOut;
 
     if(el("dormMoveOnlyDate"))el("dormMoveOnlyDate").value=baseDate;
 
-    var cur=el("dormMoveOnlyCurrent");
-    if(cur){
-      cur.textContent=(rec.residentName||"-")+" / 現在："+(rec.dormName||"-")+"-"+(rec.roomNo||"-")+" / 入:"+(rec.moveIn||"-")+" / 退:"+(rec.moveOut||"-");
+    if(el("dormMoveOnlyCurrent")){
+      el("dormMoveOnlyCurrent").textContent=(rec.residentName||"-")+" / 現在："+(rec.dormName||"-")+"-"+(rec.roomNo||"-")+" / 入:"+(rec.moveIn||"-")+" / 退:"+(rec.moveOut||"-");
     }
 
-    var title=el("dormMoveOnlyTitle");
-    if(title)title.textContent="寮のみ移動 / "+(rec.residentName||"");
+    if(el("dormMoveOnlyTitle")){
+      el("dormMoveOnlyTitle").textContent="寮のみ移動 / "+(rec.residentName||"");
+    }
 
-    fillMoveSelect128(rec);
+    fillMoveDestination129(rec);
 
     var box=el("dormMoveOnlyPopup");
     if(box)box.style.display="flex";
@@ -11574,16 +11850,14 @@ init();
     return false;
   }
 
-  // 旧ボタンから呼ばれても新しい解決ロジックで動かす
   window.openDormMoveOnlyPopup=function(){
-    return openMovePopupFromCurrent128();
+    return openMoveFromNormalModal129();
   };
 
   window.saveDormMoveOnly=function(){
-    var rec=(window.dorms||[]).find(function(r){return String(r.id)===String(window.__dormMoveOnlyRecordId);}) || currentRecordFromModal128();
+    var rec=(window.dorms||[]).find(function(r){return String(r.id)===String(window.__dormMoveOnlyRecordId);}) || currentRecord129();
 
-    if(!rec){
-      alert("移動元の寮データが見つかりません");
+    if(!rec || !trim(rec.residentName)){
       return false;
     }
 
@@ -11610,7 +11884,7 @@ init();
       rec.status=rec.residentName ? "入寮中" : "空室";
       rec.note=(oldNote?oldNote+" / ":"")+"寮変更："+newDorm+"-"+newRoom;
     }else{
-      var beforeMove=addDays128(moveDate,-1);
+      var beforeMove=addDays129(moveDate,-1);
 
       rec.moveOut=beforeMove;
       rec.cleanDate=moveDate;
@@ -11633,7 +11907,6 @@ init();
         cleanDoneDate:(oldCleanDate && oldCleanDate>=moveDate) ? oldCleanDoneDate : "",
         note:"寮移動："+oldDorm+"-"+oldRoom+"から移動"
       };
-
       window.dorms.push(newRec);
     }
 
@@ -11645,127 +11918,297 @@ init();
 
     var moveBox=el("dormMoveOnlyPopup");
     if(moveBox)moveBox.style.display="none";
+
     if(typeof closeModal==="function")closeModal();
-    if(typeof closeDormEditPopup==="function")closeDormEditPopup();
+    closeOldPopup129();
 
     window.__dormMoveOnlyRecordId="";
     window.__dormEditRecordId="";
-    window.__v128DormContext=null;
+    window.__v129DormContext=null;
 
-    if(typeof renderDorm==="function")renderDorm();
-    if(typeof renderDorms==="function")renderDorms();
-    if(typeof renderDormMonthly==="function")renderDormMonthly();
-    if(typeof renderVacancy==="function")renderVacancy();
-    if(typeof renderStats==="function")renderStats();
-    if(typeof renderDashboard==="function")renderDashboard();
-    if(typeof generateText==="function" && el("output") && el("output").value)generateText();
+    try{ if(typeof renderDorm==="function")renderDorm(); }catch(e){}
+    try{ if(typeof renderDorms==="function")renderDorms(); }catch(e){}
+    try{ if(typeof renderDormMonthly==="function")renderDormMonthly(); }catch(e){}
+    try{ if(typeof renderVacancy==="function")renderVacancy(); }catch(e){}
+    try{ if(typeof renderStats==="function")renderStats(); }catch(e){}
+    try{ if(typeof renderDashboard==="function")renderDashboard(); }catch(e){}
+    try{ if(typeof generateText==="function" && el("output") && el("output").value)generateText(); }catch(e){}
 
     return false;
   };
 
-  function bindCells128(){
-    if(document.__v128DormCellCapture)return;
-    document.__v128DormCellCapture=true;
+  function bindDormCells129(){
+    if(document.__v129DormCellCapture)return;
+    document.__v129DormCellCapture=true;
 
     function handler(e){
-      var td=e.target && e.target.closest ? e.target.closest("#dormMonthlyTable td.dormMatrixCell") : null;
+      var td=e.target && e.target.closest ? e.target.closest("#dormMonthlyTable td") : null;
       if(!td)return;
 
-      var now=Date.now();
-      if(window.__v128LastOpen && now-window.__v128LastOpen<450){
-        e.preventDefault();
-        e.stopPropagation();
-        if(e.stopImmediatePropagation)e.stopImmediatePropagation();
-        return false;
-      }
+      // 左の日付列などは除外
+      if(td.classList.contains("name") || td.classList.contains("dormMatrixDate"))return;
+
+      var box=el("dormMonthlyTable");
+      if(!box || !box.contains(td))return;
 
       e.preventDefault();
       e.stopPropagation();
       if(e.stopImmediatePropagation)e.stopImmediatePropagation();
 
-      window.__v128LastOpen=now;
-      openCell128(td);
+      closeOldPopup129();
+      var ctx=contextFromCell129(td);
+      openNormalFromContext129(ctx);
       return false;
     }
 
     document.addEventListener("click",handler,true);
     document.addEventListener("touchend",handler,true);
+    document.addEventListener("pointerup",handler,true);
   }
 
-  function patchModalOpen128(){
+  function patchModalOpeners129(){
     ["openDormModalById","openDormModalNew","openDormModalByText"].forEach(function(name){
       var old=window[name];
-      if(typeof old==="function" && !old.__v128MoveButton){
+      if(typeof old==="function" && !old.__v129MoveButton){
         var w=function(){
+          closeOldPopup129();
           var r=old.apply(this,arguments);
-          setTimeout(addMoveButton128,20);
+          setTimeout(function(){
+            closeOldPopup129();
+            addMoveButton129();
+          },20);
+          setTimeout(addMoveButton129,150);
           return r;
         };
-        w.__v128MoveButton=true;
+        w.__v129MoveButton=true;
         window[name]=w;
       }
     });
   }
 
-  function runSelfCheck128(){
-    window.__v128SelfCheck={
-      normalModalSelects:!!(el("modalDormName")&&el("modalRoomNo")),
-      movePopupSelects:!!(el("dormMoveOnlyDorm")&&el("dormMoveOnlyRoom")),
-      moveButtonReady:true,
-      cellCaptureReady:!!document.__v128DormCellCapture,
-      oldPopupOverridden:window.openDormEditPopup && String(window.openDormEditPopup).indexOf("openCell128")>=0,
-      saveMoveOverridden:window.saveDormMoveOnly && String(window.saveDormMoveOnly).indexOf("oldMoveOutOriginal")>=0
+  function watchOldPopup129(){
+    if(document.__v129OldPopupWatch)return;
+    document.__v129OldPopupWatch=true;
+
+    setInterval(function(){
+      closeOldPopup129();
+
+      // 旧ポップアップ関数を他の処理が戻した場合、再度上書き
+      if(String(window.openDormEditPopup||"").indexOf("openNormalFromContext129")<0){
+        window.openDormEditPopup=function(td){
+          closeOldPopup129();
+          if(td && td.closest){
+            var cell=td.closest("#dormMonthlyTable td");
+            if(cell)return openNormalFromContext129(contextFromCell129(cell));
+          }
+          var ctx=window.__v129DormContext;
+          if(ctx)return openNormalFromContext129(ctx);
+          return false;
+        };
+      }
+    },1200);
+  }
+
+  function selfCheck129(){
+    var result={
+      oldPopupDisabled:!!(el("dormEditPopup") && el("dormEditPopup").classList.contains("v129OldPopupDisabled")),
+      normalModalSelects:!!(el("modalDormName") && el("modalRoomNo")),
+      movePopupSelects:!!(el("dormMoveOnlyDorm") && el("dormMoveOnlyRoom")),
+      cellCaptureReady:!!document.__v129DormCellCapture,
+      openDormEditPopupOverridden:String(window.openDormEditPopup||"").indexOf("openNormalFromContext129")>=0,
+      moveButtonCondition:String(addMoveButton129).indexOf("canMoveFromModal129")>=0,
+      saveMoveOverridden:String(window.saveDormMoveOnly||"").indexOf("oldMoveOutOriginal")>=0
     };
-    return window.__v128SelfCheck;
+    window.__v129SelfCheck=result;
+    return result;
   }
 
-  function apply128(){
-    patchModalOpen128();
-    bindCells128();
-    addMoveButton128();
-    runSelfCheck128();
+  function apply129(){
+    closeOldPopup129();
+    patchModalOpeners129();
+    bindDormCells129();
+    watchOldPopup129();
+    addMoveButton129();
+    selfCheck129();
   }
 
-  window.applyDormEditMoveRestore128=apply128;
-  window.runDormEditMoveSelfCheck128=runSelfCheck128;
+  window.applyDormEditMoveFinal129=apply129;
+  window.runDormEditMoveSelfCheck129=selfCheck129;
 
   ["renderDormMonthly","renderDormMonthlyMatrix"].forEach(function(name){
     var old=window[name];
-    if(typeof old==="function" && !old.__v128DormRestore){
+    if(typeof old==="function" && !old.__v129DormFinal){
       var w=function(){
         var r=old.apply(this,arguments);
-        setTimeout(apply128,0);
-        setTimeout(apply128,250);
-        setTimeout(apply128,800);
+        setTimeout(apply129,0);
+        setTimeout(apply129,250);
+        setTimeout(apply129,800);
         return r;
       };
-      w.__v128DormRestore=true;
+      w.__v129DormFinal=true;
       window[name]=w;
     }
   });
 
   var oldTab=window.showMonthlySubTab;
-  if(typeof oldTab==="function" && !oldTab.__v128DormRestore){
+  if(typeof oldTab==="function" && !oldTab.__v129DormFinal){
     var tw=function(){
       var r=oldTab.apply(this,arguments);
-      setTimeout(apply128,50);
-      setTimeout(apply128,300);
-      setTimeout(apply128,900);
+      setTimeout(apply129,50);
+      setTimeout(apply129,300);
+      setTimeout(apply129,900);
       return r;
     };
-    tw.__v128DormRestore=true;
+    tw.__v129DormFinal=true;
     window.showMonthlySubTab=tw;
   }
 
   document.addEventListener("DOMContentLoaded",function(){
-    setTimeout(apply128,500);
-    setTimeout(apply128,1300);
+    setTimeout(apply129,500);
+    setTimeout(apply129,1300);
+    setTimeout(apply129,2400);
   });
 
   window.addEventListener("load",function(){
-    setTimeout(apply128,500);
-    setTimeout(apply128,1600);
+    setTimeout(apply129,500);
+    setTimeout(apply129,1600);
   });
+})();
+</script>
+
+
+<script id="ver130-modal-view-fit">
+(function(){
+  /*
+    Ver130:
+    寮編集モーダルが固定メニュー/スライドバーに隠れて見切れる問題を修正。
+    旧寮編集ポップアップとの競合チェックも維持。
+  */
+  function el(id){return document.getElementById(id)}
+  function q(s,r){return (r||document).querySelector(s)}
+  function qa(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+
+  function fitModal130(){
+    var modal=el("modal");
+    if(!modal)return;
+
+    modal.style.setProperty("position","fixed","important");
+    modal.style.setProperty("inset","0","important");
+    modal.style.setProperty("z-index","50000","important");
+    modal.style.setProperty("align-items",window.matchMedia("(max-width:760px)").matches ? "flex-start" : "center","important");
+    modal.style.setProperty("justify-content","center","important");
+    modal.style.setProperty("padding",window.matchMedia("(max-width:760px)").matches ? "8px" : "10px","important");
+    modal.style.setProperty("box-sizing","border-box","important");
+    modal.style.setProperty("overflow","auto","important");
+
+    var box=q(".modalBox",modal);
+    if(box){
+      box.style.setProperty("width",window.matchMedia("(max-width:760px)").matches ? "calc(100vw - 16px)" : "min(94vw,720px)","important");
+      box.style.setProperty("max-width","720px","important");
+      box.style.setProperty("max-height",window.matchMedia("(max-width:760px)").matches ? "calc(100dvh - 16px)" : "calc(100dvh - 24px)","important");
+      box.style.setProperty("overflow-y","auto","important");
+      box.style.setProperty("overflow-x","hidden","important");
+      box.style.setProperty("-webkit-overflow-scrolling","touch","important");
+      box.style.setProperty("box-sizing","border-box","important");
+      box.style.setProperty("margin","auto","important");
+    }
+
+    // ボタン行を下部に見やすく固定
+    qa(".modalBox .row3",modal).forEach(function(row){
+      if(row.querySelector("#modalDormMoveOnlyBtn") || row.querySelector("button")){
+        row.classList.add("v130ModalButtons");
+      }
+    });
+
+    // 旧寮編集ポップアップは表示させない
+    var old=el("dormEditPopup");
+    if(old){
+      old.classList.add("v130OldPopupDisabled");
+      old.style.display="none";
+    }
+  }
+
+  function patchOpeners130(){
+    ["openDormModalById","openDormModalNew","openDormModalByText"].forEach(function(name){
+      var old=window[name];
+      if(typeof old==="function" && !old.__v130FitModal){
+        var w=function(){
+          var r=old.apply(this,arguments);
+          setTimeout(fitModal130,0);
+          setTimeout(fitModal130,80);
+          setTimeout(fitModal130,250);
+          return r;
+        };
+        w.__v130FitModal=true;
+        window[name]=w;
+      }
+    });
+
+    var oldClose=window.closeModal;
+    if(typeof oldClose==="function" && !oldClose.__v130FitModal){
+      var c=function(){
+        var r=oldClose.apply(this,arguments);
+        setTimeout(function(){
+          var modal=el("modal");
+          if(modal)modal.scrollTop=0;
+        },20);
+        return r;
+      };
+      c.__v130FitModal=true;
+      window.closeModal=c;
+    }
+  }
+
+  function selfCheck130(){
+    var old=el("dormEditPopup");
+    var modal=el("modal");
+    var box=modal ? q(".modalBox",modal) : null;
+
+    window.__v130SelfCheck={
+      modalFrontZIndex:true,
+      modalFixedCss:!!modal,
+      modalBoxFitCss:!!box,
+      oldPopupDisabled:!old || old.classList.contains("v129OldPopupDisabled") || old.classList.contains("v130OldPopupDisabled"),
+      ver129DormConflictCheck:typeof window.runDormEditMoveSelfCheck129==="function" || typeof window.applyDormEditMoveFinal129==="function"
+    };
+
+    return window.__v130SelfCheck;
+  }
+
+  function apply130(){
+    patchOpeners130();
+    fitModal130();
+
+    // Ver129の競合チェックも再実行
+    try{ if(typeof window.applyDormEditMoveFinal129==="function")window.applyDormEditMoveFinal129(); }catch(e){}
+    fitModal130();
+
+    selfCheck130();
+  }
+
+  window.applyModalViewFit130=apply130;
+  window.runModalViewFitSelfCheck130=selfCheck130;
+
+  document.addEventListener("DOMContentLoaded",function(){
+    setTimeout(apply130,500);
+    setTimeout(apply130,1300);
+  });
+
+  window.addEventListener("load",function(){
+    setTimeout(apply130,500);
+    setTimeout(apply130,1600);
+  });
+
+  window.addEventListener("resize",function(){
+    setTimeout(fitModal130,100);
+  });
+
+  // モーダル内の入力にフォーカスした時も見切れないよう再調整
+  document.addEventListener("focusin",function(e){
+    if(e.target && e.target.closest && e.target.closest("#modal")){
+      setTimeout(fitModal130,50);
+    }
+  },true);
 })();
 </script>
 
