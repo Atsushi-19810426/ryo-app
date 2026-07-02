@@ -117,3 +117,5 @@ Ver134 Clean Dorm Modal Data Fix: Ver126クリーンベースから再構築。V
 Ver135 Popup Save Delete Fix: Ver134ベース。今回はポップアップの保存・削除が機能しない一点だけを修正。原因は追加処理側で window.dorms/window.dormMaster/window.staff を参照していたため、アプリ本体の実データ let dorms/dormMaster/staff に反映されなかったこと。Ver134スクリプト内の参照を実データ参照へ修正し、保存/削除/閉じるボタンをtype=button化して直接関数へ再接続。月間表スライドバー、固定ヘッダー、一列メニュー、サイズ調整、寮移動ボタン処理は変更なし。保存キー・読込キー変更なし。
 
 Ver136 MoveOut Vacant History Fix: Ver135ベース。退寮日を入力したデータは、履歴（residentName/moveIn/moveOut）を残したまま status=空室、cleanDate=退寮日、cleanStatus=清掃予定へ自動補正。退寮日当日から occupiedRecord は占有扱いにしないため、ホーム入寮中人数や空室判定にも反映。保存/削除修正はVer135を維持。月間表スライドバー・固定ヘッダー・一列メニューは変更なし。保存キー・読込キー変更なし。
+
+Ver137 MoveOut Count History Fix: Ver136ベース。本日退寮を退寮人数/本日の確認/AI書き出しに必ず含める。退寮日当日から部屋は空室扱い、清掃予定は退寮日、清掃状態は清掃予定。ただしresidentName/moveIn/moveOutは履歴として残し、誰が入っていたかを確認できる。Ver134由来の空室正規化で退寮履歴が消えないよう、save/saveDormModal/saveDormDataSafe134を安全版で上書き。保存/削除修正、寮移動ボタン処理は維持。スライドバー・固定ヘッダー・一列メニューは変更なし。保存キー・読込キー変更なし。
