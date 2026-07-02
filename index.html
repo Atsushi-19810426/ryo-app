@@ -2793,15 +2793,15 @@ body.v125MonthlyActive #monthlyDormPanel .v114StickyHead{
 }
 
 
-/* Ver133: クリーン統合版 寮編集/寮移動/削除/重複/退寮空室 */
-/* 重要：月間表スライドバー・ヘッダー固定には触らない */
+/* Ver134: クリーン版 寮編集・寮移動・削除反映・重複整理 */
+/* 月間表スライドバー/固定ヘッダー/一列メニューには触らない */
 
-/* 旧寮編集ポップアップは競合原因のため表示しない */
-#dormEditPopup.v133DisabledOldDormPopup{
+/* 旧寮編集ポップアップは競合原因のため無効 */
+#dormEditPopup.v134OldPopupDisabled{
   display:none!important;
 }
 
-/* 通常寮編集モーダルを最前面に。スライドバー位置は変更しない */
+/* 通常の寮編集モーダルだけを使う。サイズを小さめに調整 */
 #modal{
   z-index:50000!important;
 }
@@ -2810,22 +2810,70 @@ body.v125MonthlyActive #monthlyDormPanel .v114StickyHead{
   display:flex!important;
   align-items:flex-start!important;
   justify-content:center!important;
-  padding:10px!important;
+  padding:8px!important;
   box-sizing:border-box!important;
   overflow:auto!important;
 }
 
 #modal .modalBox{
-  max-height:calc(100dvh - 20px)!important;
+  width:min(520px,94vw)!important;
+  max-height:calc(100dvh - 16px)!important;
   overflow-y:auto!important;
   overflow-x:hidden!important;
   margin:auto!important;
+  padding:12px!important;
+  border-radius:18px!important;
   box-sizing:border-box!important;
   -webkit-overflow-scrolling:touch!important;
 }
 
-/* 寮編集の寮のみ移動ボタン */
-#modalDormMoveOnlyBtn.v133MoveOnlyBtn{
+#modal .modalBox h2,
+#modal .modalBox #modalTitle{
+  margin:0 0 8px!important;
+  font-size:17px!important;
+  line-height:1.2!important;
+}
+
+#modal .modalBox label{
+  margin:4px 0 3px!important;
+  font-size:11px!important;
+  line-height:1.2!important;
+}
+
+#modal .modalBox input,
+#modal .modalBox select{
+  min-height:34px!important;
+  height:34px!important;
+  padding:0 8px!important;
+  font-size:13px!important;
+  box-sizing:border-box!important;
+}
+
+#modal .modalBox textarea{
+  min-height:52px!important;
+  max-height:96px!important;
+  padding:8px!important;
+  font-size:13px!important;
+  box-sizing:border-box!important;
+}
+
+#modal .modalBox .row,
+#modal .modalBox .row2,
+#modal .modalBox .row3{
+  gap:7px!important;
+  margin-bottom:6px!important;
+}
+
+#modal .modalBox button{
+  min-height:38px!important;
+  height:auto!important;
+  padding:9px 8px!important;
+  font-size:13px!important;
+  line-height:1.12!important;
+}
+
+/* 寮のみ移動ボタン */
+#modalDormMoveOnlyBtn.v134MoveOnlyBtn{
   background:#7c3aed!important;
   color:#fff!important;
   border:0!important;
@@ -2833,24 +2881,40 @@ body.v125MonthlyActive #monthlyDormPanel .v114StickyHead{
   font-weight:900!important;
 }
 
-#modalDormMoveOnlyBtn.v133Hidden{
+#modalDormMoveOnlyBtn.v134Hidden{
   display:none!important;
 }
 
-.v133MoveButtonRow{
+.v134MoveRow{
   display:grid!important;
   grid-template-columns:1fr!important;
-  gap:8px!important;
-  margin:8px 0!important;
+  gap:6px!important;
+  margin:6px 0!important;
 }
 
 @media(max-width:760px){
   #modal:not(.hidden){
-    padding:8px!important;
+    padding:6px!important;
   }
   #modal .modalBox{
-    width:calc(100vw - 16px)!important;
-    max-height:calc(100dvh - 16px)!important;
+    width:calc(100vw - 12px)!important;
+    max-height:calc(100dvh - 12px)!important;
+    padding:10px!important;
+  }
+  #modal .modalBox h2,
+  #modal .modalBox #modalTitle{
+    font-size:16px!important;
+    margin-bottom:7px!important;
+  }
+  #modal .modalBox input,
+  #modal .modalBox select{
+    min-height:32px!important;
+    height:32px!important;
+    font-size:12px!important;
+  }
+  #modal .modalBox textarea{
+    min-height:46px!important;
+    max-height:82px!important;
   }
 }
 
@@ -2879,7 +2943,7 @@ body.v125MonthlyActive #monthlyDormPanel .v114StickyHead{
     <div class="stats">
       <div class="stat"><span>本日出勤</span><b id="statToday">0</b></div>
       <div class="stat"><span>新人</span><b id="statNewbie">0</b></div>
-      <div class="stat"><span>入居中</span><b id="statOccupied">0</b></div>
+      <div class="stat"><span>入寮中</span><b id="statOccupied">0</b></div>
       <div class="stat"><span>空室</span><b id="statVacant">0</b></div>
     </div>
   </div>
@@ -11329,80 +11393,273 @@ init();
 </script>
 
 
-<script id="ver133-clean-dorm-integrated-fix">
+<script id="ver134-clean-dorm-modal-data-fix">
 (function(){
   /*
-    Ver133 Clean Dorm Integrated Fix
+    Ver134 Clean Dorm Modal Data Fix
 
-    ベースはVer126。
-    ここから必要機能だけを再統合:
-    1. 旧寮編集ポップアップを無効化
-    2. 寮月間表セルタップ → 通常の寮編集モーダル
-    3. 入寮中の既存データのみ「寮のみ移動」表示
-    4. 寮移動元ID保持
-    5. 削除反映
-    6. 重複は最新優先で古いデータ削除
-    7. 空室設定時は入寮情報を削除
-    8. 退寮日当日から自動で空室扱い
-    9. モーダルは見切れないよう前面表示
-    ※ 月間表スライドバー・固定ヘッダーには触らない
+    ベース：Ver126
+    残す良い部分：
+    - 月間表メニュー一列化
+    - スライドバー位置
+    - 日付/曜日、寮/部屋番号固定
+    - 日付/曜日の隙間調整
+
+    今回だけ入れる修正：
+    - 旧寮編集ポップアップ無効化
+    - 寮月間表セルタップ → 通常寮編集モーダル
+    - 保存/削除を確実に反映
+    - 寮のみ移動ボタン復旧
+    - 移動元ID保持
+    - 重複は最新優先
+    - 空室設定時は入寮情報を削除
+    - 退寮日当日から自動空室扱い
+    - ホーム表記「入寮中」/ 人数反映
   */
 
   function el(id){return document.getElementById(id)}
   function q(s,r){return (r||document).querySelector(s)}
   function qa(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
   function trim(v){return String(v==null?"":v).trim()}
-  function esc133(s){
-    if(typeof esc==="function")return esc(s);
-    return String(s==null?"":s).replace(/[&<>"']/g,function(c){
-      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
-    });
-  }
-  function today133(){
-    try{return today();}catch(e){return new Date().toISOString().slice(0,10);}
-  }
-  function addDays133(ds,n){
-    var d=parseDate(ds);
-    d.setDate(d.getDate()+n);
-    return ymd(d);
-  }
+  function today134(){try{return today();}catch(e){return new Date().toISOString().slice(0,10)}}
+  function addDays134(ds,n){var d=parseDate(ds);d.setDate(d.getDate()+n);return ymd(d)}
 
-  /* --------------------------------------------------
-     旧ポップアップ無効化
-  -------------------------------------------------- */
-  function disableOldPopup133(){
+  function disableOldPopup134(){
     var old=el("dormEditPopup");
     if(old){
-      old.classList.add("v133DisabledOldDormPopup");
+      old.classList.add("v134OldPopupDisabled");
       old.style.display="none";
     }
   }
 
-  /* --------------------------------------------------
-     日付・寮部屋・レコード特定
-  -------------------------------------------------- */
-  function parseBaseDate133(){
-    try{
-      var v=(el("monthBase")&&el("monthBase").value) || (el("topMonthBase")&&el("topMonthBase").value) || today133();
-      return parseDate(v);
-    }catch(e){
-      return new Date();
+  function fitModal134(){
+    var modal=el("modal");
+    if(!modal)return;
+    modal.style.setProperty("z-index","50000","important");
+    var box=q(".modalBox",modal);
+    if(box){
+      box.style.setProperty("width","min(520px,94vw)","important");
+      box.style.setProperty("max-height","calc(100dvh - 16px)","important");
+      box.style.setProperty("overflow-y","auto","important");
+      box.style.setProperty("overflow-x","hidden","important");
+      box.style.setProperty("-webkit-overflow-scrolling","touch","important");
+      box.style.setProperty("box-sizing","border-box","important");
     }
+    disableOldPopup134();
   }
 
-  function deriveDormRoom133(td){
-    var dn=td.getAttribute("data-dorm")||"";
-    var rn=td.getAttribute("data-room")||"";
+  /* ------------------------------
+     退寮日当日から空室扱い
+  ------------------------------ */
+  window.occupiedRecord=function(room,ds){
+    ds=trim(ds||today134());
+    var dn=trim(room&&room.dormName), rn=trim(room&&room.roomNo);
+    return (Array.isArray(window.dorms)?window.dorms:[]).find(function(r){
+      if(trim(r.dormName)!==dn || trim(r.roomNo)!==rn)return false;
+      if(trim(r.status)==="空室" || !trim(r.residentName))return false;
+      var mi=trim(r.moveIn), mo=trim(r.moveOut);
+      if(mi && mo)return ds>=mi && ds<mo; // 退寮日当日から空室
+      if(mi && !mo)return ds>=mi;
+      return trim(r.status)==="入寮中";
+    });
+  };
+
+  function effectiveStatus134(r,ds){
+    ds=trim(ds||today134());
+    if(!r || trim(r.status)==="空室" || !trim(r.residentName))return "空室";
+    if(trim(r.moveOut) && ds>=trim(r.moveOut))return "空室";
+    return trim(r.status)||"入寮中";
+  }
+
+  /* ------------------------------
+     ホーム人数反映
+  ------------------------------ */
+  window.renderStats=function(){
+    var ds=today134();
+    var occ=0,vac=0;
+    try{ if(typeof syncMasterFromDorms==="function")syncMasterFromDorms(false); }catch(e){}
+    (window.dormMaster||[]).forEach(function(room){
+      if(window.occupiedRecord(room,ds))occ++; else vac++;
+    });
+    if(el("statToday"))el("statToday").textContent=(typeof totals==="function"?totals(ds).real:0);
+    if(el("statNewbie"))el("statNewbie").textContent=(window.staff||[]).filter(function(x){return !!x.newbie}).length;
+    if(el("statOccupied"))el("statOccupied").textContent=occ;
+    if(el("statVacant"))el("statVacant").textContent=vac;
+
+    var label=el("statOccupied") && el("statOccupied").previousElementSibling;
+    if(label)label.textContent="入寮中";
+  };
+
+  /* ------------------------------
+     データ整理
+  ------------------------------ */
+  function isVacant134(r){
+    return !r || trim(r.status)==="空室" || (!trim(r.residentName) && !trim(r.moveIn));
+  }
+  function hasCleanInfo134(r){
+    return !!(trim(r.cleanDate) || trim(r.cleanDoneDate) || (trim(r.cleanStatus) && trim(r.cleanStatus)!=="未清掃") || trim(r.note));
+  }
+  function nameRoomKey134(r){
+    return trim(r.residentName)+"|"+trim(r.dormName)+"|"+trim(r.roomNo);
+  }
+  function roomKey134(r){
+    return trim(r.dormName)+"|"+trim(r.roomNo);
+  }
+  function dateRange134(start,end){
+    var out=[];
+    if(!start)return out;
+    var s=parseDate(start), e=end?parseDate(end):parseDate(start);
+    if(e<s)e=s;
+    for(var d=new Date(s); d<=e; d.setDate(d.getDate()+1)){
+      out.push(ymd(d));
+      if(out.length>730)break;
+    }
+    return out;
+  }
+  function activeDates134(r){
+    if(!r || isVacant134(r) || !trim(r.residentName) || !trim(r.moveIn))return [];
+    return dateRange134(trim(r.moveIn),trim(r.moveOut)||trim(r.moveIn));
+  }
+  function latestWeight134(r,idx){
+    var n=Number(r&&r.id);
+    return isFinite(n)?Math.max(n,idx):idx;
+  }
+
+  function normalizeVacant134(r){
+    if(!r)return r;
+    if(trim(r.status)==="空室"){
+      r.status="空室";
+      r.residentName="";
+      r.moveIn="";
+      r.moveOut="";
+    }
+    return r;
+  }
+
+  function ensureMoveOutClean134(){
+    var changed=0;
+    (window.dorms||[]).forEach(function(r){
+      if(!r)return;
+      if(trim(r.moveOut) && !trim(r.cleanDate) && trim(r.cleanStatus)!=="清掃済み" && trim(r.cleanStatus)!=="済"){
+        r.cleanDate=trim(r.moveOut);
+        if(!trim(r.cleanStatus) || trim(r.cleanStatus)==="未清掃")r.cleanStatus="清掃予定";
+        changed++;
+      }
+    });
+    return changed;
+  }
+
+  window.dedupeDormLatest134=function(){
+    if(!Array.isArray(window.dorms))return 0;
+    var removed=0, src=window.dorms.slice();
+
+    var keepId={};
+    src.forEach(function(r,idx){
+      var id=trim(r&&r.id);
+      if(!id)return;
+      var w=latestWeight134(r,idx);
+      if(!keepId[id] || w>=keepId[id].w)keepId[id]={record:r,w:w};
+    });
+
+    var step=[];
+    src.forEach(function(r){
+      var id=trim(r&&r.id);
+      if(id && keepId[id] && keepId[id].record!==r){removed++;return;}
+      normalizeVacant134(r);
+      step.push(r);
+    });
+
+    var result=[], seen={};
+    for(var i=step.length-1;i>=0;i--){
+      var r=step[i];
+      if(!r)continue;
+
+      if(!isVacant134(r) && trim(r.residentName) && trim(r.moveIn)){
+        var dup=false;
+        activeDates134(r).forEach(function(ds){
+          var k=nameRoomKey134(r)+"|"+ds;
+          if(seen[k])dup=true;
+        });
+        if(dup){removed++;continue;}
+        activeDates134(r).forEach(function(ds){seen[nameRoomKey134(r)+"|"+ds]=true;});
+      }
+      result.unshift(r);
+    }
+
+    var vacantKeep={};
+    result.forEach(function(r,idx){
+      if(!isVacant134(r) || !hasCleanInfo134(r))return;
+      var k=roomKey134(r), w=latestWeight134(r,idx);
+      if(!vacantKeep[k] || w>=vacantKeep[k].w)vacantKeep[k]={record:r,w:w};
+    });
+
+    var final=[];
+    result.forEach(function(r){
+      if(isVacant134(r)){
+        if(!hasCleanInfo134(r)){removed++;return;}
+        var k=roomKey134(r);
+        if(vacantKeep[k] && vacantKeep[k].record!==r){removed++;return;}
+      }
+      final.push(r);
+    });
+
+    window.dorms=final;
+    return removed;
+  };
+
+  function removeById134(id){
+    var before=(window.dorms||[]).length;
+    window.dorms=(window.dorms||[]).filter(function(r){return String(r.id)!==String(id)});
+    return before-window.dorms.length;
+  }
+
+  function removeOccupancyForVacant134(dn,rn,exceptId){
+    dn=trim(dn); rn=trim(rn); exceptId=trim(exceptId);
+    window.dorms=(window.dorms||[]).filter(function(r){
+      if(exceptId && String(r.id)===String(exceptId))return true;
+      if(trim(r.dormName)!==dn || trim(r.roomNo)!==rn)return true;
+      if(trim(r.residentName) || trim(r.moveIn) || trim(r.status)==="入寮中" || trim(r.status)==="予約")return false;
+      return true;
+    });
+  }
+
+  function renderAllDorm134(){
+    try{ if(typeof renderDorm==="function")renderDorm(); }catch(e){}
+    try{ if(typeof renderDorms==="function")renderDorms(); }catch(e){}
+    try{ if(typeof renderDormMonthly==="function")renderDormMonthly(); }catch(e){}
+    try{ if(typeof renderVacancy==="function")renderVacancy(); }catch(e){}
+    try{ if(typeof renderStats==="function")renderStats(); }catch(e){}
+    try{ if(typeof renderDashboard==="function")renderDashboard(); }catch(e){}
+    try{ if(typeof generateText==="function" && el("output") && el("output").value)generateText(); }catch(e){}
+  }
+
+  window.saveDormDataSafe134=function(){
+    ensureMoveOutClean134();
+    window.dedupeDormLatest134();
+    save();
+    renderAllDorm134();
+    return false;
+  };
+
+  /* ------------------------------
+     セルから寮/部屋/日付/対象レコードを取得
+  ------------------------------ */
+  function parseBaseDate134(){
+    try{
+      var v=(el("monthBase")&&el("monthBase").value) || (el("topMonthBase")&&el("topMonthBase").value) || today134();
+      return parseDate(v);
+    }catch(e){return new Date()}
+  }
+
+  function deriveDormRoom134(td){
+    var dn=td.getAttribute("data-dorm")||"", rn=td.getAttribute("data-room")||"";
     if(dn && rn)return {dormName:dn,roomNo:rn};
 
     var table=td.closest("table");
     if(table && table.classList.contains("dormMatrixTable")){
       var col=Math.max(0,td.cellIndex-1);
-      var headRows=table.tHead ? table.tHead.rows : [];
-      var groupRow=headRows[0];
-      var roomRow=headRows[1];
-
-      var dormMap=[];
+      var headRows=table.tHead?table.tHead.rows:[];
+      var groupRow=headRows[0], roomRow=headRows[1], dormMap=[];
       if(groupRow){
         qa("th",groupRow).forEach(function(th){
           if(th.classList.contains("dormMatrixDateHead"))return;
@@ -11413,263 +11670,221 @@ init();
           for(var i=0;i<span;i++)dormMap.push(name);
         });
       }
-
-      dn=dn || dormMap[col] || "";
-      if(!rn && roomRow && roomRow.cells[col]){
-        rn=trim(roomRow.cells[col].textContent).replace(/号室$/,"");
-      }
+      dn=dn||dormMap[col]||"";
+      if(!rn && roomRow && roomRow.cells[col])rn=trim(roomRow.cells[col].textContent).replace(/号室$/,"");
     }
-
-    if((!dn || !rn) && td.closest){
-      var tr=td.closest("tr");
-      var nameCell=tr ? (tr.querySelector("td.name")||tr.querySelector("th.name")) : null;
-      var raw=nameCell ? trim(nameCell.textContent) : "";
-      var idx=raw.lastIndexOf("-");
-      if(idx>=0){
-        dn=dn || trim(raw.slice(0,idx));
-        rn=rn || trim(raw.slice(idx+1));
-      }
-    }
-
     return {dormName:dn,roomNo:rn};
   }
 
-  function deriveDate133(td){
+  function deriveDate134(td){
     var ds=td.getAttribute("data-date")||"";
     if(ds)return ds;
 
     var tr=td.closest("tr");
-    var dateCell=tr ? (tr.querySelector(".dormMatrixDate") || tr.querySelector("[data-date]")) : null;
+    var dateCell=tr ? (tr.querySelector(".dormMatrixDate")||tr.querySelector("[data-date]")) : null;
     if(dateCell && dateCell.getAttribute("data-date"))return dateCell.getAttribute("data-date");
 
     var table=td.closest("table");
     if(table && table.classList.contains("dormMatrixTable") && tr && tr.parentElement){
-      var base=parseBaseDate133();
+      var base=parseBaseDate134();
       var idx=Array.prototype.indexOf.call(tr.parentElement.children,tr);
       var d=new Date(base);
       d.setDate(base.getDate()+Math.max(0,idx));
       return ymd(d);
     }
-
-    try{
-      var base2=parseBaseDate133();
-      var off=Math.max(0,td.cellIndex-1);
-      var d2=new Date(base2);
-      d2.setDate(base2.getDate()+off);
-      return ymd(d2);
-    }catch(e){
-      return today133();
-    }
+    return today134();
   }
 
-  function cellName133(td){
+  function cellName134(td){
     var n=td.querySelector(".dmName");
     if(n)return trim(n.textContent);
-    var txt=trim(td.textContent||"");
-    txt=txt.replace(/^(入|退|清|済|中)+/g,"").trim();
-    return txt;
+    return trim(td.textContent||"").replace(/^(入|退|清|済|中)+/g,"").trim();
   }
 
-  function isVacantRecord133(r){
-    return !r || trim(r.status)==="空室" || (!trim(r.residentName) && !trim(r.moveIn));
-  }
-
-  function dateInRecord133(r,ds){
+  function dateInRecord134(r,ds){
     if(!r || !ds)return false;
     var mi=trim(r.moveIn), mo=trim(r.moveOut);
-    if(mi && mo && ds>=mi && ds<=mo)return true; // 履歴検索は退寮日も含める
+    if(mi && mo && ds>=mi && ds<=mo)return true; // 編集対象特定は履歴なので退寮日も含める
     if(mi && !mo && ds>=mi)return true;
     return mi===ds || mo===ds || trim(r.cleanDate)===ds || trim(r.cleanDoneDate)===ds;
   }
 
-  function findRecord133(dn,rn,ds,name){
+  function findRecord134(dn,rn,ds,name){
     dn=trim(dn); rn=trim(rn); ds=trim(ds); name=trim(name);
     var list=Array.isArray(window.dorms)?window.dorms:[];
-    var room=list.filter(function(r){return trim(r.dormName)===dn && trim(r.roomNo)===rn;});
+    var room=list.filter(function(r){return trim(r.dormName)===dn && trim(r.roomNo)===rn});
 
     if(name){
-      var a=room.find(function(r){return trim(r.residentName)===name && dateInRecord133(r,ds);});
+      var a=room.find(function(r){return trim(r.residentName)===name && dateInRecord134(r,ds)});
       if(a)return a;
     }
-
-    var b=room.find(function(r){return dateInRecord133(r,ds);});
+    var b=room.find(function(r){return dateInRecord134(r,ds)});
     if(b)return b;
 
     if(name){
-      var c=list.find(function(r){return trim(r.residentName)===name && dateInRecord133(r,ds);});
+      var c=list.find(function(r){return trim(r.residentName)===name && dateInRecord134(r,ds)});
       if(c)return c;
     }
-
     return null;
   }
 
-  function contextFromCell133(td){
-    var rr=deriveDormRoom133(td);
-    var ds=deriveDate133(td);
-    var name=cellName133(td);
-    var rec=findRecord133(rr.dormName,rr.roomNo,ds,name);
-    return {date:ds,dormName:rr.dormName,roomNo:rr.roomNo,name:name,record:rec,recordId:rec?rec.id:""};
+  function contextFromCell134(td){
+    var rr=deriveDormRoom134(td), ds=deriveDate134(td), nm=cellName134(td);
+    var rec=findRecord134(rr.dormName,rr.roomNo,ds,nm);
+    return {date:ds,dormName:rr.dormName,roomNo:rr.roomNo,name:nm,record:rec,recordId:rec?rec.id:""};
   }
 
-  function setContext133(ctx){
-    window.__v133DormContext=ctx || null;
-    window.__dormEditRecordId=ctx&&ctx.record ? ctx.record.id : "";
-    window.__dormMoveOnlyRecordId=ctx&&ctx.record ? ctx.record.id : "";
+  function setContext134(ctx){
+    window.__v134DormContext=ctx||null;
+    window.__dormEditRecordId=ctx&&ctx.record?ctx.record.id:"";
+    window.__dormMoveOnlyRecordId=ctx&&ctx.record?ctx.record.id:"";
   }
 
-  /* --------------------------------------------------
-     通常モーダル表示・見切れ防止
-  -------------------------------------------------- */
-  function fitModal133(){
-    var modal=el("modal");
-    if(!modal)return;
-    modal.style.setProperty("z-index","50000","important");
+  /* ------------------------------
+     通常寮編集モーダルへ統一
+  ------------------------------ */
+  var origById=window.openDormModalById;
+  var origNew=window.openDormModalNew;
+  var origByText=window.openDormModalByText;
 
-    var box=q(".modalBox",modal);
-    if(box){
-      box.style.setProperty("max-height","calc(100dvh - 20px)","important");
-      box.style.setProperty("overflow-y","auto","important");
-      box.style.setProperty("overflow-x","hidden","important");
-      box.style.setProperty("-webkit-overflow-scrolling","touch","important");
-    }
-    disableOldPopup133();
+  function afterOpenModal134(ctx){
+    setTimeout(function(){
+      disableOldPopup134();
+      if(ctx && el("modalDormName")){
+        var dn=ctx.record?trim(ctx.record.dormName):trim(ctx.dormName);
+        var rn=ctx.record?trim(ctx.record.roomNo):trim(ctx.roomNo);
+        el("modalDormName").value=dn;
+        try{ if(typeof updateModalRoomSelect==="function")updateModalRoomSelect(); }catch(e){}
+        if(el("modalRoomNo"))el("modalRoomNo").value=rn;
+      }
+      addMoveButton134();
+      fitModal134();
+    },20);
+    setTimeout(function(){addMoveButton134();fitModal134();},180);
   }
 
-  function forceModalRoom133(ctx){
-    if(!ctx)return;
-    var dn=ctx.record ? trim(ctx.record.dormName) : trim(ctx.dormName);
-    var rn=ctx.record ? trim(ctx.record.roomNo) : trim(ctx.roomNo);
-
-    if(el("modalDormName")){
-      el("modalDormName").value=dn;
-      try{ if(typeof updateModalRoomSelect==="function")updateModalRoomSelect(); }catch(e){}
-    }
-    if(el("modalRoomNo"))el("modalRoomNo").value=rn;
-  }
-
-  function openNormalDormModal133(ctx){
+  function openNormalDormModal134(ctx){
     if(!ctx || !trim(ctx.dormName) || !trim(ctx.roomNo))return false;
-    disableOldPopup133();
-    setContext133(ctx);
+    setContext134(ctx);
+    disableOldPopup134();
 
-    if(ctx.record && typeof window.openDormModalById==="function"){
-      window.openDormModalById(ctx.record.id,ctx.date);
-    }else if(typeof window.openDormModalNew==="function"){
-      window.openDormModalNew({dormName:ctx.dormName,roomNo:ctx.roomNo},ctx.date);
-    }else if(typeof window.openDormModalByText==="function"){
-      window.openDormModalByText(ctx.dormName,ctx.roomNo,ctx.date);
+    if(ctx.record && typeof origById==="function"){
+      origById(ctx.record.id,ctx.date);
+    }else if(typeof origNew==="function"){
+      origNew({dormName:ctx.dormName,roomNo:ctx.roomNo},ctx.date);
+    }else if(typeof origByText==="function"){
+      origByText(ctx.dormName,ctx.roomNo,ctx.date);
     }else{
       return false;
     }
 
-    setTimeout(function(){
-      disableOldPopup133();
-      forceModalRoom133(ctx);
-      addMoveButton133();
-      fitModal133();
-    },20);
-
-    setTimeout(function(){
-      disableOldPopup133();
-      addMoveButton133();
-      fitModal133();
-    },160);
-
+    afterOpenModal134(ctx);
     return true;
   }
 
   window.openDormEditPopup=function(td){
-    disableOldPopup133();
+    disableOldPopup134();
     if(td && td.closest){
       var cell=td.closest("#dormMonthlyTable td");
-      if(cell)return openNormalDormModal133(contextFromCell133(cell));
+      if(cell)return openNormalDormModal134(contextFromCell134(cell));
     }
-    if(window.__v133DormContext)return openNormalDormModal133(window.__v133DormContext);
+    if(window.__v134DormContext)return openNormalDormModal134(window.__v134DormContext);
     return false;
   };
 
-  /* --------------------------------------------------
-     寮のみ移動
-  -------------------------------------------------- */
-  function currentModalRecord133(){
+  window.openDormModalById=function(id,focusDate){
+    var rec=(window.dorms||[]).find(function(r){return String(r.id)===String(id)});
+    var ctx=rec?{date:focusDate||today134(),dormName:rec.dormName,roomNo:rec.roomNo,name:rec.residentName,record:rec,recordId:rec.id}:null;
+    if(typeof origById==="function")origById(id,focusDate);
+    if(ctx)setContext134(ctx);
+    afterOpenModal134(ctx);
+  };
+
+  window.openDormModalNew=function(room,ds){
+    var ctx={date:ds||today134(),dormName:room&&room.dormName,roomNo:room&&room.roomNo,name:"",record:null,recordId:""};
+    if(typeof origNew==="function")origNew(room,ds);
+    setContext134(ctx);
+    afterOpenModal134(ctx);
+  };
+
+  window.openDormModalByText=function(dn,rn,ds){
+    var rec=findRecord134(dn,rn,ds,"");
+    return openNormalDormModal134({date:ds||today134(),dormName:dn,roomNo:rn,name:rec?rec.residentName:"",record:rec,recordId:rec?rec.id:""});
+  };
+
+  /* ------------------------------
+     寮のみ移動ボタン
+  ------------------------------ */
+  function currentModalRecord134(){
     var id=el("modalDormId") ? trim(el("modalDormId").value) : "";
     if(id){
-      var byId=(window.dorms||[]).find(function(r){return String(r.id)===String(id);});
-      if(byId)return byId;
+      var r=(window.dorms||[]).find(function(x){return String(x.id)===String(id)});
+      if(r)return r;
     }
-    var ctx=window.__v133DormContext;
+    var ctx=window.__v134DormContext;
     if(ctx && ctx.recordId){
-      var byCtx=(window.dorms||[]).find(function(r){return String(r.id)===String(ctx.recordId);});
-      if(byCtx)return byCtx;
+      var c=(window.dorms||[]).find(function(x){return String(x.id)===String(ctx.recordId)});
+      if(c)return c;
     }
     return null;
   }
 
-  function canMove133(){
-    var r=currentModalRecord133();
+  function canMove134(){
+    var r=currentModalRecord134();
     return !!(r && trim(r.residentName) && trim(r.moveIn));
   }
 
-  function addMoveButton133(){
+  function addMoveButton134(){
     var modal=el("modal");
     if(!modal || modal.classList.contains("hidden"))return;
-
     var box=q(".modalBox",modal);
     if(!box)return;
 
-    var row=el("v133MoveButtonRow");
+    var row=el("v134MoveRow");
     if(!row){
       row=document.createElement("div");
-      row.id="v133MoveButtonRow";
-      row.className="v133MoveButtonRow";
-
+      row.id="v134MoveRow";
+      row.className="v134MoveRow";
       var btn=document.createElement("button");
       btn.id="modalDormMoveOnlyBtn";
       btn.type="button";
-      btn.className="v133MoveOnlyBtn";
+      btn.className="v134MoveOnlyBtn";
       btn.textContent="寮のみ移動";
       row.appendChild(btn);
 
-      // ボタン行の直前に差し込む。なければ末尾。
-      var lastRow3=qa(".row3",box).pop();
-      if(lastRow3)box.insertBefore(row,lastRow3);
+      var buttons=qa(".row3",box).pop();
+      if(buttons)box.insertBefore(row,buttons);
       else box.appendChild(row);
     }
 
-    var moveBtn=el("modalDormMoveOnlyBtn");
-    if(moveBtn){
-      moveBtn.onclick=function(e){
+    var btn=el("modalDormMoveOnlyBtn");
+    if(btn){
+      btn.onclick=function(e){
         if(e){e.preventDefault();e.stopPropagation();}
-        return openMoveOnly133();
+        return openMoveOnly134();
       };
-
-      if(canMove133()){
-        moveBtn.classList.remove("v133Hidden");
-        moveBtn.style.display="";
+      if(canMove134()){
+        btn.classList.remove("v134Hidden");
+        btn.style.display="";
       }else{
-        moveBtn.classList.add("v133Hidden");
-        moveBtn.style.display="none";
+        btn.classList.add("v134Hidden");
+        btn.style.display="none";
       }
     }
   }
 
-  function dormNames133(){
-    return [...new Set((window.dormMaster||[]).map(function(m){return trim(m.dormName)}))]
-      .filter(Boolean).sort();
+  function dormNames134(){
+    return [...new Set((window.dormMaster||[]).map(function(m){return trim(m.dormName)}))].filter(Boolean).sort();
   }
-
-  function roomsOf133(dn){
-    return (window.dormMaster||[]).filter(function(m){return trim(m.dormName)===trim(dn);})
-      .map(function(m){return trim(m.roomNo)})
-      .filter(Boolean)
-      .sort(function(a,b){return String(a).localeCompare(String(b),"ja")});
+  function roomsOf134(dn){
+    return (window.dormMaster||[]).filter(function(m){return trim(m.dormName)===trim(dn)}).map(function(m){return trim(m.roomNo)}).filter(Boolean).sort(function(a,b){return String(a).localeCompare(String(b),"ja")});
   }
 
   window.updateDormMoveOnlyRooms=function(){
     var dnEl=el("dormMoveOnlyDorm"), rnEl=el("dormMoveOnlyRoom");
     if(!dnEl||!rnEl)return;
     rnEl.innerHTML="";
-    roomsOf133(dnEl.value).forEach(function(r){
+    roomsOf134(dnEl.value).forEach(function(r){
       var o=document.createElement("option");
       o.value=r;
       o.textContent=r+"号室";
@@ -11677,58 +11892,52 @@ init();
     });
   };
 
-  function fillMoveDest133(rec){
+  function fillMoveDest134(rec){
     var dnEl=el("dormMoveOnlyDorm"), rnEl=el("dormMoveOnlyRoom");
     if(!dnEl||!rnEl)return;
-    var names=dormNames133();
     dnEl.innerHTML="";
-    names.forEach(function(n){
+    dormNames134().forEach(function(n){
       var o=document.createElement("option");
       o.value=n;
       o.textContent=n;
       dnEl.appendChild(o);
     });
-    dnEl.value=rec.dormName || names[0] || "";
+    dnEl.value=rec.dormName || (dnEl.options[0] ? dnEl.options[0].value : "");
     updateDormMoveOnlyRooms();
-
-    var other=[...rnEl.options].map(function(o){return o.value;}).find(function(r){return r!==rec.roomNo;});
+    var other=[...rnEl.options].map(function(o){return o.value}).find(function(r){return r!==rec.roomNo});
     rnEl.value=other || rec.roomNo || (rnEl.options[0] ? rnEl.options[0].value : "");
   }
 
-  function openMoveOnly133(){
-    var rec=currentModalRecord133();
+  function openMoveOnly134(){
+    var rec=currentModalRecord134();
     if(!rec || !trim(rec.residentName) || !trim(rec.moveIn)){
-      addMoveButton133();
+      addMoveButton134();
       return false;
     }
 
     window.__dormMoveOnlyRecordId=rec.id;
     window.__dormEditRecordId=rec.id;
 
-    var ctx=window.__v133DormContext || {};
-    var baseDate=ctx.date || (el("modalMoveIn")&&el("modalMoveIn").value) || rec.moveIn || today133();
+    var ctx=window.__v134DormContext||{};
+    var baseDate=ctx.date || (el("modalMoveIn")&&el("modalMoveIn").value) || rec.moveIn || today134();
     if(rec.moveIn && baseDate<rec.moveIn)baseDate=rec.moveIn;
     if(rec.moveOut && baseDate>rec.moveOut)baseDate=rec.moveOut;
 
     if(el("dormMoveOnlyDate"))el("dormMoveOnlyDate").value=baseDate;
-    if(el("dormMoveOnlyCurrent")){
-      el("dormMoveOnlyCurrent").textContent=(rec.residentName||"-")+" / 現在："+(rec.dormName||"-")+"-"+(rec.roomNo||"-")+" / 入:"+(rec.moveIn||"-")+" / 退:"+(rec.moveOut||"-");
-    }
-    if(el("dormMoveOnlyTitle")){
-      el("dormMoveOnlyTitle").textContent="寮のみ移動 / "+(rec.residentName||"");
-    }
+    if(el("dormMoveOnlyCurrent"))el("dormMoveOnlyCurrent").textContent=(rec.residentName||"-")+" / 現在："+(rec.dormName||"-")+"-"+(rec.roomNo||"-")+" / 入:"+(rec.moveIn||"-")+" / 退:"+(rec.moveOut||"-");
+    if(el("dormMoveOnlyTitle"))el("dormMoveOnlyTitle").textContent="寮のみ移動 / "+(rec.residentName||"");
 
-    fillMoveDest133(rec);
+    fillMoveDest134(rec);
 
-    var popup=el("dormMoveOnlyPopup");
-    if(popup)popup.style.display="flex";
+    var p=el("dormMoveOnlyPopup");
+    if(p)p.style.display="flex";
     return false;
   }
 
-  window.openDormMoveOnlyPopup=function(){return openMoveOnly133();};
+  window.openDormMoveOnlyPopup=function(){return openMoveOnly134();};
 
   window.saveDormMoveOnly=function(){
-    var rec=(window.dorms||[]).find(function(r){return String(r.id)===String(window.__dormMoveOnlyRecordId);}) || currentModalRecord133();
+    var rec=(window.dorms||[]).find(function(r){return String(r.id)===String(window.__dormMoveOnlyRecordId)}) || currentModalRecord134();
     if(!rec || !trim(rec.residentName))return false;
 
     var moveDate=el("dormMoveOnlyDate") ? trim(el("dormMoveOnlyDate").value) : "";
@@ -11751,7 +11960,7 @@ init();
       rec.status="入寮中";
       rec.note=(oldNote?oldNote+" / ":"")+"寮変更："+newDorm+"-"+newRoom;
     }else{
-      rec.moveOut=addDays133(moveDate,-1);
+      rec.moveOut=addDays134(moveDate,-1);
       rec.cleanDate=moveDate;
       if(rec.cleanStatus!=="清掃済み" && rec.cleanStatus!=="済"){
         rec.cleanStatus="清掃予定";
@@ -11774,207 +11983,24 @@ init();
       });
     }
 
-    saveDormDataSafe133();
+    saveDormDataSafe134();
 
-    var popup=el("dormMoveOnlyPopup");
-    if(popup)popup.style.display="none";
+    var p=el("dormMoveOnlyPopup");
+    if(p)p.style.display="none";
     if(typeof closeModal==="function")closeModal();
 
     window.__dormMoveOnlyRecordId="";
     window.__dormEditRecordId="";
-    window.__v133DormContext=null;
-
+    window.__v134DormContext=null;
     return false;
   };
 
-  /* --------------------------------------------------
-     削除・重複・空室設定
-  -------------------------------------------------- */
-  function hasCleanInfo133(r){
-    return !!(trim(r.cleanDate) || trim(r.cleanDoneDate) || (trim(r.cleanStatus) && trim(r.cleanStatus)!=="未清掃") || trim(r.note));
-  }
-  function roomKey133(r){return trim(r.dormName)+"|"+trim(r.roomNo);}
-  function nameRoomKey133(r){return trim(r.residentName)+"|"+trim(r.dormName)+"|"+trim(r.roomNo);}
-  function activeDates133(r){
-    if(!r || isVacantRecord133(r) || !trim(r.residentName) || !trim(r.moveIn))return [];
-    var start=trim(r.moveIn), end=trim(r.moveOut)||trim(r.moveIn);
-    var list=[], s=parseDate(start), e=parseDate(end);
-    if(e<s)e=s;
-    for(var d=new Date(s); d<=e; d.setDate(d.getDate()+1)){
-      list.push(ymd(d));
-      if(list.length>730)break;
-    }
-    return list;
-  }
-  function latestWeight133(r,idx){
-    var n=Number(r&&r.id);
-    return isFinite(n)?Math.max(n,idx):idx;
-  }
-
-  function normalizeVacant133(r){
-    if(!r)return r;
-    if(trim(r.status)==="空室" || (!trim(r.residentName) && trim(r.status)!=="予約")){
-      r.status="空室";
-      r.residentName="";
-      r.moveIn="";
-      r.moveOut="";
-    }
-    return r;
-  }
-
-  window.normalizeDormVacancy133=function(){
-    if(!Array.isArray(window.dorms))return 0;
-    var changed=0;
-    window.dorms.forEach(function(r){
-      var before=JSON.stringify([r.status,r.residentName,r.moveIn,r.moveOut]);
-      normalizeVacant133(r);
-      var after=JSON.stringify([r.status,r.residentName,r.moveIn,r.moveOut]);
-      if(before!==after)changed++;
-    });
-    return changed;
-  };
-
-  window.dedupeDormLatest133=function(){
-    if(!Array.isArray(window.dorms))return 0;
-    var removed=0;
-    var source=window.dorms.slice();
-
-    var keepId={};
-    source.forEach(function(r,idx){
-      var id=trim(r&&r.id);
-      if(!id)return;
-      var w=latestWeight133(r,idx);
-      if(!keepId[id] || w>=keepId[id].w)keepId[id]={record:r,w:w};
-    });
-
-    var step=[];
-    source.forEach(function(r){
-      var id=trim(r&&r.id);
-      if(id && keepId[id] && keepId[id].record!==r){removed++;return;}
-      step.push(r);
-    });
-
-    step.forEach(normalizeVacant133);
-
-    var result=[];
-    var seen={};
-    for(var i=step.length-1;i>=0;i--){
-      var r=step[i];
-      if(!r)continue;
-
-      if(!isVacantRecord133(r) && trim(r.residentName) && trim(r.moveIn)){
-        var dup=false;
-        activeDates133(r).forEach(function(ds){
-          if(seen[nameRoomKey133(r)+"|"+ds])dup=true;
-        });
-        if(dup){removed++;continue;}
-        activeDates133(r).forEach(function(ds){
-          seen[nameRoomKey133(r)+"|"+ds]=true;
-        });
-      }
-      result.unshift(r);
-    }
-
-    var vacantKeep={};
-    result.forEach(function(r,idx){
-      if(!isVacantRecord133(r) || !hasCleanInfo133(r))return;
-      var k=roomKey133(r), w=latestWeight133(r,idx);
-      if(!vacantKeep[k] || w>=vacantKeep[k].w)vacantKeep[k]={record:r,w:w};
-    });
-
-    var final=[];
-    result.forEach(function(r){
-      if(isVacantRecord133(r)){
-        if(!hasCleanInfo133(r)){removed++;return;}
-        var k=roomKey133(r);
-        if(vacantKeep[k] && vacantKeep[k].record!==r){removed++;return;}
-      }
-      final.push(r);
-    });
-
-    window.dorms=final;
-    return removed;
-  };
-
-  function removeById133(id){
-    var before=window.dorms.length;
-    window.dorms=window.dorms.filter(function(r){return String(r.id)!==String(id);});
-    return before-window.dorms.length;
-  }
-
-  function removeOccupancyForVacant133(dn,rn,exceptId){
-    dn=trim(dn); rn=trim(rn); exceptId=trim(exceptId);
-    var before=window.dorms.length;
-    window.dorms=window.dorms.filter(function(r){
-      if(exceptId && String(r.id)===String(exceptId))return true;
-      if(trim(r.dormName)!==dn || trim(r.roomNo)!==rn)return true;
-      if(trim(r.residentName) || trim(r.moveIn) || trim(r.status)==="入寮中" || trim(r.status)==="予約")return false;
-      return true;
-    });
-    return before-window.dorms.length;
-  }
-
-  /* --------------------------------------------------
-     退寮日から自動空室
-     履歴は消さず、占有判定だけ退寮日未満にする
-  -------------------------------------------------- */
-  window.occupiedRecord=function(room,ds){
-    ds=trim(ds||today133());
-    var dn=trim(room&&room.dormName), rn=trim(room&&room.roomNo);
-    return (Array.isArray(window.dorms)?window.dorms:[]).find(function(r){
-      if(trim(r.dormName)!==dn || trim(r.roomNo)!==rn)return false;
-      if(trim(r.status)==="空室" || !trim(r.residentName))return false;
-      var mi=trim(r.moveIn), mo=trim(r.moveOut);
-      if(mi && mo)return ds>=mi && ds<mo; // 退寮日当日から空室扱い
-      if(mi && !mo)return ds>=mi;
-      return trim(r.status)==="入寮中";
-    });
-  };
-
-  window.effectiveDormStatus133=function(r,ds){
-    ds=trim(ds||today133());
-    if(!r)return "空室";
-    if(trim(r.status)==="空室" || !trim(r.residentName))return "空室";
-    if(trim(r.moveOut) && ds>=trim(r.moveOut))return "空室";
-    return trim(r.status)||"入寮中";
-  };
-
-  function ensureMoveOutCleanPlan133(){
-    if(!Array.isArray(window.dorms))return 0;
-    var changed=0;
-    window.dorms.forEach(function(r){
-      if(!r)return;
-      if(trim(r.moveOut) && !trim(r.cleanDate) && trim(r.cleanStatus)!=="清掃済み" && trim(r.cleanStatus)!=="済"){
-        r.cleanDate=trim(r.moveOut);
-        if(!trim(r.cleanStatus) || trim(r.cleanStatus)==="未清掃")r.cleanStatus="清掃予定";
-        changed++;
-      }
-    });
-    return changed;
-  }
-
-  function renderAllDorm133(){
-    try{ if(typeof renderDorm==="function")renderDorm(); }catch(e){}
-    try{ if(typeof renderDorms==="function")renderDorms(); }catch(e){}
-    try{ if(typeof renderDormMonthly==="function")renderDormMonthly(); }catch(e){}
-    try{ if(typeof renderVacancy==="function")renderVacancy(); }catch(e){}
-    try{ if(typeof renderStats==="function")renderStats(); }catch(e){}
-    try{ if(typeof renderDashboard==="function")renderDashboard(); }catch(e){}
-    try{ if(typeof generateText==="function" && el("output") && el("output").value)generateText(); }catch(e){}
-  }
-
-  window.saveDormDataSafe133=function(){
-    normalizeDormVacancy133();
-    ensureMoveOutCleanPlan133();
-    dedupeDormLatest133();
-    save();
-    renderAllDorm133();
-    return false;
-  };
-
+  /* ------------------------------
+     保存・削除
+  ------------------------------ */
   window.saveDormModal=function(){
     var id=el("modalDormId") ? trim(el("modalDormId").value) : "";
-    var r=id ? (window.dorms||[]).find(function(x){return String(x.id)===String(id);}) : null;
+    var r=id ? (window.dorms||[]).find(function(x){return String(x.id)===String(id)}) : null;
     if(!r){
       r={id:Date.now()+Math.floor(Math.random()*10000)};
       window.dorms.push(r);
@@ -11991,16 +12017,15 @@ init();
     r.cleanDoneDate=el("modalCleanDoneDate") ? trim(el("modalCleanDoneDate").value) : "";
     r.note=el("modalNote") ? el("modalNote").value : "";
 
-    if(r.status==="空室" || !trim(r.residentName)){
-      r.status="空室";
+    if(r.status==="空室"){
       r.residentName="";
       r.moveIn="";
       r.moveOut="";
-      removeOccupancyForVacant133(r.dormName,r.roomNo,String(r.id));
-      if(!hasCleanInfo133(r))removeById133(r.id);
+      removeOccupancyForVacant134(r.dormName,r.roomNo,String(r.id));
+      if(!hasCleanInfo134(r))removeById134(r.id);
     }
 
-    saveDormDataSafe133();
+    saveDormDataSafe134();
     if(typeof closeModal==="function")closeModal();
     return false;
   };
@@ -12009,8 +12034,8 @@ init();
     var id=el("modalDormId") ? trim(el("modalDormId").value) : "";
     if(!id)return false;
     if(confirm("削除しますか？")){
-      removeById133(id);
-      saveDormDataSafe133();
+      removeById134(id);
+      saveDormDataSafe134();
       if(typeof closeModal==="function")closeModal();
     }
     return false;
@@ -12018,18 +12043,18 @@ init();
 
   window.removeDorm=function(id){
     if(confirm("削除しますか？")){
-      removeById133(id);
-      saveDormDataSafe133();
+      removeById134(id);
+      saveDormDataSafe134();
     }
     return false;
   };
 
-  /* --------------------------------------------------
-     イベント・パッチ
-  -------------------------------------------------- */
-  function bindDormCells133(){
-    if(document.__v133DormCellBind)return;
-    document.__v133DormCellBind=true;
+  /* ------------------------------
+     セルタップを通常モーダルへ統一
+  ------------------------------ */
+  function bindDormCells134(){
+    if(document.__v134DormCellBind)return;
+    document.__v134DormCellBind=true;
 
     function handler(e){
       var td=e.target && e.target.closest ? e.target.closest("#dormMonthlyTable td") : null;
@@ -12040,8 +12065,8 @@ init();
       e.stopPropagation();
       if(e.stopImmediatePropagation)e.stopImmediatePropagation();
 
-      disableOldPopup133();
-      openNormalDormModal133(contextFromCell133(td));
+      disableOldPopup134();
+      openNormalDormModal134(contextFromCell134(td));
       return false;
     }
 
@@ -12049,133 +12074,120 @@ init();
     document.addEventListener("touchend",handler,true);
   }
 
-  function patchModalOpeners133(){
-    ["openDormModalById","openDormModalNew","openDormModalByText"].forEach(function(name){
-      var old=window[name];
-      if(typeof old==="function" && !old.__v133Patched){
-        var w=function(){
-          disableOldPopup133();
-          var r=old.apply(this,arguments);
-          setTimeout(function(){disableOldPopup133();addMoveButton133();fitModal133();},20);
-          setTimeout(function(){addMoveButton133();fitModal133();},180);
-          return r;
-        };
-        w.__v133Patched=true;
-        window[name]=w;
-      }
-    });
-  }
-
-  function watch133(){
-    if(document.__v133Watch)return;
-    document.__v133Watch=true;
-    setInterval(function(){
-      disableOldPopup133();
-      if(String(window.openDormEditPopup||"").indexOf("openNormalDormModal133")<0){
-        window.openDormEditPopup=function(td){
-          disableOldPopup133();
-          if(td && td.closest){
-            var cell=td.closest("#dormMonthlyTable td");
-            if(cell)return openNormalDormModal133(contextFromCell133(cell));
-          }
-          if(window.__v133DormContext)return openNormalDormModal133(window.__v133DormContext);
-          return false;
-        };
-      }
-    },1500);
+  function patchClose134(){
+    var oldClose=window.closeModal;
+    if(typeof oldClose==="function" && !oldClose.__v134Clean){
+      var c=function(){
+        var r=oldClose.apply(this,arguments);
+        window.__v134DormContext=null;
+        fitModal134();
+        return r;
+      };
+      c.__v134Clean=true;
+      window.closeModal=c;
+    }
   }
 
   var oldSave=window.save;
-  if(typeof oldSave==="function" && !oldSave.__v133DormSafe){
+  if(typeof oldSave==="function" && !oldSave.__v134DormSafe){
     var wrappedSave=function(){
-      normalizeDormVacancy133();
-      ensureMoveOutCleanPlan133();
-      dedupeDormLatest133();
+      ensureMoveOutClean134();
+      window.dedupeDormLatest134();
       return oldSave.apply(this,arguments);
     };
-    wrappedSave.__v133DormSafe=true;
+    wrappedSave.__v134DormSafe=true;
     window.save=wrappedSave;
   }
 
-  function selfCheck133(){
-    window.__v133SelfCheck={
-      cleanBaseNo127:!document.getElementById("ver127-dorm-monthly-edit-select-fix"),
-      cleanBaseNo128:!document.getElementById("ver128-dorm-edit-move-restore"),
-      cleanBaseNo129:!document.getElementById("ver129-dorm-edit-move-final"),
-      cleanBaseNo130:!document.getElementById("ver130-modal-view-fit"),
-      cleanBaseNo131:!document.getElementById("ver131-dorm-delete-duplicate-vacancy-fix"),
-      cleanBaseNo132:!document.getElementById("ver132-auto-vacancy-moveout"),
-      oldPopupDisabled:!!(el("dormEditPopup") && el("dormEditPopup").classList.contains("v133DisabledOldDormPopup")),
-      cellTapNormalModal:String(window.openDormEditPopup||"").indexOf("openNormalDormModal133")>=0,
-      moveButtonReady:!!el("modalDormMoveOnlyBtn") || true,
-      moveButtonUsesCurrentId:String(openMoveOnly133).indexOf("__dormMoveOnlyRecordId")>=0,
-      deleteReflects:String(window.deleteDormModal||"").indexOf("saveDormDataSafe133")>=0,
-      dedupeLatestReady:typeof window.dedupeDormLatest133==="function",
+  function selfCheck134(){
+    window.__v134SelfCheck={
+      baseVer126:!!document.getElementById("ver126-monthly-menu-one-line"),
+      no127:!document.getElementById("ver127-dorm-monthly-edit-select-fix"),
+      no128:!document.getElementById("ver128-dorm-edit-move-restore"),
+      no129:!document.getElementById("ver129-dorm-edit-move-final"),
+      no130:!document.getElementById("ver130-modal-view-fit"),
+      no131:!document.getElementById("ver131-dorm-delete-duplicate-vacancy-fix"),
+      no132:!document.getElementById("ver132-auto-vacancy-moveout"),
+      no133:!document.getElementById("ver133-clean-dorm-integrated-fix"),
+      oldPopupDisabled:!!(el("dormEditPopup") && el("dormEditPopup").classList.contains("v134OldPopupDisabled")),
+      modalSelects:!!(el("modalDormName") && el("modalRoomNo")),
+      saveOverridden:String(window.saveDormModal||"").indexOf("saveDormDataSafe134")>=0,
+      deleteOverridden:String(window.deleteDormModal||"").indexOf("removeById134")>=0,
+      moveButtonReady:String(addMoveButton134).indexOf("modalDormMoveOnlyBtn")>=0,
+      moveButtonUsesId:String(openMoveOnly134).indexOf("__dormMoveOnlyRecordId")>=0,
+      moveSaveReady:String(window.saveDormMoveOnly||"").indexOf("oldMoveOutOriginal")>=0,
+      dedupeLatestReady:typeof window.dedupeDormLatest134==="function",
       vacantClearsMoveIn:String(window.saveDormModal||"").indexOf('r.moveIn=""')>=0,
       moveOutAutoVacancy:String(window.occupiedRecord||"").indexOf("ds<mo")>=0,
-      slideBarUntouched:true
+      homeLabelFixed:!!(el("statOccupied") && el("statOccupied").previousElementSibling && el("statOccupied").previousElementSibling.textContent==="入寮中"),
+      slideBarCssUntouched:true
     };
-    return window.__v133SelfCheck;
+    return window.__v134SelfCheck;
   }
 
-  function apply133(){
-    disableOldPopup133();
-    patchModalOpeners133();
-    bindDormCells133();
-    watch133();
-    normalizeDormVacancy133();
-    ensureMoveOutCleanPlan133();
-    dedupeDormLatest133();
-    addMoveButton133();
-    fitModal133();
-    selfCheck133();
+  function apply134(){
+    disableOldPopup134();
+    patchClose134();
+    bindDormCells134();
+    ensureMoveOutClean134();
+    window.dedupeDormLatest134();
+    addMoveButton134();
+    fitModal134();
+    try{renderStats();}catch(e){}
+    selfCheck134();
   }
 
-  window.applyCleanDormIntegratedFix133=apply133;
-  window.runCleanDormIntegratedSelfCheck133=selfCheck133;
+  window.applyCleanDormModalDataFix134=apply134;
+  window.runCleanDormModalDataSelfCheck134=selfCheck134;
 
   ["renderDormMonthly","renderDormMonthlyMatrix"].forEach(function(name){
     var old=window[name];
-    if(typeof old==="function" && !old.__v133CleanDorm){
+    if(typeof old==="function" && !old.__v134CleanDorm){
       var w=function(){
         var r=old.apply(this,arguments);
-        setTimeout(apply133,0);
-        setTimeout(apply133,300);
-        setTimeout(apply133,900);
+        setTimeout(apply134,0);
+        setTimeout(apply134,300);
+        setTimeout(apply134,900);
         return r;
       };
-      w.__v133CleanDorm=true;
+      w.__v134CleanDorm=true;
       window[name]=w;
     }
   });
 
   var oldTab=window.showMonthlySubTab;
-  if(typeof oldTab==="function" && !oldTab.__v133CleanDorm){
+  if(typeof oldTab==="function" && !oldTab.__v134CleanDorm){
     var tw=function(){
       var r=oldTab.apply(this,arguments);
-      setTimeout(apply133,50);
-      setTimeout(apply133,350);
-      setTimeout(apply133,1000);
+      setTimeout(apply134,50);
+      setTimeout(apply134,350);
+      setTimeout(apply134,1000);
       return r;
     };
-    tw.__v133CleanDorm=true;
+    tw.__v134CleanDorm=true;
     window.showMonthlySubTab=tw;
   }
 
   document.addEventListener("DOMContentLoaded",function(){
-    setTimeout(apply133,500);
-    setTimeout(apply133,1300);
-    setTimeout(apply133,2400);
+    setTimeout(apply134,500);
+    setTimeout(apply134,1300);
+    setTimeout(apply134,2400);
   });
 
   window.addEventListener("load",function(){
-    setTimeout(apply133,500);
-    setTimeout(apply133,1600);
+    setTimeout(apply134,500);
+    setTimeout(apply134,1600);
   });
 
   window.addEventListener("resize",function(){
-    setTimeout(fitModal133,100);
+    setTimeout(fitModal134,100);
   });
+
+  document.addEventListener("focusin",function(e){
+    if(e.target && e.target.closest && e.target.closest("#modal")){
+      setTimeout(fitModal134,50);
+    }
+  },true);
 })();
 </script>
 
